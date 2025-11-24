@@ -1,0 +1,12 @@
+E:\.1-Graduation Project\Backend\src\Kawadar.Domain\bin\Debug\net9.0\Kawadar.Domain.deps.json
+E:\.1-Graduation Project\Backend\src\kawadar.domain\bin\Debug\net9.0\Kawadar.Domain.dll
+E:\.1-Graduation Project\Backend\src\kawadar.domain\bin\Debug\net9.0\Kawadar.Domain.pdb
+E:\.1-Graduation Project\Backend\src\kawadar.domain\obj\Debug\net9.0\Kawadar.Domain.GeneratedMSBuildEditorConfig.editorconfig
+E:\.1-Graduation Project\Backend\src\kawadar.domain\obj\Debug\net9.0\Kawadar.Domain.AssemblyInfoInputs.cache
+E:\.1-Graduation Project\Backend\src\kawadar.domain\obj\Debug\net9.0\Kawadar.Domain.AssemblyInfo.cs
+E:\.1-Graduation Project\Backend\src\kawadar.domain\obj\Debug\net9.0\Kawadar.Domain.csproj.CoreCompileInputs.cache
+E:\.1-Graduation Project\Backend\src\kawadar.domain\obj\Debug\net9.0\Kawadar.Domain.sourcelink.json
+E:\.1-Graduation Project\Backend\src\kawadar.domain\obj\Debug\net9.0\Kawadar.Domain.dll
+E:\.1-Graduation Project\Backend\src\kawadar.domain\obj\Debug\net9.0\refint\Kawadar.Domain.dll
+E:\.1-Graduation Project\Backend\src\kawadar.domain\obj\Debug\net9.0\Kawadar.Domain.pdb
+E:\.1-Graduation Project\Backend\src\Kawadar.Domain\obj\Debug\net9.0\ref\Kawadar.Domain.dll

@@ -1,0 +1,16 @@
+E:\.1-Graduation Project\Backend\src\kawadar.application\bin\Debug\net9.0\Kawadar.Application.deps.json
+E:\.1-Graduation Project\Backend\src\kawadar.application\bin\Debug\net9.0\Kawadar.Application.dll
+E:\.1-Graduation Project\Backend\src\kawadar.application\bin\Debug\net9.0\Kawadar.Application.pdb
+E:\.1-Graduation Project\Backend\src\kawadar.application\bin\Debug\net9.0\Kawadar.Domain.dll
+E:\.1-Graduation Project\Backend\src\kawadar.application\bin\Debug\net9.0\Kawadar.Domain.pdb
+E:\.1-Graduation Project\Backend\src\kawadar.application\obj\Debug\net9.0\Kawadar.Application.csproj.AssemblyReference.cache
+E:\.1-Graduation Project\Backend\src\kawadar.application\obj\Debug\net9.0\Kawadar.Application.GeneratedMSBuildEditorConfig.editorconfig
+E:\.1-Graduation Project\Backend\src\kawadar.application\obj\Debug\net9.0\Kawadar.Application.AssemblyInfoInputs.cache
+E:\.1-Graduation Project\Backend\src\kawadar.application\obj\Debug\net9.0\Kawadar.Application.AssemblyInfo.cs
+E:\.1-Graduation Project\Backend\src\kawadar.application\obj\Debug\net9.0\Kawadar.Application.csproj.CoreCompileInputs.cache
+E:\.1-Graduation Project\Backend\src\kawadar.application\obj\Debug\net9.0\Kawadar.Application.sourcelink.json
+E:\.1-Graduation Project\Backend\src\kawadar.application\obj\Debug\net9.0\Kawadar..03005B4F.Up2Date
+E:\.1-Graduation Project\Backend\src\kawadar.application\obj\Debug\net9.0\Kawadar.Application.dll
+E:\.1-Graduation Project\Backend\src\kawadar.application\obj\Debug\net9.0\refint\Kawadar.Application.dll
+E:\.1-Graduation Project\Backend\src\kawadar.application\obj\Debug\net9.0\Kawadar.Application.pdb
+E:\.1-Graduation Project\Backend\src\kawadar.application\obj\Debug\net9.0\ref\Kawadar.Application.dll
