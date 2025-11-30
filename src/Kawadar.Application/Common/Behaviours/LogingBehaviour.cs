@@ -1,4 +1,5 @@
 using Kawadar.Application.Common.Interfaces;
+using Kawadar.Application.Common.Interfaces.Auth;
 using MediatR.Pipeline;
 using Microsoft.Extensions.Logging;
 

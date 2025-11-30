@@ -1,7 +1,8 @@
 namespace Kawadar.Api.Services;
 
+using System.Collections.Generic;
 using System.Security.Claims;
-using Kawadar.Application.Common.Interfaces;
+using Kawadar.Application.Common.Interfaces.Auth;
 
 public class CurrentUser : IUser
 {
@@ -13,4 +14,11 @@ public class CurrentUser : IUser
 
   }
   public string? Id => _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+  // get Permissions claims
+  public List<string> Claims => _httpContextAccessor.HttpContext?.User?.Claims
+      .Where(c => c.Type == "Permission")
+      .Select(c => c.Value)
+      .ToList() ?? new List<string>();
+
 }

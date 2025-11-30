@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Kawadar.Application.Common.Interfaces;
+using Kawadar.Application.Common.Interfaces.Auth;
 using MediatR;
 using Microsoft.Extensions.Logging;
 

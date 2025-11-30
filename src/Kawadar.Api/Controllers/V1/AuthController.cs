@@ -1,7 +1,10 @@
 
 using System.Threading.Tasks;
+using Kawadar.Api.Attributes;
 using Kawadar.Application.Common.Interfaces;
+using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Features.Auth.Commands.Register;
+using Kawadar.Domain.Common.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,10 +19,12 @@ public class AuthController : ApiController
 
   private readonly ISender _sender;
   private readonly ITokenProvider _tokenProvider;
-  public AuthController(ISender sender, ITokenProvider tokenProvider)
+  private readonly IUser _user;
+  public AuthController(ISender sender, ITokenProvider tokenProvider, IUser user)
   {
     _sender = sender;
     _tokenProvider = tokenProvider;
+    _user = user;
   }
 
 
@@ -51,10 +56,19 @@ public class AuthController : ApiController
 
   [HttpGet("testauth")]
 
-  [Authorize(Policy = Permissions.ApproveUsers)]
+  [HasPermission(Permissions.ApproveUsers)]
+
   public IActionResult TestAuth()
   {
-    return Ok("You are authorized!");
+    var claims = _user.Claims;
+
+
+    return Ok(new
+    {
+      Message = "You are authorized!",
+      UserId = _user.Id,
+      Claims = claims
+    });
   }
 
 }

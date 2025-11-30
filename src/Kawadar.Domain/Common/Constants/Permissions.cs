@@ -1,3 +1,5 @@
+namespace Kawadar.Domain.Common.Constants;
+
 public static class Permissions
 {
   // User Management
@@ -31,9 +33,3 @@ public static class Permissions
             .ToList();
   }
 };
-
-public static class DefaultRoles
-{
-  public const string Admin = "Admin";
-  public const string User = "User";
-}

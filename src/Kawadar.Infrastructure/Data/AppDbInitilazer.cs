@@ -1,5 +1,6 @@
 
 using System.Security.Claims;
+using Kawadar.Domain.Common.Constants;
 using Kawadar.Infrastructure.Identity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;

@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Kawadar.Application.Common.Interfaces;
+using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Domain.Common.Results;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;

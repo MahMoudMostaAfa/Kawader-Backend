@@ -3,7 +3,7 @@ using Asp.Versioning;
 using Kawadar.Api.Infrastructure;
 using Kawadar.Api.OpenApi.Transformer;
 using Kawadar.Api.Services;
-using Kawadar.Application.Common.Interfaces;
+using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Infrastructure.Settings;
 
 namespace Kawadar.Api;

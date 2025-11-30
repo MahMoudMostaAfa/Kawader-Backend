@@ -1,18 +1,17 @@
-
 namespace Kawadar.Infrastructure;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
-using Kawadar.Application.Common.Interfaces;
 using Kawadar.Infrastructure.Identity;
 using Kawadar.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text.Unicode;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Kawadar.Infrastructure.Data.Interceptors;
+using Kawadar.Domain.Common.Constants;
+using Kawadar.Application.Common.Interfaces.Auth;
 
 public static class DependencyInjection
 {
@@ -84,8 +83,9 @@ public static class DependencyInjection
 
 
     service.AddScoped<ApplicationDbContextInitialiser>();
-
     service.AddScoped<ITokenProvider, TokenProvider>();
+
+
 
     service.AddTransient<IIdentityService, IdentityService>();
     return service;

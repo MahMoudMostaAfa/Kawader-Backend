@@ -1,6 +1,6 @@
 using Kawadar.Domain.Common.Results;
 
-namespace Kawadar.Application.Common.Interfaces;
+namespace Kawadar.Application.Common.Interfaces.Auth;
 
 public interface ITokenProvider
 {
