@@ -73,10 +73,19 @@ public static class DependencyInjection
 
 
 
-    service.AddAuthorizationBuilder();
+    var authBuilder = service.AddAuthorizationBuilder();
+
+    // Automatically add policies for all permissions
+    foreach (var permission in Permissions.GetAllPermissions())
+    {
+      authBuilder.AddPolicy(permission, policy =>
+        policy.RequireClaim("Permission", permission));
+    }
 
 
+    service.AddScoped<ApplicationDbContextInitialiser>();
 
+    service.AddScoped<ITokenProvider, TokenProvider>();
 
     service.AddTransient<IIdentityService, IdentityService>();
     return service;

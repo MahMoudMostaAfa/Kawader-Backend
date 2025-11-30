@@ -2,6 +2,7 @@ using Kawadar.Api;
 using Kawadar.Api.Infrastructure;
 using Kawadar.Application;
 using Kawadar.Infrastructure;
+using Kawadar.Infrastructure.Data;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,7 +39,7 @@ if (app.Environment.IsDevelopment())
 
   app.MapScalarApiReference();
 
-
+  await app.InitialiseDatabaseAsync();
 
 
 }
