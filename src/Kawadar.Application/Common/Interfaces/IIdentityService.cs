@@ -1,8 +1,6 @@
-
 namespace Kawadar.Application.Common.Interfaces;
 
-public interface IUser
+public interface IIdentityService
 {
-  string? Id { get; }
 
 }

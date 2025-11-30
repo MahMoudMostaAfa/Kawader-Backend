@@ -22,6 +22,7 @@ public class AuthController : ApiController
   {
     return Ok("Auth Controller is working!");
   }
+  
 
   [HttpPost("register")]
   public async Task<IActionResult> Register([FromBody] Request request)
@@ -34,7 +35,10 @@ public class AuthController : ApiController
       return Ok(result);
     }
   }
+ 
 }
+
+
 public class Request
 {
   public string Name { get; set; } = "";

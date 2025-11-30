@@ -1,6 +1,7 @@
 namespace Kawadar.Api.Services;
 
 using System.Security.Claims;
+using Kawadar.Application.Common.Interfaces;
 
 public class CurrentUser : IUser
 {
