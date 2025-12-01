@@ -20,11 +20,15 @@ public class AuthController : ApiController
   private readonly ISender _sender;
   private readonly ITokenProvider _tokenProvider;
   private readonly IUser _user;
-  public AuthController(ISender sender, ITokenProvider tokenProvider, IUser user)
+  private readonly IEmailService _emailService;
+  private readonly IEmailTemplateService _emailTemplateService;
+  public AuthController(ISender sender, ITokenProvider tokenProvider, IUser user, IEmailService emailService, IEmailTemplateService emailTemplateService)
   {
     _sender = sender;
     _tokenProvider = tokenProvider;
     _user = user;
+    _emailService = emailService;
+    _emailTemplateService = emailTemplateService;
   }
 
 
@@ -50,6 +54,9 @@ public class AuthController : ApiController
   [HttpGet("token")]
   public async Task<IActionResult> GetToken()
   {
+    var welocome = _emailTemplateService.GenerateWelcomeEmail("Mahmoud", "https://kawadar.com");
+
+    await _emailService.SendAsync("mahmoud@gmail.com", "Test Email", welocome);
     var token = await _tokenProvider.GenerateTokenAsync("7ebb61a5-a142-47c2-83d6-9b1bd802606d");
     return Ok(new { Token = token.Value });
   }

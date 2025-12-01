@@ -11,7 +11,9 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Kawadar.Infrastructure.Data.Interceptors;
 using Kawadar.Domain.Common.Constants;
+using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Interfaces.Auth;
+using Kawadar.Infrastructure.Services;
 
 public static class DependencyInjection
 {
@@ -65,7 +67,9 @@ public static class DependencyInjection
       options.Password.RequireNonAlphanumeric = false;
       options.Password.RequiredLength = 6;
       options.SignIn.RequireConfirmedEmail = true;
-    }).AddRoles<IdentityRole>()
+    })
+    .AddRoles<IdentityRole>()
+    .AddSignInManager<SignInManager<AppUser>>()
     .AddEntityFrameworkStores<AppDbContext>();
 
 
@@ -85,7 +89,9 @@ public static class DependencyInjection
     service.AddScoped<ApplicationDbContextInitialiser>();
     service.AddScoped<ITokenProvider, TokenProvider>();
 
-
+    // Email services
+    service.AddScoped<IEmailService, EmailService>();
+    service.AddSingleton<IEmailTemplateService, EmailTemplateService>();
 
     service.AddTransient<IIdentityService, IdentityService>();
     return service;
