@@ -1,4 +1,5 @@
 using Kawadar.Domain.Common;
+using Kawadar.Domain.UserProfiles;
 using Kawadar.Infrastructure.Identity;
 using MediatR;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -9,7 +10,7 @@ namespace Kawadar.Infrastructure.Data;
 public class AppDbContext(DbContextOptions<AppDbContext> options, IMediator mediator) : IdentityDbContext<AppUser>(options)
 {
 
-
+  public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
   public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
   {
     await DispatchDomainEventsAsync(cancellationToken);

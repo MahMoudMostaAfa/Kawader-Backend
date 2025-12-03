@@ -23,4 +23,9 @@ public interface IIdentityService
   Task<Result<Success>> AddClaimAsync(string userId, string claimType, string claimValue);
   Task<Result<Success>> RemoveClaimAsync(string userId, string claimType, string claimValue);
   Task<Result<List<(string Type, string Value)>>> GetUserClaimsAsync(string userId);
+
+  Task<Result<bool>> IsAvailableUserNameAsync(string userName);
+  Task<Result<UserDto>> GetUserByUserNameAsync(string userName);
+
+  Task<Result<string>> GenerateUserNameAsync(string firstName, string lastName);
 }

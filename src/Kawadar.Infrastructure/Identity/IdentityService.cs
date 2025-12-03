@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Models;
 using Kawadar.Domain.Common.Results;
@@ -23,6 +24,11 @@ public class IdentityService : IIdentityService
     if (existingUser is not null)
     {
       return Error.Conflict("User.AlreadyExists", "A user with this email already exists.");
+    }
+    var existingUserName = await _userManager.FindByNameAsync(userName);
+    if (existingUserName is not null)
+    {
+      return Error.Conflict("UserName.AlreadyExists", "A user with this user name already exists.");
     }
 
     var user = new AppUser
@@ -235,6 +241,22 @@ public class IdentityService : IIdentityService
     };
   }
 
+  public async Task<Result<UserDto>> GetUserByUserNameAsync(string userName)
+  {
+    var user = await _userManager.FindByNameAsync(userName);
+    if (user is null)
+    {
+      return Error.NotFound("User.NotFound", "User not found.");
+    }
+
+    return new UserDto
+    {
+      Id = user.Id,
+      Email = user.Email!,
+      UserName = user.UserName!,
+      EmailConfirmed = user.EmailConfirmed
+    };
+  }
   public async Task<Result<bool>> IsInRoleAsync(string userId, string role)
   {
     var user = await _userManager.FindByIdAsync(userId);
@@ -341,5 +363,46 @@ public class IdentityService : IIdentityService
 
     var claims = await _userManager.GetClaimsAsync(user);
     return claims.Select(c => (c.Type, c.Value)).ToList();
+  }
+
+
+  public async Task<Result<bool>> IsAvailableUserNameAsync(string userName)
+  {
+    var user = await _userManager.FindByNameAsync(userName);
+
+    return user is null;
+  }
+
+  public async Task<Result<string>> GenerateUserNameAsync(string firstName, string lastName)
+  {
+
+    string baseUserName = $"{firstName}{lastName}";
+    baseUserName = SanitizeUserName(baseUserName);
+    string uniqueUserName = baseUserName;
+
+
+    Random random = new Random();
+
+    while (!(await IsAvailableUserNameAsync(uniqueUserName)).Value)
+    {
+      var randomSuffix = random.Next(1, 9999).ToString();
+      uniqueUserName = baseUserName + randomSuffix;
+    }
+
+    return uniqueUserName;
+
+  }
+
+  private string SanitizeUserName(string userName)
+  {
+    userName = userName.ToLowerInvariant().Trim();
+
+    // Keep only letters and numbers
+
+    userName = Regex.Replace(userName, @"[^a-z0-9]", "");
+
+    return userName;
+
+
   }
 }

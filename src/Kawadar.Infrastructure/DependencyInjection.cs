@@ -14,6 +14,8 @@ using Kawadar.Domain.Common.Constants;
 using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Infrastructure.Services;
+using Kawadar.Application.Common.Interfaces.Repositories;
+using Kawadar.Infrastructure.Services.Repositories;
 
 public static class DependencyInjection
 {
@@ -70,7 +72,8 @@ public static class DependencyInjection
     })
     .AddRoles<IdentityRole>()
     .AddSignInManager<SignInManager<AppUser>>()
-    .AddEntityFrameworkStores<AppDbContext>();
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
 
 
 
@@ -92,6 +95,10 @@ public static class DependencyInjection
     // Email services
     service.AddScoped<IEmailService, EmailService>();
     service.AddSingleton<IEmailTemplateService, EmailTemplateService>();
+
+    // repositories and unit of work
+    service.AddScoped<IUsersRepository, UsersRepository>();
+    service.AddScoped<IUnitOfWork, UnitOfWork>();
 
     service.AddTransient<IIdentityService, IdentityService>();
     return service;

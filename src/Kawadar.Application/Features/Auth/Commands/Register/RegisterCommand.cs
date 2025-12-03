@@ -3,4 +3,4 @@ using Kawadar.Domain.Common.Results;
 using MediatR;
 namespace Kawadar.Application.Features.Auth.Commands.Register;
 
-public record RegisterCommand(string name) : IRequest<Result<UserDto>>;
+public record RegisterCommand(string FirstName, string LastName, string Email, string Password) : IRequest<Result<Success>>;
