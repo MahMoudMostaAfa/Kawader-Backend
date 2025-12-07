@@ -24,5 +24,12 @@ namespace Kawadar.Domain.Specilizations
             var specilization = new Specilization(name, isActive);
             return specilization;
         }
+
+        public Result<Updated> Update(string name, bool isActive)
+        {
+            Name = name;
+            IsActive = isActive;
+            return Result.Updated;
+        }
     }
 }

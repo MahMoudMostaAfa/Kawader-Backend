@@ -5,13 +5,17 @@ namespace Kawadar.Domain.Portfolios.Project
 {
     public interface IPortfolioProjectRepository
     {
-        public Task addAsync(PortfolioProject Project);
-        public Task<Result<PortfolioProject>> getPortfolioProjectById(Guid PortfolioProjectId);
-        public Task<IEnumerable<PortfolioProject>> getAllByFreelancerId(Guid FreelancerId);
-        public Task<Result<PortfolioProject>> getWithItemsByProjectId(Guid PortfolioProjectId);
-        public void Delete(PortfolioProject Project);
-        public Task addItemAsync(PortfolioItem Item);
-        public void deleteItem(PortfolioItem Item);
-        
+        public Task<Result<Success>> AddAsync(PortfolioProject Project);
+        public Task<Result<PortfolioProject>> GetPortfolioProjectById(Guid PortfolioProjectId);
+        public Task<IEnumerable<PortfolioProject>> GetAllByFreelancerId(Guid FreelancerId);
+        public Task<Result<PortfolioProject>> GetWithItemsByProjectId(Guid PortfolioProjectId);
+        public Result<Deleted> Delete(PortfolioProject Project);
+        public Task<Result<Success>> AddItemAsync(PortfolioItem Item);
+        public Result<Deleted> DeleteItem(PortfolioItem Item);
+
+        public Task<Result<int>> GetProjectViews(Guid ProjectId);
+
+        // waiting for the skill entity implementation
+        //public Task addSkill(Guid Skill);
     }
 }

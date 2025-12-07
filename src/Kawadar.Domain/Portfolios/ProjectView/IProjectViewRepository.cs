@@ -11,6 +11,6 @@ namespace Kawadar.Domain.Portfolios.ProjectView
     {
         public Task addAsync(PortfolioProjectView projectView);
         public Task<int> getViewsByProjectId(Guid projectId);
-        public void Delete(Guid Id);
+        public Task<Result<Success>> Delete(Guid Id);
     }
 }
