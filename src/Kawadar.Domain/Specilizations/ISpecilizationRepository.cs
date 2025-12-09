@@ -8,6 +8,8 @@ namespace Kawadar.Domain.Specilizations
         public Task<Result<Success>> AddAsync(Specilization Specilization);
         public Task<IEnumerable<Specilization>> GetAll(CancellationToken cancellationToken);
         public Result<Deleted> Delete(Specilization specilization);
-        public Task<Result<Updated>> Update(Guid Id, Specilization UpdatedSpecilization);
+
+        public Task<Result<Specilization>> GetByName(string name);
+        public Task<Result<Specilization>> GetById(Guid Id);
     }
 }

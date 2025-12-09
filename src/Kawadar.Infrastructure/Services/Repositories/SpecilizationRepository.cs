@@ -26,11 +26,16 @@ namespace Kawadar.Infrastructure.Services.Repositories
             return specilizations;
         }
 
-        public async Task<Result<Updated>> Update(Guid Id, Specilization UpdatedSpecilization)
+        public async Task<Result<Specilization>> GetByName(string name)
         {
-            var specilization = await appDbContext.Specilizations.FirstOrDefaultAsync();
-            specilization.Update(UpdatedSpecilization.Name, UpdatedSpecilization.IsActive);
-            return Result.Updated;
+            var specilization = await appDbContext.Specilizations.FirstOrDefaultAsync(s => s.Name == name);
+            return specilization;
+        }
+
+        public async Task<Result<Specilization>> GetById(Guid Id)
+        {
+            var specilization = await appDbContext.Specilizations.FirstOrDefaultAsync(s => s.Id == Id);
+            return specilization;
         }
     }
 }

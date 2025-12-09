@@ -24,12 +24,5 @@ namespace Kawadar.Infrastructure.Services.Repositories
             var badge = await appDbContext.Badges.FirstOrDefaultAsync(b => b.Id == Id);
             return badge;
         }
-
-        public async Task<Result<Updated>> Update(Guid BadgeId, Badge NewBadge)
-        {
-            var badge = await appDbContext.Badges.FirstOrDefaultAsync(b => b.Id == BadgeId);
-            badge.Update(NewBadge.iconUrl);
-            return Result.Updated;
-        }
     }
 }

@@ -5,15 +5,15 @@ using Kawadar.Domain.Portfolios.Project.Enum;
 
 namespace Kawadar.Domain.Portfolios.Project
 {
-    public class PortfolioProject: AuditableEntity
+    public class PortfolioProject : AuditableEntity
     {
-        public string Title { get; private set; }
-        public string Description { get; private set; }
-        public PortfolioProjectCategory Category { get; private set; }
-        public DateTime? ProjectDate { get; private set; }
-        public string? ProjectUrl { get; private set; }
-        public string ProjectImageUrl { get; private set; } = "";
-        public int DisplayOrder { get; private set; }
+        public string Title { get; private set; } = "";
+        public string Description { get; private set; } = "";
+        public PortfolioProjectCategory Category { get; private set; } = PortfolioProjectCategory.GraphicDesign;
+        public DateTime? ProjectDate { get; private set; } = DateTime.UtcNow;
+        public string? ProjectUrl { get; private set; } = "";
+        public string ? ProjectImageUrl { get; private set; } = "";
+        public int DisplayOrder { get; private set; } = 1;
         public bool IsPublic { get; private set; } = true;
         private readonly List<PortfolioItem> _items = new();
         public IReadOnlyCollection<PortfolioItem> Items => _items.AsReadOnly();
@@ -21,22 +21,16 @@ namespace Kawadar.Domain.Portfolios.Project
         public Guid FreelancerId { get; private set; }
 
 
-        private PortfolioProject(string Title, string Description, PortfolioProjectCategory Category, DateTime Date,
-            string ProjectUrl, string ImageUrl, int DisplayOrder, bool IsPublic, Guid FreelancerId): base(Guid.NewGuid())
+        private PortfolioProject(string Title, string Description, PortfolioProjectCategory Category,
+             Guid FreelancerId): base(Guid.NewGuid())
         {
             this.Title = Title;
             this.Description = Description;
             this.Category = Category;
-            ProjectDate = Date;
-            this.ProjectUrl = ProjectUrl;
-            ProjectImageUrl = ImageUrl;
-            this.DisplayOrder = DisplayOrder;
-            this.IsPublic = IsPublic;
             this.FreelancerId = FreelancerId;
         }
 
-        public static Result<PortfolioProject> Create(string Title, string Description, PortfolioProjectCategory Category, DateTime Date,
-            string ProjectUrl, string ImageUrl, int DisplayOrder, bool IsPublic, Guid FreelancerId)
+        public static Result<PortfolioProject> Create(string Title, string Description, PortfolioProjectCategory Category, Guid FreelancerId)
         {
             if (string.IsNullOrWhiteSpace(Title)){
                 return PortfolioProjectErrors.TitleIsRequired;
@@ -56,12 +50,8 @@ namespace Kawadar.Domain.Portfolios.Project
                 Title,
                 Description,
                 Category,
-                Date,
-                ProjectUrl,
-                ImageUrl,
-                DisplayOrder,
-                IsPublic,
-                FreelancerId);
+                FreelancerId
+                );
 
             return Project;
         }

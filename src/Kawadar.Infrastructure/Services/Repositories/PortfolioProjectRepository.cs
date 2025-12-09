@@ -1,6 +1,7 @@
 ﻿
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Portfolios.Items;
+using Kawadar.Domain.Portfolios.Items.Enum;
 using Kawadar.Domain.Portfolios.Project;
 using Kawadar.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -46,6 +47,12 @@ namespace Kawadar.Infrastructure.Services.Repositories
             return Project;
         }
 
+        public async Task<Result<PortfolioItem>> GetProjectItemById(Guid ItemId)
+        {
+            var Item = await appDbContext.PortfolioItems.FirstOrDefaultAsync(i => i.Id == ItemId);
+            return Item;
+        }
+
         public async Task<Result<int>> GetProjectViews(Guid ProjectId)
         {
             var Views = await appDbContext.ProjectViews.Where(v => v.PortfolioProjectId == ProjectId).CountAsync();
@@ -61,6 +68,6 @@ namespace Kawadar.Infrastructure.Services.Repositories
 
         // add Skill
 
-        
+
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Kawadar.Domain.Common;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Portfolios.Items.Enum;
+using Kawadar.Domain.Portfolios.Project;
 
 
 namespace Kawadar.Domain.Portfolios.Items
@@ -9,10 +10,11 @@ namespace Kawadar.Domain.Portfolios.Items
     {
         public ItemType itemType { get; private set; } = ItemType.Text;
         public string content { get; private set; } = "";
-        public int displayOrder;
+        public int displayOrder { get; private set; }
 
         //Foreign Key
-        public Guid portfolioProjectId;
+        public Guid portfolioProjectId { get; private set; }
+        public PortfolioProject Project { get; private set; } = null;
 
         private PortfolioItem(ItemType ItemType, string Content, int DisplayOrder, Guid PortfolioProjectId): base(Guid.NewGuid())
         {
