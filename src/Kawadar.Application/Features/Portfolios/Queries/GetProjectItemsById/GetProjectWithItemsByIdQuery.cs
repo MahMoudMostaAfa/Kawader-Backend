@@ -4,5 +4,5 @@ using MediatR;
 
 namespace Kawadar.Application.Features.Portfolios.Queries.GetProjectItemsById
 {
-    public record GetProjectItemsByIdQuery(Guid Id) : IRequest<Result<List<ItemDTO>>>;
+    public record GetProjectWithItemsByIdQuery(Guid Id) : IRequest<Result<List<ItemDTO>>>;
 }

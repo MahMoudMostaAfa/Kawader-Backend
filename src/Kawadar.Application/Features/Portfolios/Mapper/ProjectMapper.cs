@@ -9,6 +9,7 @@ namespace Kawadar.Application.Features.Portfolios.Mapper
         {
             var DTO = new ProjectDTO
             {
+                Id = project.Id,
                 title = project.Title,
                 displayOrder = project.DisplayOrder,
                 category = project.Category,

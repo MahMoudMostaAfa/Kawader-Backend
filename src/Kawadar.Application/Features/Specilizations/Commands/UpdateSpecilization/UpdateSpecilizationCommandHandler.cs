@@ -18,8 +18,12 @@ namespace Kawadar.Application.Features.Specilizations.Commands.UpdateSpecilizati
             if (result.IsError) return result.Errors;
 
             var specilization = result.Value;
+            var updateResult = specilization.Update(request.name, request.isActive);
+
+            if (updateResult.IsError) return updateResult.Errors;
+
             await unitOfWork.SaveChangesAsync(cancellationToken);
-            return specilization.Update(request.name, request.isActive);
+            return updateResult;
         }
     }
 }

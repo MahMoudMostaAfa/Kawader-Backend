@@ -7,7 +7,7 @@ namespace Kawadar.Application.Features.Specilizations.Mapper
     {
         public static SpecilizationDTO toDTO(this Specilization specilization)
         {
-            var specilizationDTO = new SpecilizationDTO { Name = specilization.Name, IsActive = specilization.IsActive };
+            var specilizationDTO = new SpecilizationDTO { Id = specilization.Id, Name = specilization.Name, IsActive = specilization.IsActive };
             return specilizationDTO;
         }
 

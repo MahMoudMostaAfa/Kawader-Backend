@@ -19,6 +19,7 @@ using Kawadar.Infrastructure.Services.Repositories;
 using Kawadar.Domain.Portfolios.Project;
 using Kawadar.Domain.Badges;
 using Kawadar.Domain.Specilizations;
+using Kawadar.Domain.Portfolios.ProjectView;
 
 public static class DependencyInjection
 {
@@ -104,6 +105,7 @@ public static class DependencyInjection
     service.AddScoped<IPortfolioProjectRepository, PortfolioProjectRepository>();
     service.AddScoped<IBadgeRepository, BadgeRepository>();
     service.AddScoped<ISpecilizationRepository, SpecilizationRepository>();
+        service.AddScoped<IProjectViewRepository, ProjectViewRepository>();
     service.AddScoped<IUnitOfWork, UnitOfWork>();
 
     service.AddTransient<IIdentityService, IdentityService>();

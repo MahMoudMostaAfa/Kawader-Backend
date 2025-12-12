@@ -6,17 +6,17 @@ namespace Kawadar.Domain.Badges
 {
     public class Badge: AuditableEntity
     {
-        public string title { get; private set; }
+        public string Title { get; private set; }
 
-        public string iconUrl { get; private set; }
-        public string description { get; private set; }
+        public string IconUrl { get; private set; }
+        public string Description { get; private set; }
 
 
         private Badge(string Title, string IconUrl, string Description) : base(Guid.NewGuid())
         {
-            title = Title;
-            iconUrl = IconUrl;
-            description = Description;
+            this.Title = Title;
+            this.IconUrl = IconUrl;
+            this.Description = Description;
         }
 
         public static Result<Badge> Create(string Title, string IconUrl, string Description)
@@ -37,7 +37,7 @@ namespace Kawadar.Domain.Badges
 
         public Result<Updated> Update(string IconUrl)
         {
-            iconUrl = IconUrl;
+            this.IconUrl = IconUrl;
             UpdatedAt = DateTime.UtcNow;
 
             return Result.Updated;

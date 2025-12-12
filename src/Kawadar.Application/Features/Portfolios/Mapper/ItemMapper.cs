@@ -7,7 +7,7 @@ namespace Kawadar.Application.Features.Portfolios.Mapper
     {
         public static ItemDTO toDTO(this PortfolioItem item)
         {
-            var DTO = new ItemDTO { content = item.content, displayOrder = item.displayOrder, itemType = item.itemType };
+            var DTO = new ItemDTO {Id = item.Id, content = item.Content, displayOrder = item.DisplayOrder, itemType = item.ItemType };
             return DTO;
         }
 

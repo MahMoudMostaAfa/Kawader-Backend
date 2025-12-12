@@ -12,7 +12,7 @@ namespace Kawadar.Application.Features.Badges.Queries
         public GetBadgeByIdQueryValidator()
         {
             RuleFor(x => x.Id).NotEmpty().WithMessage("Badge Id is Required")
-                .Equal(Guid.Empty).WithMessage("Badge Id can't be empty");
+                .NotEqual(Guid.Empty).WithMessage("Badge Id can't be empty");
         }
     }
 }

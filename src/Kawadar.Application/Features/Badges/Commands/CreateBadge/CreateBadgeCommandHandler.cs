@@ -1,6 +1,7 @@
 ﻿using Kawadar.Application.Common.Errors;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
+using Kawadar.Application.Features.Badges.DTOs;
 using Kawadar.Domain.Badges;
 using Kawadar.Domain.Common.Results;
 using MediatR;
@@ -8,9 +9,9 @@ using MediatR;
 
 namespace Kawadar.Application.Features.Badges.Commands.CreateBadge
 {
-    public class CreateBadgeCommandHandler(IUnitOfWork unitOfWork,IUser user, IBadgeRepository badgeRepository) : IRequestHandler<CreateBadgeCommand, Result<Success>>
+    public class CreateBadgeCommandHandler(IUnitOfWork unitOfWork,IUser user, IBadgeRepository badgeRepository) : IRequestHandler<CreateBadgeCommand, Result<BadgeDTO>>
     {
-        public async Task<Result<Success>> Handle(CreateBadgeCommand request, CancellationToken cancellationToken)
+        public async Task<Result<BadgeDTO>> Handle(CreateBadgeCommand request, CancellationToken cancellationToken)
         {
             var userId = user.Id;
             if (userId is null) return ApplicationErrors.UserIsNotAuthenticated;
@@ -21,7 +22,7 @@ namespace Kawadar.Application.Features.Badges.Commands.CreateBadge
 
             await badgeRepository.AddAsync(result.Value);
             await unitOfWork.SaveChangesAsync(cancellationToken);
-            return Result.Success;
+            return new BadgeDTO { Id = result.Value.Id, title = result.Value.Title, description = result.Value.Description, IconUrl = result.Value.IconUrl};
         }
     }
 }

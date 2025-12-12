@@ -6,7 +6,7 @@ namespace Kawadar.Application.Features.Portfolios.Queries.GetProjectViews
     {
         public GetProjectViewsValidator()
         {
-            RuleFor(x => x.Id).NotEmpty().WithMessage("Project Id is Required")
+            RuleFor(x => x.projectId).NotEmpty().WithMessage("Project Id is Required")
                 .NotEqual(Guid.Empty).WithMessage("Project Id can't be Empty");
         }
     }

@@ -53,12 +53,6 @@ namespace Kawadar.Infrastructure.Services.Repositories
             return Item;
         }
 
-        public async Task<Result<int>> GetProjectViews(Guid ProjectId)
-        {
-            var Views = await appDbContext.ProjectViews.Where(v => v.PortfolioProjectId == ProjectId).CountAsync();
-            return Views;
-        }
-
         public async Task<Result<PortfolioProject>> GetWithItemsByProjectId(Guid PortfolioProjectId)
         {
             var Project = await appDbContext.PortfolioProjects.

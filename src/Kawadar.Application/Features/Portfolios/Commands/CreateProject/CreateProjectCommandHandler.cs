@@ -1,6 +1,8 @@
 ﻿using Kawadar.Application.Common.Errors;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
+using Kawadar.Application.Features.Portfolios.DTOs;
+using Kawadar.Application.Features.Portfolios.Mapper;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Portfolios.Project;
 using MediatR;
@@ -8,9 +10,9 @@ using MediatR;
 namespace Kawadar.Application.Features.Portfolios.Commands.CreateProject
 {
     public class CreateProjectCommandHandler(IUnitOfWork unitOfWork, IUser user, IPortfolioProjectRepository projectRepository
-        , IUsersRepository usersRepository) : IRequestHandler<CreateProjectCommand, Result<Success>>
+        , IUsersRepository usersRepository) : IRequestHandler<CreateProjectCommand, Result<ProjectDTO>>
     {
-        public async Task<Result<Success>> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
+        public async Task<Result<ProjectDTO>> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
         {
             var userId = user.Id;
             if (userId is null) return ApplicationErrors.UserIsNotAuthenticated;
@@ -24,7 +26,7 @@ namespace Kawadar.Application.Features.Portfolios.Commands.CreateProject
 
             await projectRepository.AddAsync(resultProject.Value);
             await unitOfWork.SaveChangesAsync(cancellationToken);
-            return Result.Success;
+            return resultProject.Value.toDTO();
         }
     }
 }

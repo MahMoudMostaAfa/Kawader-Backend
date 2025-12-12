@@ -15,7 +15,6 @@ namespace Kawadar.Domain.Portfolios.Project
         public Result<Deleted> Delete(PortfolioProject Project);
         public Task<Result<Success>> AddItemAsync(PortfolioItem Item);
         public Result<Deleted> DeleteItem(PortfolioItem Item);
-        public Task<Result<int>> GetProjectViews(Guid ProjectId);
 
         // waiting for the skill entity implementation
         //public Task addSkill(Guid Skill);

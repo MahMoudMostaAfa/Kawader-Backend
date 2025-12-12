@@ -11,7 +11,6 @@ namespace Kawadar.Domain.Portfolios.ProjectSkill
         public Guid PortfolioProjectId { get; private set; }
         public Guid SkillId { get; private set; }
 
-        public PortfolioProject PortfolioProject { get; private set; }
 
         private PortfolioProjectSkill(Guid portfolioProjectId, Guid skillId): base(Guid.NewGuid())
         {

@@ -8,20 +8,21 @@ namespace Kawadar.Domain.Portfolios.Items
 {
     public class PortfolioItem: AuditableEntity
     {
-        public ItemType itemType { get; private set; } = ItemType.Text;
-        public string content { get; private set; } = "";
-        public int displayOrder { get; private set; }
+        public ItemType ItemType { get; private set; } = ItemType.Text;
+        public string Content { get; private set; } = "";
+        public int DisplayOrder { get; private set; }
 
         //Foreign Key
-        public Guid portfolioProjectId { get; private set; }
-        public PortfolioProject Project { get; private set; } = null;
+        public Guid PortfolioProjectId { get; private set; }
+
+        public PortfolioProject PortfolioProject { get; private set; }
 
         private PortfolioItem(ItemType ItemType, string Content, int DisplayOrder, Guid PortfolioProjectId): base(Guid.NewGuid())
         {
-            itemType = ItemType;
-            content = Content;
-            displayOrder = DisplayOrder;
-            portfolioProjectId = PortfolioProjectId;
+            this.ItemType = ItemType;
+            this.Content = Content;
+            this.DisplayOrder = DisplayOrder;
+            this.PortfolioProjectId = PortfolioProjectId;
         }
 
         public static Result<PortfolioItem> Create(ItemType ItemType, string Content, int DisplayOrder, Guid PortfolioProjectId)
@@ -42,9 +43,9 @@ namespace Kawadar.Domain.Portfolios.Items
 
         public Result<Updated> Update(ItemType ItemType, string Content, int DisplayOrder)
         {
-            itemType = ItemType;
-            content = Content;
-            displayOrder = DisplayOrder;
+            this.ItemType = ItemType;
+            this.Content = Content;
+            this.DisplayOrder = DisplayOrder;
 
             UpdatedAt = DateTime.UtcNow;
             return Result.Updated;

@@ -18,7 +18,7 @@ namespace Kawadar.Application.Features.Badges.Queries
             var result = await badgeRepository.GetById(request.Id);
             if (result.IsError) return result.Errors;
             var badge = result.Value;
-            return new BadgeDTO { title = badge.title, IconUrl = badge.iconUrl, description = badge.description};
+            return new BadgeDTO { Id = badge.Id, title = badge.Title, IconUrl = badge.IconUrl, description = badge.Description};
         }
     }
 }

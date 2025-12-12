@@ -5,14 +5,14 @@ namespace Kawadar.Domain.Badges.FreelancerBadges
 {
     public class FreelancerBadge:AuditableEntity
     {
-        public Guid freelancerId { get; private set; }
+        public Guid FreelancerId { get; private set; }
 
-        public Guid badgeId { get; private set; }
+        public Guid BadgeId { get; private set; }
 
         private FreelancerBadge(Guid FreelancerId, Guid BadgeId): base(Guid.NewGuid())
         {
-            freelancerId = FreelancerId;
-            badgeId = BadgeId;
+            this.FreelancerId = FreelancerId;
+            this.BadgeId = BadgeId;
         }
 
         public static Result<FreelancerBadge> Create(Guid FreelancerId, Guid BadgeId)

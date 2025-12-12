@@ -2,7 +2,7 @@
 
 namespace Kawadar.Application.Features.Portfolios.Queries.GetProjectItemsById
 {
-    public class GetProjectItemsByIdValidator : AbstractValidator<GetProjectItemsByIdQuery>
+    public class GetProjectItemsByIdValidator : AbstractValidator<GetProjectWithItemsByIdQuery>
     {
         public GetProjectItemsByIdValidator()
         {

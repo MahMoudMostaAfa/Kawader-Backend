@@ -19,6 +19,8 @@ namespace Kawadar.Application.Features.Specilizations.Commands.DeleteSpecilizati
 
             var deleteResult = specilizationRepository.Delete(result.Value);
             if (deleteResult.IsError) return deleteResult.Errors;
+
+            await unitOfWork.SaveChangesAsync(cancellationToken);
             return deleteResult;
         }
     }

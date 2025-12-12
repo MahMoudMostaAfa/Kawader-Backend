@@ -26,7 +26,7 @@ namespace Kawadar.Infrastructure.Services.Repositories
             return specilizations;
         }
 
-        public async Task<Result<Specilization>> GetByName(string name)
+        public async Task<Specilization> GetByName(string name)
         {
             var specilization = await appDbContext.Specilizations.FirstOrDefaultAsync(s => s.Name == name);
             return specilization;

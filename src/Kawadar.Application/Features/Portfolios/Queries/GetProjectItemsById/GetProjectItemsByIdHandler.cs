@@ -9,9 +9,9 @@ using MediatR;
 namespace Kawadar.Application.Features.Portfolios.Queries.GetProjectItemsById
 {
     public class GetProjectItemsByIdHandler(IUser user,
-        IPortfolioProjectRepository projectRepository) : IRequestHandler<GetProjectItemsByIdQuery, Result<List<ItemDTO>>>
+        IPortfolioProjectRepository projectRepository) : IRequestHandler<GetProjectWithItemsByIdQuery, Result<List<ItemDTO>>>
     {
-        public async Task<Result<List<ItemDTO>>> Handle(GetProjectItemsByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Result<List<ItemDTO>>> Handle(GetProjectWithItemsByIdQuery request, CancellationToken cancellationToken)
         {
             var userId = user.Id;
             if (userId is null) return ApplicationErrors.UserIsNotAuthenticated;
