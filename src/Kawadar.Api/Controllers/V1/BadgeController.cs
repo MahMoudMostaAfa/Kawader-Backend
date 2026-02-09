@@ -4,6 +4,7 @@ using Kawadar.Application.Features.Badges.Commands.DeleteBadge;
 using Kawadar.Application.Features.Badges.Commands.UpdateBadge;
 using Kawadar.Application.Features.Badges.DTOs;
 using Kawadar.Application.Features.Badges.Queries;
+using Kawadar.Domain.Common.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -11,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Kawadar.Api.Controllers.V1
 {
-    [Authorize]
+    [Authorize(Policy = Permissions.ViewBadges)]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/Badge")]
     public class BadgeController : ApiController
@@ -42,6 +43,8 @@ namespace Kawadar.Api.Controllers.V1
 
 
         [HttpPost]
+        [Authorize(Policy = Permissions.CreateBadges)]
+        [Consumes("multipart/form-data")]
         [ProducesResponseType(typeof(BadgeDTO), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
@@ -50,7 +53,7 @@ namespace Kawadar.Api.Controllers.V1
         [EndpointDescription("Creates a badge with data from the request.")]
         public async Task<IActionResult> CreateBadge(CreateBadgeRequest request, CancellationToken ct)
         {
-            var command = new CreateBadgeCommand(request.title, request.IconUrl, request.description);
+            var command = new CreateBadgeCommand(request.title, request.Icon, request.description);
             var result = await _sender.Send(command, ct);
 
             return result.Match(
@@ -61,6 +64,7 @@ namespace Kawadar.Api.Controllers.V1
 
 
         [HttpDelete("{Id:guid}")]
+        [Authorize(Policy = Permissions.DeleteBadges)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
@@ -79,6 +83,7 @@ namespace Kawadar.Api.Controllers.V1
 
 
         [HttpPut("{Id:guid}")]
+        [Authorize(Policy = Permissions.EditBadges)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]

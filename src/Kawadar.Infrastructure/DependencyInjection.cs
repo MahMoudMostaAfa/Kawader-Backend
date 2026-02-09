@@ -20,6 +20,9 @@ using Kawadar.Domain.Portfolios.Project;
 using Kawadar.Domain.Badges;
 using Kawadar.Domain.Specilizations;
 using Kawadar.Domain.Portfolios.ProjectView;
+using Azure.Storage.Blobs;
+using Azure.Identity;
+using Kawadar.Domain.StorageRepository;
 
 public static class DependencyInjection
 {
@@ -85,6 +88,17 @@ public static class DependencyInjection
 
     var authBuilder = service.AddAuthorizationBuilder();
 
+    //Adding Azure Blob Storage
+    service.AddSingleton(provider =>
+    {
+        var Azure = configuration.GetSection("Azure");
+        var accountStorageName = Azure["StorageAccountName"];
+        ArgumentException.ThrowIfNullOrEmpty(accountStorageName, "Account Storage Name 'Azure' not found.");
+        var blobUri = new Uri($"https://{accountStorageName}.blob.core.windows.net");
+        return new BlobServiceClient(blobUri, new DefaultAzureCredential());
+    });
+
+
     // Automatically add policies for all permissions
     foreach (var permission in Permissions.GetAllPermissions())
     {
@@ -102,10 +116,11 @@ public static class DependencyInjection
 
     // repositories and unit of work
     service.AddScoped<IUsersRepository, UsersRepository>();
+    service.AddScoped<IStorageClient, AzureStorageClient>();
     service.AddScoped<IPortfolioProjectRepository, PortfolioProjectRepository>();
     service.AddScoped<IBadgeRepository, BadgeRepository>();
     service.AddScoped<ISpecilizationRepository, SpecilizationRepository>();
-        service.AddScoped<IProjectViewRepository, ProjectViewRepository>();
+    service.AddScoped<IProjectViewRepository, ProjectViewRepository>();
     service.AddScoped<IUnitOfWork, UnitOfWork>();
 
     service.AddTransient<IIdentityService, IdentityService>();

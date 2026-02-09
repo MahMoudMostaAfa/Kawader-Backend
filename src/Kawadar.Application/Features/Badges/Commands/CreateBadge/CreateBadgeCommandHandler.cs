@@ -4,19 +4,25 @@ using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Application.Features.Badges.DTOs;
 using Kawadar.Domain.Badges;
 using Kawadar.Domain.Common.Results;
+using Kawadar.Domain.StorageRepository;
 using MediatR;
 
 
 namespace Kawadar.Application.Features.Badges.Commands.CreateBadge
 {
-    public class CreateBadgeCommandHandler(IUnitOfWork unitOfWork,IUser user, IBadgeRepository badgeRepository) : IRequestHandler<CreateBadgeCommand, Result<BadgeDTO>>
+    public class CreateBadgeCommandHandler(IUnitOfWork unitOfWork,IUser user, IBadgeRepository badgeRepository, IStorageClient storageClient) : IRequestHandler<CreateBadgeCommand, Result<BadgeDTO>>
     {
         public async Task<Result<BadgeDTO>> Handle(CreateBadgeCommand request, CancellationToken cancellationToken)
         {
             var userId = user.Id;
             if (userId is null) return ApplicationErrors.UserIsNotAuthenticated;
 
-            var result = Badge.Create(request.title, request.IconUrl, request.description);
+            using var stream = request.Icon.OpenReadStream();
+            var uploadResult = await storageClient.UploadFileAsync(stream, request.Icon.FileName, "badges");
+
+            if (uploadResult.IsError) return uploadResult.Errors;
+
+            var result = Badge.Create(request.title, uploadResult.Value, request.description);
 
             if (result.IsError) return result.Errors;
 
