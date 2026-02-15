@@ -21,6 +21,12 @@ public static class Permissions
   public const string EditRoles = "Permissions.Roles.Edit";
   public const string DeleteRoles = "Permissions.Roles.Delete";
 
+  //Badge Managemet
+  public const string ViewBadges = "Permissions.Badges.View";
+  public const string DeleteBadges = "Permissions.Badges.Delete";
+  public const string CreateBadges = "Permissions.Badges.Create";
+  public const string EditBadges = "Permissions.Badges.Edit";
+
 
 
   public static List<string> GetAllPermissions()

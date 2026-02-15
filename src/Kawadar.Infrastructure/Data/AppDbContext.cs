@@ -1,4 +1,11 @@
+using Kawadar.Domain.Badges;
+using Kawadar.Domain.Badges.FreelancerBadges;
 using Kawadar.Domain.Common;
+using Kawadar.Domain.Portfolios.Items;
+using Kawadar.Domain.Portfolios.Project;
+using Kawadar.Domain.Portfolios.ProjectSkill;
+using Kawadar.Domain.Portfolios.ProjectView;
+using Kawadar.Domain.Specilizations;
 using Kawadar.Domain.UserProfiles;
 using Kawadar.Infrastructure.Identity;
 using MediatR;
@@ -11,6 +18,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IMediator medi
 {
 
   public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
+    public DbSet<PortfolioItem> PortfolioItems => Set<PortfolioItem>();
+    public DbSet<PortfolioProject> PortfolioProjects => Set<PortfolioProject>();
+    public DbSet<PortfolioProjectSkill> ProjectSkills => Set<PortfolioProjectSkill>();
+    public DbSet<PortfolioProjectView> ProjectViews => Set<PortfolioProjectView>();
+    public DbSet<Specilization> Specilizations => Set<Specilization>();
+    public DbSet<Badge> Badges => Set<Badge>();
+    public DbSet<FreelancerBadge> FreelancerBadges => Set<FreelancerBadge>();
+
   public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
   {
     await DispatchDomainEventsAsync(cancellationToken);

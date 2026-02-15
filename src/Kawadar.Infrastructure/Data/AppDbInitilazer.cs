@@ -1,6 +1,7 @@
 
 using System.Security.Claims;
 using Kawadar.Domain.Common.Constants;
+using Kawadar.Domain.Common.Results;
 using Kawadar.Infrastructure.Identity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -97,6 +98,25 @@ public class ApplicationDbContextInitialiser(
         await _userManager.AddToRoleAsync(user, DefaultRoles.User);
       }
     }
+
+    if(await _userManager.FindByEmailAsync("omartamer244@gmail.com") == null)
+        {
+            var coAdmin = new AppUser
+            {
+                UserName = "Omar244",
+                Email = "omartamer244@gmail.com",
+                EmailConfirmed = true,
+            };
+            var result = await _userManager.CreateAsync(coAdmin, "Omar@123");
+            if (result.Succeeded)
+            {
+                await _userManager.AddToRoleAsync(coAdmin, DefaultRoles.Admin);
+                foreach (var permission in Permissions.GetAllPermissions())
+                {
+                    await _userManager.AddClaimAsync(coAdmin, new Claim("Permission", permission));
+                }
+            }
+        }
   }
 }
 
