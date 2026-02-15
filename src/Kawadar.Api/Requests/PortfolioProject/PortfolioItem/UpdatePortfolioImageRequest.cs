@@ -2,9 +2,9 @@
 
 namespace Kawadar.Api.Requests.PortfolioProject.PortfolioItem
 {
-    public class UpdateItemRequest
+    public class UpdatePortfolioImageRequest
     {
-        public string Content { get; set; }
+        public IFormFile Image { get; set; }
         public int DisplayOrder { get; set; }
     }
 }

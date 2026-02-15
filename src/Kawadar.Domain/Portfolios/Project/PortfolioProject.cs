@@ -30,7 +30,8 @@ namespace Kawadar.Domain.Portfolios.Project
             this.FreelancerId = FreelancerId;
         }
 
-        public static Result<PortfolioProject> Create(string Title, string Description, PortfolioProjectCategory Category, Guid FreelancerId)
+        public static Result<PortfolioProject> Create(string Title, string Description, PortfolioProjectCategory Category,
+             Guid FreelancerId, string ProjectImageUrl = "", string ProjectUrl = "")
         {
             if (string.IsNullOrWhiteSpace(Title)){
                 return PortfolioProjectErrors.TitleIsRequired;
@@ -52,6 +53,9 @@ namespace Kawadar.Domain.Portfolios.Project
                 Category,
                 FreelancerId
                 );
+
+            Project.ProjectImageUrl = ProjectImageUrl;
+            Project.ProjectUrl = ProjectUrl;
 
             return Project;
         }

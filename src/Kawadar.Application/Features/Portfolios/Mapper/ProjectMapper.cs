@@ -13,7 +13,9 @@ namespace Kawadar.Application.Features.Portfolios.Mapper
                 title = project.Title,
                 displayOrder = project.DisplayOrder,
                 category = project.Category,
-                description = project.Description
+                description = project.Description,
+                ProjectImageUrl = project.ProjectImageUrl,
+                ProjectUrl = project.ProjectUrl
             };
 
             return DTO;

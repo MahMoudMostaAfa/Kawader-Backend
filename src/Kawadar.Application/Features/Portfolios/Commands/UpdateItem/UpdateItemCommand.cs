@@ -4,5 +4,5 @@ using MediatR;
 
 namespace Kawadar.Application.Features.Portfolios.Commands.UpdateItem
 {
-    public record UpdateItemCommand(Guid Id, ItemType ItemType, string Content, int DisplayOrder) : IRequest<Result<Updated>>;
+    public record UpdateItemCommand(Guid Id, string Content, int DisplayOrder) : IRequest<Result<Updated>>;
 }

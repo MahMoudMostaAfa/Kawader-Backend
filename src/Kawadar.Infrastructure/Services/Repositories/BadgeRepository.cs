@@ -22,6 +22,8 @@ namespace Kawadar.Infrastructure.Services.Repositories
         public async Task<Result<Badge>> GetById(Guid Id)
         {
             var badge = await appDbContext.Badges.FirstOrDefaultAsync(b => b.Id == Id);
+
+            if (badge == null) return Error.NotFound("Badge.NotFound", "Badge not found");
             return badge;
         }
     }

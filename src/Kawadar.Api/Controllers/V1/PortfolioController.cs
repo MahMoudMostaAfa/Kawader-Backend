@@ -27,15 +27,16 @@ namespace Kawadar.Api.Controllers.V1
         }
         //need modification after the freelancer class is added
         [HttpPost]
+        [Consumes("multipart/form-data")]
         [ProducesResponseType(typeof(ProjectDTO), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [EndpointName("CreateProject")]
         [EndpointSummary("Creates a new portfolio project")]
         [EndpointDescription("Creates a new portfolio project with the freelancerId.")]
-        public async Task<IActionResult> CreatePortfolioProject([FromBody] CreateProjectRequest request, CancellationToken ct = default)
+        public async Task<IActionResult> CreatePortfolioProject([FromForm] CreateProjectRequest request, CancellationToken ct = default)
         {
-            var command = new CreateProjectCommand(request.title, request.description, request.category);
+            var command = new CreateProjectCommand(request.title, request.description, request.category, request.ProjectImage, request.ProjectUrl);
             var result = await _sender.Send(command, ct);
 
             return result.Match(
@@ -99,15 +100,16 @@ namespace Kawadar.Api.Controllers.V1
 
 
         [HttpPut("{Id:guid}")]
+        [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [EndpointName("UpdateProject")]
         [EndpointSummary("Updates a portfolio project")]
         [EndpointDescription("Updates a portfolio project with Its unique Identifier.")]
-        public async Task<IActionResult> UpdateProject(Guid Id, [FromBody] UpdateProjectRequest request, CancellationToken ct)
+        public async Task<IActionResult> UpdateProject(Guid Id, [FromForm] UpdateProjectRequest request, CancellationToken ct)
         {
-            var command = new UpdateProjectCommand(Id, request.ProjectUrl, request.ImageUrl, request.DisplayOrder, request.isPublic);
+            var command = new UpdateProjectCommand(Id, request.ProjectUrl, request.Image, request.DisplayOrder, request.isPublic);
             var result = await _sender.Send(command, ct);
 
             return result.Match(

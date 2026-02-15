@@ -9,7 +9,7 @@ using MediatR;
 
 namespace Kawadar.Application.Features.Specilizations.Queries.GetSpecilizationById
 {
-    public class GetSpecilizationByIdQueryHandler(IUnitOfWork unitOfWork, IUser user, ISpecilizationRepository specilizationRepository)
+    public class GetSpecilizationByIdQueryHandler(IUser user, ISpecilizationRepository specilizationRepository)
         : IRequestHandler<GetSpecilizationByIdQuery, Result<SpecilizationDTO>>
     {
         public async Task<Result<SpecilizationDTO>> Handle(GetSpecilizationByIdQuery request, CancellationToken cancellationToken)

@@ -1,6 +1,8 @@
 ﻿using Kawadar.Api.Requests.PortfolioProject.PortfolioItem;
+using Kawadar.Application.Features.Portfolios.Commands.CreateImageItem;
 using Kawadar.Application.Features.Portfolios.Commands.CreateItem;
 using Kawadar.Application.Features.Portfolios.Commands.DeleteItem;
+using Kawadar.Application.Features.Portfolios.Commands.UpdateImageItem;
 using Kawadar.Application.Features.Portfolios.Commands.UpdateItem;
 using Kawadar.Application.Features.Portfolios.DTOs;
 using Kawadar.Application.Features.Portfolios.Queries.GetProjectItemById;
@@ -34,6 +36,25 @@ namespace Kawadar.Api.Controllers.V1
         public async Task<IActionResult> CreateItem(Guid ProjectId, [FromBody]CreatePortfolioItemRequest request, CancellationToken ct)
         {
             var command = new CreateItemCommand(request.ItemType, request.Content, request.DisplayOrder, ProjectId);
+            var result = await _sender.Send(command, ct);
+
+            return result.Match(
+                item => CreatedAtAction(nameof(GetProjectItemById), new { Id = item.Id }, item)
+                , errors => Problem(errors));
+        }
+
+
+        [HttpPost("Image")]
+        [Consumes("multipart/form-data")]
+        [ProducesResponseType(typeof(ProjectDTO), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [EndpointName("CreateProjectImageItem")]
+        [EndpointSummary("Creates a project Item")]
+        [EndpointDescription("Creates a project item.")]
+        public async Task<IActionResult> CreateImageItem(Guid ProjectId, [FromForm] CreatePortfolioImageItemRequest request, CancellationToken ct)
+        {
+            var command = new CreateImageItemCommand(request.ItemType, request.Image, request.DisplayOrder, ProjectId);
             var result = await _sender.Send(command, ct);
 
             return result.Match(
@@ -106,7 +127,7 @@ namespace Kawadar.Api.Controllers.V1
         [EndpointDescription("Updates a portfolio project item with Its unique Identifier.")]
         public async Task<IActionResult> UpdateItem(Guid Id, [FromBody] UpdateItemRequest request, CancellationToken ct)
         {
-            var command = new UpdateItemCommand(Id, request.ItemType, request.Content, request.DisplayOrder);
+            var command = new UpdateItemCommand(Id, request.Content, request.DisplayOrder);
             var result = await _sender.Send(command, ct);
 
             return result.Match(
@@ -114,6 +135,21 @@ namespace Kawadar.Api.Controllers.V1
                 errors => Problem(errors));
         }
 
+        [HttpPut("{Id:guid}/Image")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [EndpointName("UpdateImageItem")]
+        [EndpointSummary("Updates a portfolio project Image item")]
+        [EndpointDescription("Updates a portfolio project Image item with Its unique Identifier.")]
+        public async Task<IActionResult> UpdateImageItem(Guid Id, [FromBody] UpdatePortfolioImageRequest request, CancellationToken ct)
+        {
+            var command = new UpdateImageItemCommand(Id, request.Image, request.DisplayOrder);
+            var result = await _sender.Send(command, ct);
 
+            return result.Match(
+                _ => NoContent(),
+                errors => Problem(errors));
+        }
     }
 }

@@ -9,7 +9,7 @@ namespace Kawadar.Domain.Specilizations
         public Task<IEnumerable<Specilization>> GetAll(CancellationToken cancellationToken);
         public Result<Deleted> Delete(Specilization specilization);
 
-        public Task<Specilization> GetByName(string name);
+        public Task<Result<Specilization>> GetByName(string name);
         public Task<Result<Specilization>> GetById(Guid Id);
     }
 }

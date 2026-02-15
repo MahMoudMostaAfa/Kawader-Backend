@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Kawadar.Api.Controllers.V1
 {
-    [Authorize(Policy = Permissions.ViewBadges)]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/Badge")]
     public class BadgeController : ApiController
@@ -25,6 +24,7 @@ namespace Kawadar.Api.Controllers.V1
         }
 
         [HttpGet("{Id:guid}")]
+        [Authorize(Policy = Permissions.ViewBadges)]
         [ProducesResponseType(typeof(BadgeDTO), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
@@ -51,7 +51,7 @@ namespace Kawadar.Api.Controllers.V1
         [EndpointName("CreateBadge")]
         [EndpointSummary("Creates a badge")]
         [EndpointDescription("Creates a badge with data from the request.")]
-        public async Task<IActionResult> CreateBadge(CreateBadgeRequest request, CancellationToken ct)
+        public async Task<IActionResult> CreateBadge([FromForm]CreateBadgeRequest request, CancellationToken ct)
         {
             var command = new CreateBadgeCommand(request.title, request.Icon, request.description);
             var result = await _sender.Send(command, ct);
@@ -84,15 +84,16 @@ namespace Kawadar.Api.Controllers.V1
 
         [HttpPut("{Id:guid}")]
         [Authorize(Policy = Permissions.EditBadges)]
+        [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [EndpointName("UpdateBadge")]
         [EndpointSummary("Updates a badge by its Id")]
         [EndpointDescription("Updates a badge by its unique identifier.")]
-        public async Task<IActionResult> UpdateBadge(Guid Id, UpdateBadgeRequest request, CancellationToken ct)
+        public async Task<IActionResult> UpdateBadge(Guid Id, [FromForm]UpdateBadgeRequest request, CancellationToken ct)
         {
-            var command = new UpdateBadgeCommand(Id, request.IconUrl);
+            var command = new UpdateBadgeCommand(Id, request.Icon);
             var result = await _sender.Send(command, ct);
 
             return result.Match(

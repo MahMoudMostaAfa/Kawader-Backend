@@ -26,15 +26,17 @@ namespace Kawadar.Infrastructure.Services.Repositories
             return specilizations;
         }
 
-        public async Task<Specilization> GetByName(string name)
+        public async Task<Result<Specilization>> GetByName(string name)
         {
             var specilization = await appDbContext.Specilizations.FirstOrDefaultAsync(s => s.Name == name);
+            if (specilization == null) return Error.NotFound("Specilizaiton.NotFound", "Specilization not found");
             return specilization;
         }
 
         public async Task<Result<Specilization>> GetById(Guid Id)
         {
             var specilization = await appDbContext.Specilizations.FirstOrDefaultAsync(s => s.Id == Id);
+            if (specilization == null) return Error.NotFound("Specilizaiton.NotFound", "Specilization not found");
             return specilization;
         }
     }

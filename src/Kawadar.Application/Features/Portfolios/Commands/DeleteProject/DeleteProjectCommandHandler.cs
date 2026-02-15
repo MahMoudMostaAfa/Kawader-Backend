@@ -1,14 +1,16 @@
 ﻿using Kawadar.Application.Common.Errors;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
+using Kawadar.Domain.Common.Constants;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Portfolios.Project;
+using Kawadar.Domain.StorageRepository;
 using MediatR;
 
 namespace Kawadar.Application.Features.Portfolios.Commands.DeleteProject
 {
     public class DeleteProjectCommandHandler(IUser user, IUnitOfWork unitOfWork,
-        IPortfolioProjectRepository projectRepository) : IRequestHandler<DeleteProjectCommand, Result<Deleted>>
+        IPortfolioProjectRepository projectRepository, IStorageClient storageClient) : IRequestHandler<DeleteProjectCommand, Result<Deleted>>
     {
         public async Task<Result<Deleted>> Handle(DeleteProjectCommand request, CancellationToken cancellationToken)
         {
@@ -18,7 +20,15 @@ namespace Kawadar.Application.Features.Portfolios.Commands.DeleteProject
             var result = await projectRepository.GetPortfolioProjectById(request.Id);
             if (result.IsError) return result.Errors;
 
-            var deleteResult = projectRepository.Delete(result.Value);
+            var project = result.Value;
+
+            if (project.ProjectImageUrl != string.Empty)
+            {
+                var storageDeleteResult = await storageClient.DeleteFileAsync(project.ProjectImageUrl, Containers.PortfolioProjects);
+                if (storageDeleteResult.IsError) return storageDeleteResult.Errors;
+            }
+
+            var deleteResult = projectRepository.Delete(project);
             if (deleteResult.IsError) return deleteResult.Errors;
 
             await unitOfWork.SaveChangesAsync(cancellationToken);

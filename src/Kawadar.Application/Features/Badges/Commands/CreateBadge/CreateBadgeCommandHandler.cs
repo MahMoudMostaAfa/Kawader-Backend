@@ -3,6 +3,7 @@ using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Application.Features.Badges.DTOs;
 using Kawadar.Domain.Badges;
+using Kawadar.Domain.Common.Constants;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.StorageRepository;
 using MediatR;
@@ -18,7 +19,7 @@ namespace Kawadar.Application.Features.Badges.Commands.CreateBadge
             if (userId is null) return ApplicationErrors.UserIsNotAuthenticated;
 
             using var stream = request.Icon.OpenReadStream();
-            var uploadResult = await storageClient.UploadFileAsync(stream, request.Icon.FileName, "badges");
+            var uploadResult = await storageClient.UploadFileAsync(stream, request.Icon.FileName, Containers.Badges, cancellationToken);
 
             if (uploadResult.IsError) return uploadResult.Errors;
 

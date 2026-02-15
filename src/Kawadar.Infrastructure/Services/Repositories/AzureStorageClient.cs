@@ -55,8 +55,6 @@ namespace Kawadar.Infrastructure.Services.Repositories
                 var containerClient = _blobServiceClient.GetBlobContainerClient(container);
                 var blobClient = containerClient.GetBlobClient(blobName);
 
-                
-
                 await blobClient.DownloadToAsync(filePath, cancellationToken);
 
                 return Result.Success;

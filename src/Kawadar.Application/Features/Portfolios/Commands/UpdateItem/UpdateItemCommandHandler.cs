@@ -20,7 +20,7 @@ namespace Kawadar.Application.Features.Portfolios.Commands.UpdateItem
             if (result.IsError) return result.Errors;
 
             var item = result.Value;
-            var updateResult = item.Update(request.ItemType, request.Content, request.DisplayOrder);
+            var updateResult = item.Update(request.Content, request.DisplayOrder);
 
             if (updateResult.IsError) return updateResult.Errors;
 

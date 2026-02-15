@@ -41,9 +41,8 @@ namespace Kawadar.Domain.Portfolios.Items
             return portfolioItem;
         }
 
-        public Result<Updated> Update(ItemType ItemType, string Content, int DisplayOrder)
+        public Result<Updated> Update(string Content, int DisplayOrder)
         {
-            this.ItemType = ItemType;
             this.Content = Content;
             this.DisplayOrder = DisplayOrder;
 

@@ -44,12 +44,15 @@ namespace Kawadar.Infrastructure.Services.Repositories
         public async Task<Result<PortfolioProject>> GetPortfolioProjectById(Guid PortfolioProjectId)
         {
             var Project = await appDbContext.PortfolioProjects.FirstOrDefaultAsync(s => s.Id == PortfolioProjectId);
+            if (Project == null) return Error.NotFound("Project.NotFound", "Project not found");
+
             return Project;
         }
 
         public async Task<Result<PortfolioItem>> GetProjectItemById(Guid ItemId)
         {
             var Item = await appDbContext.PortfolioItems.FirstOrDefaultAsync(i => i.Id == ItemId);
+            if (Item == null) return Error.NotFound("Item.NotFound", "Item not found");
             return Item;
         }
 
@@ -57,6 +60,8 @@ namespace Kawadar.Infrastructure.Services.Repositories
         {
             var Project = await appDbContext.PortfolioProjects.
                 Include(p => p.Items).FirstOrDefaultAsync(p => p.Id == PortfolioProjectId);
+
+            if (Project == null) return Error.NotFound("Project.NotFound", "Project not found");
             return Project;
         }
 
