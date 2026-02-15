@@ -38,8 +38,7 @@ public class AuthController : ApiController
   [HttpPost("Register")]
   [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
   [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)
-  ]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
   [EndpointName(nameof(Register))]
   [EndpointSummary("Registers a new user.")]
   [EndpointDescription("Creates a new user account with the provided registration details.")]
