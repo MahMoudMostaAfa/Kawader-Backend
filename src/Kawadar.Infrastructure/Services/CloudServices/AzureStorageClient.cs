@@ -3,7 +3,7 @@ using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.StorageRepository;
 using System.Threading;
 
-namespace Kawadar.Infrastructure.Services.Repositories
+namespace Kawadar.Infrastructure.Services.CloudServices
 {
     public class AzureStorageClient(BlobServiceClient _blobServiceClient) : IStorageClient
     {
