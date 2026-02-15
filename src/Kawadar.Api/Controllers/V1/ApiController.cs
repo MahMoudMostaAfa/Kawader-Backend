@@ -14,7 +14,6 @@ public class ApiController : ControllerBase
     {
       return Problem();
     }
-
     if (errors.All(error => error.Type == ErrorKind.Validation))
     {
       return ValidationProblem(errors);
