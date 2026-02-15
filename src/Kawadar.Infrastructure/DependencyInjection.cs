@@ -92,8 +92,15 @@ public static class DependencyInjection
     //Adding Azure Blob Storage
     service.AddSingleton(provider =>
     {
-        var Azure = configuration.GetSection("Azure");
-        var accountStorageName = Azure["StorageAccountName"];
+        var azureSection = configuration.GetSection("Azure");
+        var storageConnectionString = azureSection["ConnectionString"];
+
+        if (!string.IsNullOrWhiteSpace(storageConnectionString))
+        {
+          return new BlobServiceClient(storageConnectionString);
+        }
+
+        var accountStorageName = azureSection["StorageAccountName"];
         ArgumentException.ThrowIfNullOrEmpty(accountStorageName, "Account Storage Name 'Azure' not found.");
         var blobUri = new Uri($"https://{accountStorageName}.blob.core.windows.net");
         return new BlobServiceClient(blobUri, new DefaultAzureCredential());
