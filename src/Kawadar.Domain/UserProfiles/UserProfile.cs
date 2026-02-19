@@ -1,5 +1,6 @@
 using Kawadar.Domain.Common;
 using Kawadar.Domain.Common.Results;
+using Kawadar.Domain.Specilizations;
 using Kawadar.Domain.UserProfiles.Enums;
 
 namespace Kawadar.Domain.UserProfiles;
@@ -11,18 +12,30 @@ public class UserProfile : AuditableEntity
   public string FirstName { get; private set; } = "";
   public string LastName { get; private set; } = "";
 
-  public string? Title { get; private set; } = "";
+
+
+
+
+  public string? Title
+  { get; private set; } = "";
 
   public string? Bio { get; private set; } = "";
   public ExperienceYear ExperienceYear { get; private set; } = ExperienceYear.LessThanOneYear;
   public string? ProfilePictureUrl { get; private set; } = "";
   public string? VideoLink { get; private set; } = "";
   public string? PhoneNumber { get; private set; } = "";
+
+
+  // specialization
+  public Specilization? Specialization { get; private set; }
+  public Guid? SpecializationId { get; private set; }
+
+
+
   // availability Status
   public bool IsAvailable { get; private set; } = true;
 
 
-  public DateTime? DateOfBirth { get; private set; }
 
   // Ban Status
   public bool IsBanned { get; private set; } = false;
@@ -37,6 +50,11 @@ public class UserProfile : AuditableEntity
   // Identity Verification
   public string? IdentityNumber { get; private set; } = "";
 
+  public DateTime? DateOfBirth { get; private set; }
+
+  public string? IdentityLocation { get; private set; } = "";
+
+  public string? IdentityName { get; private set; } = "";
   public string? IdentityImgUrl { get; set; } = "";
 
   public string? IdentityImgBackUrl { get; set; } = "";
@@ -64,6 +82,7 @@ public class UserProfile : AuditableEntity
     UserId = userId;
     FirstName = firstName;
     LastName = lastName;
+
     ProfileType = profileType;
   }
 
@@ -83,9 +102,52 @@ public class UserProfile : AuditableEntity
       return UserProfileErrors.LastNameIsRequired;
     }
 
+
     var UserProfile = new UserProfile(userId, firstName, lastName, profileType);
 
     return UserProfile;
   }
+
+
+
+  public Result<Updated> UpdateProfile(string? firstName, string? lastName, string? title, string? bio, ExperienceYear? experienceYear, bool? isAvailable, ProfileType? profileType, string? phoneNumber)
+  {
+    if (!string.IsNullOrWhiteSpace(firstName))
+    {
+      FirstName = firstName;
+    }
+    if (!string.IsNullOrWhiteSpace(lastName))
+    {
+      LastName = lastName;
+    }
+    if (!string.IsNullOrWhiteSpace(title))
+    {
+      Title = title;
+    }
+    if (!string.IsNullOrWhiteSpace(bio))
+    {
+      Bio = bio;
+    }
+    if (experienceYear.HasValue)
+    {
+      ExperienceYear = experienceYear.Value;
+    }
+    if (isAvailable.HasValue)
+    {
+      IsAvailable = isAvailable.Value;
+    }
+    if (profileType.HasValue)
+    {
+      ProfileType = profileType.Value;
+    }
+    if (!string.IsNullOrWhiteSpace(phoneNumber))
+    {
+      PhoneNumber = phoneNumber;
+    }
+
+    return Result.Updated;
+  }
+
+
 
 }

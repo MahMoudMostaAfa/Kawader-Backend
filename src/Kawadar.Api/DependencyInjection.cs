@@ -40,7 +40,7 @@ public static class DependencyInjection
       options =>
       {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        // options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
       }
     );
 
@@ -114,16 +114,15 @@ public static class DependencyInjection
             options.AssumeDefaultVersionWhenUnspecified = true;
             options.ReportApiVersions = true;
             options.ApiVersionReader = new UrlSegmentApiVersionReader();
-          });
-    // .AddMvc()
-    // .AddApiExplorer(options =>
-    // {
-    //   options.GroupNameFormat = "'v'VVV";
-    //   options.SubstituteApiVersionInUrl = true;
-    // });
+          })
+    .AddMvc()
+    .AddApiExplorer(options =>
+    {
+      options.GroupNameFormat = "'v'VVV";
+      options.SubstituteApiVersionInUrl = true;
+    });
 
     return services;
-    ;
   }
 
   public static IApplicationBuilder UseCoreMiddleware(this IApplicationBuilder app, IConfiguration configuration)

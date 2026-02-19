@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using AutoMapper;
 using AutoMapper.Configuration.Annotations;
 using Kawadar.Application.Common.Interfaces.Auth;
@@ -19,6 +20,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Su
   private readonly IIdentityService _identityService;
 
 
+
   public RegisterCommandHandler(IUnitOfWork unitOfWork, IUsersRepository usersRepository, IIdentityService identityService)
   {
     _unitOfWork = unitOfWork;
@@ -28,6 +30,8 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Su
   }
   public async Task<Result<Success>> Handle(RegisterCommand request, CancellationToken cancellationToken)
   {
+    if (request.ProfileType == ProfileType.Admin) return UserProfileErrors.FreelancerOrClientOnlyCanRegister;
+
     var generatedUserNameResult = await _identityService.GenerateUserNameAsync(request.FirstName, request.LastName);
 
     if (generatedUserNameResult.IsError) return Error.Failure("User.GenerateUserNameFailed", "Failed to generate username.");
@@ -39,7 +43,11 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Su
 
     await _identityService.AddToRoleAsync(userId, DefaultRoles.User);
 
-    var userProfileResult = UserProfile.create(userId, request.FirstName, request.LastName, ProfileType.Freelancer);
+
+
+
+    var userProfileResult = UserProfile.create(userId, request.FirstName, request.LastName, request.ProfileType
+    );
 
     if (userProfileResult.IsError)
     {

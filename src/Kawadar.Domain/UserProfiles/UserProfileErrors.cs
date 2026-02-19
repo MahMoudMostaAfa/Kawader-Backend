@@ -14,5 +14,6 @@ public static class UserProfileErrors
   public static Error LastNameIsRequired => Error.Validation(
   "UserProfile.LastNameIsRequired", "Last name is required to create a user profile.");
 
+  public static Error FreelancerOrClientOnlyCanRegister => Error.Failure("UserProfile.InvalidProfileType", "Invalid profile type. Only Freelancer and Client profile type is allowed for registration.");
 
 }
