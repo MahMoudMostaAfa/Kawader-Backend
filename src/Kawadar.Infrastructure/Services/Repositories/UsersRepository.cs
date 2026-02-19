@@ -25,4 +25,13 @@ public class UsersRepository(AppDbContext appDbContext) : IUsersRepository
     return userProfile;
 
   }
+
+  public async Task<Result<UserProfile>> GetUserProfileByIdAsync(Guid id)
+  {
+    var userProfile = await appDbContext.UserProfiles.FirstOrDefaultAsync(up => up.Id == id);
+
+    if (userProfile == null) return Error.NotFound("UserProfile.NotFound", "User profile not found");
+
+    return userProfile;
+  }
 }

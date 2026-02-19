@@ -9,4 +9,6 @@ public interface IUsersRepository
   Task<Result<Success>> CreateUserProfileAsync(UserProfile userProfile);
 
   Task<Result<UserProfile>> GetUserProfileByUserIdAsync(string userId);
+
+  Task<Result<UserProfile>> GetUserProfileByIdAsync(Guid id);
 }
