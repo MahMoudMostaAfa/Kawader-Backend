@@ -1,4 +1,4 @@
-﻿namespace Kawadar.Domain.Common.Constants
+﻿namespace Kawadar.Application.Common.Constants
 {
     public static class Containers
     {

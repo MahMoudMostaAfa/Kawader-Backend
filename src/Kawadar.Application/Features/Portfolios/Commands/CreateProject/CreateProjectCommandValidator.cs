@@ -13,10 +13,12 @@ namespace Kawadar.Application.Features.Portfolios.Commands.CreateProject
             RuleFor(x => x.Description).NotEmpty().WithMessage("Project Description can't be Empty")
                 .MaximumLength(300).WithMessage("Project description can't exceed 300 characters");
 
-            RuleFor(x => x.ProjectImage).Must(FileName => ExtensionValidator.ValidExtension(FileName.FileName, Extensions.AllowedImageExtensions))
-                .When(File => File.ProjectImage is not null).WithMessage("Alllowed file extensions are png, jpg and jpeg");
+            RuleFor(x => x.ProjectImage).NotNull().WithMessage("The thumbnail image is required");
 
-            RuleFor(x => x.ProjectImage.Length).LessThanOrEqualTo(10 * 1024 * 1024).When(x => x.ProjectImage is not null)
+            RuleFor(x => x.ProjectImage).Must(FileName => ExtensionValidator.ValidExtension(FileName.FileName, Extensions.AllowedImageExtensions))
+                .WithMessage("Alllowed file extensions are png, jpg and jpeg");
+
+            RuleFor(x => x.ProjectImage.Length).LessThanOrEqualTo(10 * 1024 * 1024)
                 .WithMessage("Maximum File length is 10 MB");
         }
     }

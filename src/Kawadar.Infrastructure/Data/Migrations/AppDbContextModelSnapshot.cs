@@ -51,7 +51,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Badges", (string)null);
+                    b.ToTable("Badges");
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Badges.FreelancerBadges.FreelancerBadge", b =>
@@ -74,10 +74,11 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BadgeId")
-                        .IsUnique();
+                    b.HasIndex("BadgeId");
 
-                    b.ToTable("FreelancerBadges", (string)null);
+                    b.HasIndex("FreelancerId");
+
+                    b.ToTable("FreelancerBadges");
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Portfolios.Items.PortfolioItem", b =>
@@ -111,7 +112,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasIndex("PortfolioProjectId");
 
-                    b.ToTable("PortfolioItems", (string)null);
+                    b.ToTable("PortfolioItems");
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Portfolios.Project.PortfolioProject", b =>
@@ -164,7 +165,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasIndex("FreelancerId");
 
-                    b.ToTable("PortfolioProjects", (string)null);
+                    b.ToTable("PortfolioProjects");
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Portfolios.ProjectSkill.PortfolioProjectSkill", b =>
@@ -190,7 +191,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.HasIndex("PortfolioProjectId")
                         .IsUnique();
 
-                    b.ToTable("ProjectSkills", (string)null);
+                    b.ToTable("ProjectSkills");
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Portfolios.ProjectView.PortfolioProjectView", b =>
@@ -219,7 +220,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.HasIndex("UserProfileId")
                         .IsUnique();
 
-                    b.ToTable("ProjectViews", (string)null);
+                    b.ToTable("ProjectViews");
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Specilizations.Specilization", b =>
@@ -244,7 +245,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Specilizations", (string)null);
+                    b.ToTable("Specilizations");
                 });
 
             modelBuilder.Entity("Kawadar.Domain.UserProfiles.UserProfile", b =>
@@ -348,7 +349,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("UserProfiles", (string)null);
+                    b.ToTable("UserProfiles");
                 });
 
             modelBuilder.Entity("Kawadar.Infrastructure.Identity.AppUser", b =>
@@ -552,8 +553,14 @@ namespace Kawadar.Infrastructure.Data.Migrations
             modelBuilder.Entity("Kawadar.Domain.Badges.FreelancerBadges.FreelancerBadge", b =>
                 {
                     b.HasOne("Kawadar.Domain.Badges.Badge", null)
-                        .WithOne()
-                        .HasForeignKey("Kawadar.Domain.Badges.FreelancerBadges.FreelancerBadge", "BadgeId")
+                        .WithMany()
+                        .HasForeignKey("BadgeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", null)
+                        .WithMany()
+                        .HasForeignKey("FreelancerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

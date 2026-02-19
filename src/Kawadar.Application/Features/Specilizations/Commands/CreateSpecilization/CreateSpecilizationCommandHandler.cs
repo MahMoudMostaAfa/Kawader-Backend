@@ -1,4 +1,5 @@
-﻿using Kawadar.Application.Common.Errors;
+﻿using AutoMapper;
+using Kawadar.Application.Common.Errors;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Application.Features.Specilizations.DTO;
@@ -10,7 +11,7 @@ using MediatR;
 namespace Kawadar.Application.Features.Specilizations.Commands.CreateSpecilization
 {
     public class CreateSpecilizationCommandHandler(IUnitOfWork unitOfWork, IUser user,
-        ISpecilizationRepository specilizationRepository) : IRequestHandler<CreateSpecilizationCommand, Result<SpecilizationDTO>>
+        ISpecilizationRepository specilizationRepository, IMapper mapper) : IRequestHandler<CreateSpecilizationCommand, Result<SpecilizationDTO>>
     {
         public async Task<Result<SpecilizationDTO>> Handle(CreateSpecilizationCommand request, CancellationToken cancellationToken)
         {
@@ -26,7 +27,9 @@ namespace Kawadar.Application.Features.Specilizations.Commands.CreateSpecilizati
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return specilization.Value.toDTO();
+            var specilizationDTO = mapper.Map<SpecilizationDTO>(specilization);
+
+            return specilizationDTO;
         }
     }
 }

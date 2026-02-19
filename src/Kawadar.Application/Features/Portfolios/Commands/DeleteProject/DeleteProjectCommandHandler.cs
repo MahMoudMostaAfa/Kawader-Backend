@@ -1,7 +1,7 @@
-﻿using Kawadar.Application.Common.Errors;
+﻿using Kawadar.Application.Common.Constants;
+using Kawadar.Application.Common.Errors;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
-using Kawadar.Domain.Common.Constants;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Portfolios.Project;
 using Kawadar.Domain.StorageRepository;
@@ -21,6 +21,13 @@ namespace Kawadar.Application.Features.Portfolios.Commands.DeleteProject
             if (result.IsError) return result.Errors;
 
             var project = result.Value;
+
+            var projects = await projectRepository.GetAllByFreelancerId(project.FreelancerId);
+            foreach (var previousProject in projects)
+            {
+                if (previousProject.DisplayOrder > project.DisplayOrder)
+                    previousProject.UpdateOrder(previousProject.DisplayOrder - 1);
+            }
 
             if (project.ProjectImageUrl != string.Empty)
             {

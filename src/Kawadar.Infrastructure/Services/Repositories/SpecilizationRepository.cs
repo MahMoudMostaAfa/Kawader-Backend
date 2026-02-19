@@ -1,4 +1,5 @@
-﻿using Kawadar.Domain.Common.Results;
+﻿using Kawadar.Application.Common.Interfaces.Repositories;
+using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Specilizations;
 using Kawadar.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;

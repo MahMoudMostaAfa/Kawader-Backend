@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Kawadar.Application.Features.Badges.Queries
+namespace Kawadar.Application.Features.Badges.Queries.GetBadgeById
 {
     public class GetBadgeByIdQueryValidator: AbstractValidator<GetBadgeByIdQuery>
     {

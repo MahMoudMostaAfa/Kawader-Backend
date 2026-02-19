@@ -1,17 +1,14 @@
 ﻿using Kawadar.Api.Requests.PortfolioProject;
 using Kawadar.Application.Features.Portfolios.Commands.CreateProject;
 using Kawadar.Application.Features.Portfolios.Commands.DeleteProject;
+using Kawadar.Application.Features.Portfolios.Commands.OrderPortfolioProjects;
 using Kawadar.Application.Features.Portfolios.Commands.UpdateProject;
 using Kawadar.Application.Features.Portfolios.DTOs;
 using Kawadar.Application.Features.Portfolios.Queries.GetAllProjectsByFreelancerId;
 using Kawadar.Application.Features.Portfolios.Queries.GetProjectById;
-using Kawadar.Application.Features.Portfolios.Queries.GetProjectViews;
-using Kawadar.Domain.Common.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Query.Internal;
 
 namespace Kawadar.Api.Controllers.V1
 {
@@ -25,7 +22,7 @@ namespace Kawadar.Api.Controllers.V1
         {
             _sender = sender;
         }
-        //need modification after the freelancer class is added
+        
         [HttpPost]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(typeof(ProjectDTO), StatusCodes.Status201Created)]
@@ -109,7 +106,24 @@ namespace Kawadar.Api.Controllers.V1
         [EndpointDescription("Updates a portfolio project with Its unique Identifier.")]
         public async Task<IActionResult> UpdateProject(Guid Id, [FromForm] UpdateProjectRequest request, CancellationToken ct)
         {
-            var command = new UpdateProjectCommand(Id, request.ProjectUrl, request.Image, request.DisplayOrder, request.isPublic);
+            var command = new UpdateProjectCommand(Id, request.ProjectUrl, request.Image, request.isPublic);
+            var result = await _sender.Send(command, ct);
+
+            return result.Match(
+                _ => NoContent(),
+                errors => Problem(errors));
+        }
+
+        [HttpPut("Reorder")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [EndpointName("ReorderProjects")]
+        [EndpointSummary("Reorders the Portfolio Projects")]
+        [EndpointDescription("Reorders the Portfolio Projects using Ids and new display order")]
+        public async Task<IActionResult> ReorderProjects([FromBody] ReorderProjectsRequest request, CancellationToken ct)
+        {
+            var command = new OrderPortfolioProjectsCommand(request.Order);
             var result = await _sender.Send(command, ct);
 
             return result.Match(

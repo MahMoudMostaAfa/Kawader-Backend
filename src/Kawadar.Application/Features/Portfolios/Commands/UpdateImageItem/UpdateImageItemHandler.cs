@@ -1,7 +1,7 @@
-﻿using Kawadar.Application.Common.Errors;
+﻿using Kawadar.Application.Common.Constants;
+using Kawadar.Application.Common.Errors;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
-using Kawadar.Domain.Common.Constants;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Portfolios.Project;
 using Kawadar.Domain.StorageRepository;
@@ -31,7 +31,7 @@ namespace Kawadar.Application.Features.Portfolios.Commands.UpdateImageItem
             if (uploadResult.IsError) return uploadResult.Errors;
 
             var imageUrl = uploadResult.Value;
-            var updateResult = item.Update(imageUrl, request.displayOrder);
+            var updateResult = item.Update(imageUrl);
 
             if (updateResult.IsError) return updateResult.Errors;
 

@@ -1,7 +1,7 @@
-﻿
-using Kawadar.Domain.Common.Results;
+﻿using Kawadar.Domain.Common.Results;
+using Kawadar.Domain.Specilizations;
 
-namespace Kawadar.Domain.Specilizations
+namespace Kawadar.Application.Common.Interfaces.Repositories
 {
     public interface ISpecilizationRepository
     {

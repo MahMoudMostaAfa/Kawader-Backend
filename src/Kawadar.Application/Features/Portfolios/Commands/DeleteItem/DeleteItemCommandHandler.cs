@@ -6,7 +6,7 @@ using Kawadar.Domain.Portfolios.Project;
 using Kawadar.Domain.StorageRepository;
 using Kawadar.Domain.Portfolios.Items.Enum;
 using MediatR;
-using Kawadar.Domain.Common.Constants;
+using Kawadar.Application.Common.Constants;
 
 namespace Kawadar.Application.Features.Portfolios.Commands.DeleteItem
 {
@@ -24,7 +24,15 @@ namespace Kawadar.Application.Features.Portfolios.Commands.DeleteItem
 
             var item = result.Value;
 
-            if(item.ItemType == ItemType.Image)
+            var projectItems = await projectRepository.GetProjectItemsByProjectId(item.PortfolioProjectId);
+
+            foreach(var previousItem in projectItems)
+            {
+                if(previousItem.DisplayOrder > item.DisplayOrder)
+                    previousItem.UpdateDisplayOrder(previousItem.DisplayOrder - 1);
+            }
+
+            if (item.ItemType == ItemType.Image)
             {
                 var deleteStorageResult = await storageClient.DeleteFileAsync(item.Content, Containers.PortfolioProjectItems);
                 if (deleteStorageResult.IsError) return deleteStorageResult.Errors;

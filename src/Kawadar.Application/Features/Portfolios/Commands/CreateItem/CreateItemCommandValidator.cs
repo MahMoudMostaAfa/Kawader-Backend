@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using Kawadar.Domain.Portfolios.Items.Enum;
 
 namespace Kawadar.Application.Features.Portfolios.Commands.CreateItem
 {
@@ -6,6 +7,8 @@ namespace Kawadar.Application.Features.Portfolios.Commands.CreateItem
     {
         public CreateItemCommandValidator()
         {
+            RuleFor(x => x.ItemType).NotEqual(ItemType.Image).WithMessage("The Type must be a Link or Text");
+
             RuleFor(x => x.Content).NotEmpty().WithMessage("Item Content is required")
                 .MaximumLength(300).WithMessage("Item Content can't exceed 300 character");
 

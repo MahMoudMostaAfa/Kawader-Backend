@@ -7,5 +7,5 @@ using MediatR;
 
 namespace Kawadar.Application.Features.Portfolios.Commands.CreateItem
 {
-    public record CreateItemCommand(ItemType ItemType, string Content, int DisplayOrder, Guid PortfolioProjectId) : IRequest<Result<ItemDTO>>;
+    public record CreateItemCommand(ItemType ItemType, string Content, Guid PortfolioProjectId) : IRequest<Result<ItemDTO>>;
 }

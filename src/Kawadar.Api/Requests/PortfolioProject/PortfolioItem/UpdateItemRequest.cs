@@ -5,6 +5,5 @@ namespace Kawadar.Api.Requests.PortfolioProject.PortfolioItem
     public class UpdateItemRequest
     {
         public string Content { get; set; }
-        public int DisplayOrder { get; set; }
     }
 }

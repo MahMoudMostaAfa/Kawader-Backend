@@ -1,4 +1,6 @@
-﻿using Kawadar.Domain.Badges;
+﻿using Kawadar.Application.Common.Interfaces;
+using Kawadar.Domain.Badges;
+using Kawadar.Domain.Badges.FreelancerBadges;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +27,21 @@ namespace Kawadar.Infrastructure.Services.Repositories
 
             if (badge == null) return Error.NotFound("Badge.NotFound", "Badge not found");
             return badge;
+        }
+
+        public async Task<Result<Success>> AddBadgeToFreelancer(FreelancerBadge freelancerBadge)
+        {
+            await appDbContext.FreelancerBadges.AddAsync(freelancerBadge);
+            return Result.Success;
+        }
+
+        public async Task<IEnumerable<Badge>> GetAllFreelancerBadges(Guid FreelancerId)
+        {
+            var FreelancerBadges = await (from b in appDbContext.Badges
+                                          join fb in appDbContext.FreelancerBadges on b.Id equals fb.BadgeId
+                                          where fb.FreelancerId == FreelancerId
+                                          select b).ToListAsync();
+            return FreelancerBadges;
         }
     }
 }

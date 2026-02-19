@@ -1,19 +1,20 @@
-﻿using Kawadar.Application.Features.Specilizations.DTO;
+﻿using AutoMapper;
+using Kawadar.Application.Features.Specilizations.DTO;
 using Kawadar.Domain.Specilizations;
 
 namespace Kawadar.Application.Features.Specilizations.Mapper
 {
-    public static class SpecilizationMapper
+    public class SpecilizationMapper : Profile
     {
-        public static SpecilizationDTO toDTO(this Specilization specilization)
+        public SpecilizationMapper()
         {
-            var specilizationDTO = new SpecilizationDTO { Id = specilization.Id, Name = specilization.Name, IsActive = specilization.IsActive };
-            return specilizationDTO;
-        }
+            CreateMap<Specilization, SpecilizationDTO>()
 
-        public static List<SpecilizationDTO> toDTOList(this IEnumerable<Specilization> specilizations)
-        {
-            return specilizations.Select(s => s.toDTO()).ToList();
+                .ForMember(dest => dest.Id, op => op.MapFrom(src => src.Id))
+
+                .ForMember(dest => dest.Name, op => op.MapFrom(src => src.Name))
+
+                .ForMember(dest => dest.IsActive, op => op.MapFrom(src => src.IsActive));
         }
     }
 }
