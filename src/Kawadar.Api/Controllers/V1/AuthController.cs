@@ -1,8 +1,5 @@
 
-using System.Threading.Tasks;
-using Kawadar.Api.Attributes;
-using Kawadar.Application.Common.Interfaces;
-using Kawadar.Application.Common.Interfaces.Auth;
+
 using Kawadar.Application.Features.Auth.Commands.ChangePassword;
 using Kawadar.Application.Features.Auth.Commands.ConfirmEmail;
 using Kawadar.Application.Features.Auth.Commands.ForgetPassword;
@@ -10,8 +7,7 @@ using Kawadar.Application.Features.Auth.Commands.Login;
 using Kawadar.Application.Features.Auth.Commands.Register;
 using Kawadar.Application.Features.Auth.Commands.ResendConfirmationEmail;
 using Kawadar.Application.Features.Auth.Commands.ResetPassword;
-using Kawadar.Domain.Common.Constants;
-using Kawadar.Domain.Common.Results;
+
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -54,6 +50,12 @@ public class AuthController : ApiController
 
   // login
   [HttpPost("Login")]
+  [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+  [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [EndpointName(nameof(Login))]
+  [EndpointSummary("Logs in a user and returns a JWT token.")]
+  [EndpointDescription("Authenticates a user with the provided credentials and returns a JWT token for authorized access to protected resources.")]
   public async Task<IActionResult> Login([FromBody] LoginCommand command, CancellationToken ct)
   {
     var result = await _sender.Send(command, ct);
@@ -65,6 +67,11 @@ public class AuthController : ApiController
 
   // confirm email
   [HttpGet("confirm-email")]
+  [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [EndpointName(nameof(ConfirmEmail))]
+  [EndpointSummary("Confirms a user's email address.")]
+  [EndpointDescription("Confirms a user's email address using the provided user ID and confirmation token.")]
   public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string token)
   {
     var Command = new ConfirmEmailCommand(userId, token);
@@ -79,6 +86,11 @@ public class AuthController : ApiController
 
   // resend confirmation email
   [HttpPost("resend-confirmation-email")]
+  [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [EndpointName(nameof(ResendConfirmationEmail))]
+  [EndpointSummary("Resends the confirmation email to a user.")]
+  [EndpointDescription("Sends a new confirmation email to the user with the provided user ID and token.")]
   public async Task<IActionResult> ResendConfirmationEmail([FromQuery] ResendConfirmationEmailCommand command, CancellationToken cancellationToken)
   {
 
@@ -93,6 +105,10 @@ public class AuthController : ApiController
   // resest password  
 
   [HttpPost("forget-password")]
+  [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [EndpointName(nameof(ForgetPassword))]
+  [EndpointSummary("Sends a password reset email to the user.")]
   public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordCommand command, CancellationToken cancellationToken)
   {
     var result = await _sender.Send(command, cancellationToken);
@@ -103,6 +119,11 @@ public class AuthController : ApiController
   }
 
   [HttpPost("reset-password")]
+  [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [EndpointName(nameof(ResetPassword))]
+  [EndpointSummary("Resets the user's password.")]
+  [EndpointDescription("Resets the user's password using the provided user ID, reset token, and new password.")]
   public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand resetPasswordCommand, CancellationToken cancellationToken)
   {
     var result = await _sender.Send(resetPasswordCommand, cancellationToken);
@@ -111,8 +132,14 @@ public class AuthController : ApiController
       Problem
     );
   }
-  [HttpPut("change-password")]
   [Authorize]
+  [HttpPut("change-password")]
+  [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
+  [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [EndpointName(nameof(ChangePassword))]
+  [EndpointSummary("Changes the user's password.")]
+  [EndpointDescription("Changes the user's password using the provided current password and new password.")]
   public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand changePassword)
   {
     var result = await _sender.Send(changePassword);

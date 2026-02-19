@@ -33,6 +33,8 @@ if (app.Environment.IsDevelopment())
 
     options.EnableFilter();
 
+
+
   });
 
   // enable scalar 

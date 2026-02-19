@@ -26,5 +26,7 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
       .Matches(@"[a-z]").WithMessage("Password must contain at least one lowercase letter.")
       .Matches(@"[0-9]").WithMessage("Password must contain at least one digit.");
 
+    RuleFor(u => u.ProfileType)
+      .IsInEnum().WithMessage("Profile type must be a valid enum value.");
   }
 }
