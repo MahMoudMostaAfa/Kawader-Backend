@@ -85,7 +85,7 @@ namespace Kawadar.Api.Controllers.V1
         [Authorize]
         [ProducesResponseType(typeof(BadgeDTO), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ProblemDetails) StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [EndpointName("AddBadgeToFreelancer")]
         [EndpointSummary("Adds a badge to a freelancer")]
         [EndpointDescription("Adds a badge to a freelancer after a certaing event")]

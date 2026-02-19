@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using Kawadar.Application.Common.Errors;
 using Kawadar.Application.Common.Interfaces.Auth;
+using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Application.Features.Portfolios.DTOs;
 using Kawadar.Domain.Common.Results;
-using Kawadar.Domain.Portfolios.Project;
 using MediatR;
 
 namespace Kawadar.Application.Features.Portfolios.Queries.GetProjectItemsById

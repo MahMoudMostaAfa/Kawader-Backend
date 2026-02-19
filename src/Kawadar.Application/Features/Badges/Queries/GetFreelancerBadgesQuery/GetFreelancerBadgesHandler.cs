@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Kawadar.Application.Common.Errors;
+using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Application.Features.Badges.DTOs;

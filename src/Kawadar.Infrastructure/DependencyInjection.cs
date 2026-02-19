@@ -22,7 +22,6 @@ using Kawadar.Domain.Specilizations;
 using Kawadar.Domain.Portfolios.ProjectView;
 using Azure.Storage.Blobs;
 using Azure.Identity;
-using Kawadar.Domain.StorageRepository;
 using Kawadar.Infrastructure.Services.CloudServices;
 
 public static class DependencyInjection

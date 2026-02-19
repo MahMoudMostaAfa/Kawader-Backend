@@ -9,7 +9,6 @@ using Kawadar.Application.Features.Portfolios.Mapper;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Portfolios.Items;
 using Kawadar.Domain.Portfolios.Project;
-using Kawadar.Domain.StorageRepository;
 using MediatR;
 
 namespace Kawadar.Application.Features.Portfolios.Commands.CreateImageItem

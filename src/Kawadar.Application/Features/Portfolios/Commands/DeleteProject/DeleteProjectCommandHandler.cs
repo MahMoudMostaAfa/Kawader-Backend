@@ -4,7 +4,6 @@ using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Portfolios.Project;
-using Kawadar.Domain.StorageRepository;
 using MediatR;
 
 namespace Kawadar.Application.Features.Portfolios.Commands.DeleteProject

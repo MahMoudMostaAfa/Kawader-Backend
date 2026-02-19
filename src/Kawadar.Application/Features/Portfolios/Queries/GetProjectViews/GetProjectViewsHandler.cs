@@ -1,7 +1,7 @@
 ﻿using Kawadar.Application.Common.Errors;
 using Kawadar.Application.Common.Interfaces.Auth;
+using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Domain.Common.Results;
-using Kawadar.Domain.Portfolios.ProjectView;
 using MediatR;
 
 namespace Kawadar.Application.Features.Portfolios.Queries.GetProjectViews

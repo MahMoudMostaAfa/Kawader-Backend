@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using Kawadar.Application.Common.Errors;
 using Kawadar.Application.Common.Interfaces.Auth;
+using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Application.Features.Specilizations.DTO;
 using Kawadar.Domain.Common.Results;
-using Kawadar.Domain.Specilizations;
 using MediatR;
 
 namespace Kawadar.Application.Features.Specilizations.Queries.GetSpecilizationById
