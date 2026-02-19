@@ -1,7 +1,7 @@
-﻿using Kawadar.Application.Common.Errors;
+﻿using Kawadar.Application.Common.Constants;
+using Kawadar.Application.Common.Errors;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
-using Kawadar.Domain.Common.Constants;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Portfolios.Project;
 using Kawadar.Domain.StorageRepository;
@@ -25,27 +25,16 @@ namespace Kawadar.Application.Features.Portfolios.Commands.UpdateProject
 
             var ImageUrl = string.Empty;
             var file = request.Image;
-            if (project.ProjectImageUrl == string.Empty)
-            {
 
-                using var stream = file.OpenReadStream();
-                var uploadResult = await storageClient.UploadFileAsync(stream, file.FileName, Containers.PortfolioProjects, cancellationToken);
-                if (uploadResult.IsError) return uploadResult.Errors;
-                ImageUrl = uploadResult.Value;
+            var deleteResult = await storageClient.DeleteFileAsync(project.ProjectImageUrl, Containers.PortfolioProjects);
+            if (deleteResult.IsError) return deleteResult.Errors;
 
-            }
-            else
-            {
-                var deleteResult = await storageClient.DeleteFileAsync(project.ProjectImageUrl, Containers.PortfolioProjects);
-                if (deleteResult.IsError) return deleteResult.Errors;
+            using var stream = file.OpenReadStream();
+            var uploadResult = await storageClient.UploadFileAsync(stream, file.FileName, Containers.PortfolioProjects, cancellationToken);
+            if (uploadResult.IsError) return uploadResult.Errors;
+            ImageUrl = uploadResult.Value;
 
-                using var stream = file.OpenReadStream();
-                var uploadResult = await storageClient.UploadFileAsync(stream, file.FileName, Containers.PortfolioProjects, cancellationToken);
-                if (uploadResult.IsError) return uploadResult.Errors;
-                ImageUrl = uploadResult.Value;
-            }
-
-            var updateResult = project.Update(request.ProjectUrl, ImageUrl, request.DisplayOrder, request.IsPublic);
+            var updateResult = project.Update(request.ProjectUrl, ImageUrl, request.IsPublic);
 
             if (updateResult.IsError) return updateResult.Errors;
 

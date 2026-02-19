@@ -2,6 +2,7 @@
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Portfolios.Items;
 using Kawadar.Domain.Portfolios.Project.Enum;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kawadar.Domain.Portfolios.Project
 {
@@ -31,9 +32,10 @@ namespace Kawadar.Domain.Portfolios.Project
         }
 
         public static Result<PortfolioProject> Create(string Title, string Description, PortfolioProjectCategory Category,
-             Guid FreelancerId, string ProjectImageUrl = "", string ProjectUrl = "")
+             Guid FreelancerId, string ProjectImageUrl, int displayOrder, string ProjectUrl = "")
         {
-            if (string.IsNullOrWhiteSpace(Title)){
+            if (string.IsNullOrWhiteSpace(Title))
+            {
                 return PortfolioProjectErrors.TitleIsRequired;
             }
 
@@ -56,16 +58,25 @@ namespace Kawadar.Domain.Portfolios.Project
 
             Project.ProjectImageUrl = ProjectImageUrl;
             Project.ProjectUrl = ProjectUrl;
+            Project.DisplayOrder = displayOrder;
 
             return Project;
         }
 
-        public Result<Updated> Update(string ProjectUrl, string ImageUrl, int DisplayOrder, bool IsPublic)
+        public Result<Updated> Update(string ProjectUrl, string ImageUrl, bool IsPublic)
         {
             this.ProjectUrl = ProjectUrl;
             ProjectImageUrl = ImageUrl;
             this.DisplayOrder = DisplayOrder;
             this.IsPublic = IsPublic;
+
+            UpdatedAt = DateTime.Now;
+            return Result.Updated;
+        }
+
+        public Result<Updated> UpdateOrder(int DisplayOrder)
+        {
+            this.DisplayOrder = DisplayOrder;
 
             UpdatedAt = DateTime.Now;
             return Result.Updated;

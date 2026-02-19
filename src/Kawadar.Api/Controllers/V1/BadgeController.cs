@@ -1,19 +1,20 @@
 ﻿using Kawadar.Api.Requests.Badge;
+using Kawadar.Application.Features.Badges.Commands.AddBadgeToFreelancer;
 using Kawadar.Application.Features.Badges.Commands.CreateBadge;
 using Kawadar.Application.Features.Badges.Commands.DeleteBadge;
 using Kawadar.Application.Features.Badges.Commands.UpdateBadge;
 using Kawadar.Application.Features.Badges.DTOs;
-using Kawadar.Application.Features.Badges.Queries;
+using Kawadar.Application.Features.Badges.Queries.GetBadgeById;
+using Kawadar.Application.Features.Badges.Queries.GetFreelancerBadgesQuery;
 using Kawadar.Domain.Common.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kawadar.Api.Controllers.V1
 {
     [ApiVersion("1.0")]
-    [Route("api/v{version:apiVersion}/Badge")]
+    [Route("api/v{version:apiVersion}/Admin/Badge")]
     public class BadgeController : ApiController
     {
         private ISender _sender;
@@ -39,8 +40,27 @@ namespace Kawadar.Api.Controllers.V1
             return result.Match(
                 badge => Ok(badge)
                 , errors => Problem(errors));
+
         }
 
+        [HttpGet("AcquiredBadges")]
+        [Authorize]
+        [ProducesResponseType(typeof(BadgeDTO), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [EndpointName("AcquiredBadges")]
+        [EndpointSummary("Gets the badges that the freelancer has")]
+        [EndpointDescription("Gets the badges that the freelancer has using his Id")]
+        public async Task<IActionResult> GetFreeLancerBadges(CancellationToken ct)
+        {
+            var query = new GetFreelancerBadgesQuery();
+            var result = await _sender.Send(query, ct);
+
+            return result.Match(
+                badges => Ok(badges)
+                , errors => Problem(errors));
+
+        }
 
         [HttpPost]
         [Authorize(Policy = Permissions.CreateBadges)]
@@ -51,16 +71,33 @@ namespace Kawadar.Api.Controllers.V1
         [EndpointName("CreateBadge")]
         [EndpointSummary("Creates a badge")]
         [EndpointDescription("Creates a badge with data from the request.")]
-        public async Task<IActionResult> CreateBadge([FromForm]CreateBadgeRequest request, CancellationToken ct)
+        public async Task<IActionResult> CreateBadge(CreateBadgeRequest request, CancellationToken ct)
         {
             var command = new CreateBadgeCommand(request.title, request.Icon, request.description);
             var result = await _sender.Send(command, ct);
 
             return result.Match(
-                badge => CreatedAtAction(nameof(GetBadgeById), new { Id = badge.Id }, badge)
+                badge => CreatedAtAction(nameof(GetBadgeById), new {Id = badge.Id}, badge)
                 , errors => Problem(errors));
         }
 
+        [HttpPost("AddBadgeToFreelancer")]
+        [Authorize]
+        [ProducesResponseType(typeof(BadgeDTO), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails) StatusCodes.Status500InternalServerError)]
+        [EndpointName("AddBadgeToFreelancer")]
+        [EndpointSummary("Adds a badge to a freelancer")]
+        [EndpointDescription("Adds a badge to a freelancer after a certaing event")]
+        public async Task<IActionResult> AddBadgeToFreelancer(AddBadgeToFreelancerRequest request, CancellationToken ct)
+        {
+            var command = new AddBadgeToFreelancerCommand(request.FreelancerId, request.BadgeId);
+            var result = await _sender.Send(command, ct);
+
+            return result.Match(
+                freelancerBadge => Created(freelancerBadge.FreelancerId.ToString(), freelancerBadge.BadgeId.ToString())
+                , errors => Problem(errors));
+        }
 
 
         [HttpDelete("{Id:guid}")]

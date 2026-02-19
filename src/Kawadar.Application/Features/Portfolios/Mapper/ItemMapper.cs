@@ -1,19 +1,22 @@
-﻿using Kawadar.Application.Features.Portfolios.DTOs;
+﻿using AutoMapper;
+using Kawadar.Application.Features.Portfolios.DTOs;
 using Kawadar.Domain.Portfolios.Items;
 
 namespace Kawadar.Application.Features.Portfolios.Mapper
 {
-    public static class ItemMapper
+    public class ItemMapper : Profile
     {
-        public static ItemDTO toDTO(this PortfolioItem item)
+        public ItemMapper()
         {
-            var DTO = new ItemDTO {Id = item.Id, content = item.Content, displayOrder = item.DisplayOrder, itemType = item.ItemType };
-            return DTO;
-        }
+            CreateMap<PortfolioItem, ItemDTO>()
 
-        public static List<ItemDTO> toDTOList(this IEnumerable<PortfolioItem> items)
-        {
-            return items.Select(i => i.toDTO()).ToList();
+                .ForMember(dest => dest.Id, op => op.MapFrom(src => src.Id))
+
+                .ForMember(dest => dest.itemType, op => op.MapFrom(src => src.ItemType))
+
+                .ForMember(dest => dest.content, op => op.MapFrom(src => src.Content))
+
+                .ForMember(dest => dest.displayOrder, op => op.MapFrom(src => src.DisplayOrder));
         }
     }
 }

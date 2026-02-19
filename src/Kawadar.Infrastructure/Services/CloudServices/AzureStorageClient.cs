@@ -1,7 +1,6 @@
 ﻿using Azure.Storage.Blobs;
+using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Domain.Common.Results;
-using Kawadar.Domain.StorageRepository;
-using System.Threading;
 
 namespace Kawadar.Infrastructure.Services.CloudServices
 {

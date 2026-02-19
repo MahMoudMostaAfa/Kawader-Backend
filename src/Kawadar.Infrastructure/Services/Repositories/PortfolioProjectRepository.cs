@@ -1,7 +1,6 @@
-﻿
+﻿using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Portfolios.Items;
-using Kawadar.Domain.Portfolios.Items.Enum;
 using Kawadar.Domain.Portfolios.Project;
 using Kawadar.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -63,6 +62,12 @@ namespace Kawadar.Infrastructure.Services.Repositories
 
             if (Project == null) return Error.NotFound("Project.NotFound", "Project not found");
             return Project;
+        }
+
+        public async Task<IEnumerable<PortfolioItem>> GetProjectItemsByProjectId(Guid projectId)
+        {
+            var items = await appDbContext.PortfolioItems.Where(x => x.PortfolioProjectId == projectId).ToListAsync();
+            return items;
         }
 
         // add Skill

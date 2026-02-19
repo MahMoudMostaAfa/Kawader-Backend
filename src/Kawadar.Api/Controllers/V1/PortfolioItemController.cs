@@ -2,6 +2,7 @@
 using Kawadar.Application.Features.Portfolios.Commands.CreateImageItem;
 using Kawadar.Application.Features.Portfolios.Commands.CreateItem;
 using Kawadar.Application.Features.Portfolios.Commands.DeleteItem;
+using Kawadar.Application.Features.Portfolios.Commands.OrderProjectItems;
 using Kawadar.Application.Features.Portfolios.Commands.UpdateImageItem;
 using Kawadar.Application.Features.Portfolios.Commands.UpdateItem;
 using Kawadar.Application.Features.Portfolios.DTOs;
@@ -35,7 +36,7 @@ namespace Kawadar.Api.Controllers.V1
         [EndpointDescription("Creates a project item.")]
         public async Task<IActionResult> CreateItem(Guid ProjectId, [FromBody]CreatePortfolioItemRequest request, CancellationToken ct)
         {
-            var command = new CreateItemCommand(request.ItemType, request.Content, request.DisplayOrder, ProjectId);
+            var command = new CreateItemCommand(request.ItemType, request.Content, ProjectId);
             var result = await _sender.Send(command, ct);
 
             return result.Match(
@@ -54,7 +55,7 @@ namespace Kawadar.Api.Controllers.V1
         [EndpointDescription("Creates a project item.")]
         public async Task<IActionResult> CreateImageItem(Guid ProjectId, [FromForm] CreatePortfolioImageItemRequest request, CancellationToken ct)
         {
-            var command = new CreateImageItemCommand(request.ItemType, request.Image, request.DisplayOrder, ProjectId);
+            var command = new CreateImageItemCommand(request.ItemType, request.Image, ProjectId);
             var result = await _sender.Send(command, ct);
 
             return result.Match(
@@ -127,7 +128,7 @@ namespace Kawadar.Api.Controllers.V1
         [EndpointDescription("Updates a portfolio project item with Its unique Identifier.")]
         public async Task<IActionResult> UpdateItem(Guid Id, [FromBody] UpdateItemRequest request, CancellationToken ct)
         {
-            var command = new UpdateItemCommand(Id, request.Content, request.DisplayOrder);
+            var command = new UpdateItemCommand(Id, request.Content);
             var result = await _sender.Send(command, ct);
 
             return result.Match(
@@ -144,7 +145,24 @@ namespace Kawadar.Api.Controllers.V1
         [EndpointDescription("Updates a portfolio project Image item with Its unique Identifier.")]
         public async Task<IActionResult> UpdateImageItem(Guid Id, [FromBody] UpdatePortfolioImageRequest request, CancellationToken ct)
         {
-            var command = new UpdateImageItemCommand(Id, request.Image, request.DisplayOrder);
+            var command = new UpdateImageItemCommand(Id, request.Image);
+            var result = await _sender.Send(command, ct);
+
+            return result.Match(
+                _ => NoContent(),
+                errors => Problem(errors));
+        }
+
+        [HttpPut("Reorder")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [EndpointName("ReorderItems")]
+        [EndpointSummary("Reorder project items")]
+        [EndpointDescription("Reorder project items using Ids and display order")]
+        public async Task<IActionResult> UpdateImageItem(Guid Id, [FromBody] OrderProjectItemsRequest request, CancellationToken ct)
+        {
+            var command = new OrderProjectItemsCommand(Id, request.Order);
             var result = await _sender.Send(command, ct);
 
             return result.Match(

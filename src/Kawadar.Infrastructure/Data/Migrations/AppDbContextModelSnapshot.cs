@@ -74,8 +74,9 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BadgeId")
-                        .IsUnique();
+                    b.HasIndex("BadgeId");
+
+                    b.HasIndex("FreelancerId");
 
                     b.ToTable("FreelancerBadges");
                 });
@@ -567,8 +568,14 @@ namespace Kawadar.Infrastructure.Data.Migrations
             modelBuilder.Entity("Kawadar.Domain.Badges.FreelancerBadges.FreelancerBadge", b =>
                 {
                     b.HasOne("Kawadar.Domain.Badges.Badge", null)
-                        .WithOne()
-                        .HasForeignKey("Kawadar.Domain.Badges.FreelancerBadges.FreelancerBadge", "BadgeId")
+                        .WithMany()
+                        .HasForeignKey("BadgeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", null)
+                        .WithMany()
+                        .HasForeignKey("FreelancerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

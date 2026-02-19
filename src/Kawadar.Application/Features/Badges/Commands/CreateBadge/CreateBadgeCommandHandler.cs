@@ -1,9 +1,9 @@
-﻿using Kawadar.Application.Common.Errors;
+﻿using Kawadar.Application.Common.Constants;
+using Kawadar.Application.Common.Errors;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Application.Features.Badges.DTOs;
 using Kawadar.Domain.Badges;
-using Kawadar.Domain.Common.Constants;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.StorageRepository;
 using MediatR;

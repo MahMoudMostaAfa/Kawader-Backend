@@ -6,5 +6,5 @@ using Microsoft.AspNetCore.Http;
 
 namespace Kawadar.Application.Features.Portfolios.Commands.CreateImageItem
 {
-    public record CreateImageItemCommand(ItemType ItemType, IFormFile Image, int DisplayOrder, Guid PortfolioProjectId): IRequest<Result<ItemDTO>>;
+    public record CreateImageItemCommand(ItemType ItemType, IFormFile Image, Guid PortfolioProjectId): IRequest<Result<ItemDTO>>;
 }

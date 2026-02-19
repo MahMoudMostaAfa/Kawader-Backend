@@ -41,10 +41,17 @@ namespace Kawadar.Domain.Portfolios.Items
             return portfolioItem;
         }
 
-        public Result<Updated> Update(string Content, int DisplayOrder)
+        public Result<Updated> Update(string Content)
         {
             this.Content = Content;
-            this.DisplayOrder = DisplayOrder;
+
+            UpdatedAt = DateTime.UtcNow;
+            return Result.Updated;
+        }
+
+        public Result<Updated> UpdateDisplayOrder(int displayOrder)
+        {
+            this.DisplayOrder = displayOrder;
 
             UpdatedAt = DateTime.UtcNow;
             return Result.Updated;

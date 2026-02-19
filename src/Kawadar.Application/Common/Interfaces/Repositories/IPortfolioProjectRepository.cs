@@ -1,8 +1,8 @@
 ﻿using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Portfolios.Items;
-using Kawadar.Domain.Portfolios.Items.Enum;
+using Kawadar.Domain.Portfolios.Project;
 
-namespace Kawadar.Domain.Portfolios.Project
+namespace Kawadar.Application.Common.Interfaces.Repositories
 {
     public interface IPortfolioProjectRepository
     {
@@ -15,6 +15,8 @@ namespace Kawadar.Domain.Portfolios.Project
         public Result<Deleted> Delete(PortfolioProject Project);
         public Task<Result<Success>> AddItemAsync(PortfolioItem Item);
         public Result<Deleted> DeleteItem(PortfolioItem Item);
+
+        public Task<IEnumerable<PortfolioItem>> GetProjectItemsByProjectId(Guid projectId);
 
         // waiting for the skill entity implementation
         //public Task addSkill(Guid Skill);

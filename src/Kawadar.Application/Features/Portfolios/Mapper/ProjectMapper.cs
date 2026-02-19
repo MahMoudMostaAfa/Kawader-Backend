@@ -1,29 +1,28 @@
-﻿using Kawadar.Application.Features.Portfolios.DTOs;
+﻿using AutoMapper;
+using Kawadar.Application.Features.Portfolios.DTOs;
 using Kawadar.Domain.Portfolios.Project;
 
 namespace Kawadar.Application.Features.Portfolios.Mapper
 {
-    public static class ProjectMapper
+    public class ProjectMapper: Profile
     {
-        public static ProjectDTO toDTO(this PortfolioProject project)
+        public ProjectMapper()
         {
-            var DTO = new ProjectDTO
-            {
-                Id = project.Id,
-                title = project.Title,
-                displayOrder = project.DisplayOrder,
-                category = project.Category,
-                description = project.Description,
-                ProjectImageUrl = project.ProjectImageUrl,
-                ProjectUrl = project.ProjectUrl
-            };
+            CreateMap<PortfolioProject, ProjectDTO>()
 
-            return DTO;
-        }
+                .ForMember(dest => dest.Id, op => op.MapFrom(src => src.Id))
 
-        public static List<ProjectDTO> toDTOList(this IEnumerable<PortfolioProject> projectList)
-        {
-            return projectList.Select(p => p.toDTO()).ToList();
+                .ForMember(dest => dest.ProjectImageUrl, op => op.MapFrom(src => src.ProjectImageUrl))
+
+                .ForMember(dest => dest.ProjectUrl, op => op.MapFrom(src => src.ProjectUrl))
+
+                .ForMember(dest => dest.title, op => op.MapFrom(src => src.Title))
+
+                .ForMember(dest => dest.category, op => op.MapFrom(src => src.Category))
+
+                .ForMember(dest => dest.description, op => op.MapFrom(src => src.Description))
+                
+                .ForMember(dest => dest.displayOrder, op => op.MapFrom(src => src.DisplayOrder));
         }
     }
 }

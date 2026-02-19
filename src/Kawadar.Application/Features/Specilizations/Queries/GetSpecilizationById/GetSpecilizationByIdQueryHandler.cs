@@ -1,16 +1,15 @@
-﻿using Kawadar.Application.Common.Errors;
+﻿using AutoMapper;
+using Kawadar.Application.Common.Errors;
 using Kawadar.Application.Common.Interfaces.Auth;
-using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Application.Features.Specilizations.DTO;
-using Kawadar.Application.Features.Specilizations.Mapper;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Specilizations;
 using MediatR;
 
 namespace Kawadar.Application.Features.Specilizations.Queries.GetSpecilizationById
 {
-    public class GetSpecilizationByIdQueryHandler(IUser user, ISpecilizationRepository specilizationRepository)
-        : IRequestHandler<GetSpecilizationByIdQuery, Result<SpecilizationDTO>>
+    public class GetSpecilizationByIdQueryHandler(IUser user, ISpecilizationRepository specilizationRepository
+        , IMapper mapper): IRequestHandler<GetSpecilizationByIdQuery, Result<SpecilizationDTO>>
     {
         public async Task<Result<SpecilizationDTO>> Handle(GetSpecilizationByIdQuery request, CancellationToken cancellationToken)
         {
@@ -21,7 +20,9 @@ namespace Kawadar.Application.Features.Specilizations.Queries.GetSpecilizationBy
             if (result.IsError) return result.Errors;
 
             var specilization = result.Value;
-            return specilization.toDTO();
+
+            var specilizationDTO = mapper.Map<SpecilizationDTO>(specilization);
+            return specilizationDTO;
         }
     }
 }

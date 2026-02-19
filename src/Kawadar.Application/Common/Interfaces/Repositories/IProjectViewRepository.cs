@@ -1,6 +1,7 @@
 ﻿using Kawadar.Domain.Common.Results;
+using Kawadar.Domain.Portfolios.ProjectView;
 
-namespace Kawadar.Domain.Portfolios.ProjectView
+namespace Kawadar.Application.Common.Interfaces.Repositories
 {
     public interface IProjectViewRepository
     {
