@@ -8,5 +8,8 @@
         public const string Avatars = "avatars";
         public const string Attachements = "attachments";
         public const string Contracts = "contracts";
+
+        public const string IdentityImages = "identity-pics";
+
     }
 }
