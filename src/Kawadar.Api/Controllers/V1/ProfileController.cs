@@ -1,4 +1,8 @@
+using Kawadar.Api.Requests.PortfolioProject.PortfolioItem;
+using Kawadar.Application.Common.Constants;
+using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Features.ProfileManagment.Commands.UpdateProfile;
+using Kawadar.Application.Features.ProfileManagment.Commands.UploadIdentity;
 using Kawadar.Application.Features.ProfileManagment.Queries.GetUserProfile;
 using Kawadar.Application.Features.ProfileManagment.Queries.GetUserProfileByUserName;
 using MediatR;
@@ -16,9 +20,11 @@ public class ProfileController : ApiController
 {
 
   private readonly ISender _sender;
-  public ProfileController(ISender sender)
+  private readonly IStorageClient _storageClient;
+  public ProfileController(ISender sender, IStorageClient storageClient)
   {
     _sender = sender;
+    _storageClient = storageClient;
   }
 
 
@@ -70,4 +76,28 @@ public class ProfileController : ApiController
         _ => NoContent(),
         errors => Problem(errors));
   }
+
+
+
+  [Consumes("multipart/form-data")]
+  [HttpPost("upload-identity")]
+  [EndpointName("UploadIdentity")]
+  [EndpointSummary("Uploads identity documents for the current user")]
+  [EndpointDescription("Uploads identity front and back images for the current user.")]
+  [ProducesResponseType(StatusCodes.Status204NoContent)]
+  [ProducesResponseType(StatusCodes.Status400BadRequest)]
+  public async Task<IActionResult> UploadIdentity([FromForm] UploadIdentityCommand command)
+  {
+
+    // var url = _storageClient.GetSasUrl("https://sakawader.blob.core.windows.net/identity-pics/303dd4a4-a97e-4629-88aa-be667f6f36c5.png", Containers.IdentityImages, TimeSpan.FromHours(1));
+    // return Ok(url.Value);
+
+
+    var uploadResult = await _sender.Send(command);
+    return uploadResult.Match(
+        _ => NoContent(),
+        errors => Problem(errors));
+  }
 }
+
+
