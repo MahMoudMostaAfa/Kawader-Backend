@@ -17,8 +17,8 @@ AddPresentation(builder.Configuration)
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
   // expose OpenAPI in Development environment
   app.MapOpenApi();
 
@@ -44,11 +44,11 @@ if (app.Environment.IsDevelopment())
   await app.InitialiseDatabaseAsync();
 
 
-}
-else
-{
-  app.UseHsts();
-}
+//}
+//else
+//{
+  //app.UseHsts();
+//}
 
 
 
