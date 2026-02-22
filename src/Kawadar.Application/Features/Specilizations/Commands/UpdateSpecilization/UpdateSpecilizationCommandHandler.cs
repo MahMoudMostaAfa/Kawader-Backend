@@ -2,7 +2,6 @@
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Domain.Common.Results;
-using Kawadar.Domain.Specilizations;
 using MediatR;
 
 namespace Kawadar.Application.Features.Specilizations.Commands.UpdateSpecilization

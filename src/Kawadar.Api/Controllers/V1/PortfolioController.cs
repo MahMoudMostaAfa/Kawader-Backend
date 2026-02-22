@@ -14,7 +14,7 @@ namespace Kawadar.Api.Controllers.V1
 {
     [Authorize]
     [ApiVersion("1.0")]
-    [Route("api/v{version:apiVersion}/Portfolio")]
+    [Route("api/v{version:apiVersion}/User/Portfolio")]
     public class PortfolioController : ApiController
     {
         private ISender _sender;

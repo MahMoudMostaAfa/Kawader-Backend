@@ -188,8 +188,9 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PortfolioProjectId")
-                        .IsUnique();
+                    b.HasIndex("PortfolioProjectId");
+
+                    b.HasIndex("SkillId");
 
                     b.ToTable("ProjectSkills");
                 });
@@ -214,13 +215,76 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PortfolioProjectId")
-                        .IsUnique();
+                    b.HasIndex("PortfolioProjectId");
 
-                    b.HasIndex("UserProfileId")
-                        .IsUnique();
+                    b.HasIndex("UserProfileId");
 
                     b.ToTable("ProjectViews");
+                });
+
+            modelBuilder.Entity("Kawadar.Domain.Skills.FreelancerSkill.FreelancerSkill", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CustomSkillName")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid>("FreelancerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("SkillId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SkillType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FreelancerId");
+
+                    b.HasIndex("SkillId");
+
+                    b.ToTable("FreelacnerSkills");
+                });
+
+            modelBuilder.Entity("Kawadar.Domain.Skills.Skill", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.ToTable("Skills");
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Specilizations.Specilization", b =>
@@ -603,8 +667,14 @@ namespace Kawadar.Infrastructure.Data.Migrations
             modelBuilder.Entity("Kawadar.Domain.Portfolios.ProjectSkill.PortfolioProjectSkill", b =>
                 {
                     b.HasOne("Kawadar.Domain.Portfolios.Project.PortfolioProject", null)
-                        .WithOne()
-                        .HasForeignKey("Kawadar.Domain.Portfolios.ProjectSkill.PortfolioProjectSkill", "PortfolioProjectId")
+                        .WithMany()
+                        .HasForeignKey("PortfolioProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kawadar.Domain.Skills.Skill", null)
+                        .WithMany()
+                        .HasForeignKey("SkillId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -612,20 +682,43 @@ namespace Kawadar.Infrastructure.Data.Migrations
             modelBuilder.Entity("Kawadar.Domain.Portfolios.ProjectView.PortfolioProjectView", b =>
                 {
                     b.HasOne("Kawadar.Domain.Portfolios.Project.PortfolioProject", "PortfolioProject")
-                        .WithOne()
-                        .HasForeignKey("Kawadar.Domain.Portfolios.ProjectView.PortfolioProjectView", "PortfolioProjectId")
+                        .WithMany()
+                        .HasForeignKey("PortfolioProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", "UserProfile")
-                        .WithOne()
-                        .HasForeignKey("Kawadar.Domain.Portfolios.ProjectView.PortfolioProjectView", "UserProfileId")
+                        .WithMany()
+                        .HasForeignKey("UserProfileId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("PortfolioProject");
 
                     b.Navigation("UserProfile");
+                });
+
+            modelBuilder.Entity("Kawadar.Domain.Skills.FreelancerSkill.FreelancerSkill", b =>
+                {
+                    b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", null)
+                        .WithMany()
+                        .HasForeignKey("FreelancerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kawadar.Domain.Skills.Skill", null)
+                        .WithMany()
+                        .HasForeignKey("SkillId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Kawadar.Domain.Skills.Skill", b =>
+                {
+                    b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Kawadar.Domain.UserProfiles.UserProfile", b =>

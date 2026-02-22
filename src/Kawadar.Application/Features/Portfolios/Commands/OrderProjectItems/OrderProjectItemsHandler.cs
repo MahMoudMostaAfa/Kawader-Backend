@@ -3,13 +3,12 @@ using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Portfolios.Items;
-using Kawadar.Domain.Portfolios.Project;
 using MediatR;
 
 namespace Kawadar.Application.Features.Portfolios.Commands.OrderProjectItems
 {
     public class OrderProjectItemsHandler(IUser user, IUnitOfWork unitOfWork,
-        IPortfolioProjectRepository projectRepository, IUsersRepository usersRepository) : IRequestHandler<OrderProjectItemsCommand, Result<Updated>>
+        IPortfolioProjectRepository projectRepository) : IRequestHandler<OrderProjectItemsCommand, Result<Updated>>
     {
         public async Task<Result<Updated>> Handle(OrderProjectItemsCommand request, CancellationToken cancellationToken)
         {

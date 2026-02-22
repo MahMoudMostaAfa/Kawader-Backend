@@ -29,6 +29,7 @@ namespace Kawadar.Domain.Specilizations
         {
             Name = name;
             IsActive = isActive;
+            UpdatedAt = DateTime.UtcNow;
             return Result.Updated;
         }
     }

@@ -1,6 +1,5 @@
 ﻿using Kawadar.Domain.Common;
 using Kawadar.Domain.Common.Results;
-using Kawadar.Domain.Portfolios.Project;
 
 
 namespace Kawadar.Domain.Portfolios.ProjectSkill

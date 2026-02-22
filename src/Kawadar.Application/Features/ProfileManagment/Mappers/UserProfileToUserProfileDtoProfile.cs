@@ -26,7 +26,8 @@ class UserProfileToUserProfileDtoProfile : Profile
     .ForMember(dest => dest.IsIdentityVerified, opt => opt.MapFrom(src => src.userProfile.IsIdentityVerified))
     .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.user.UserName))
     .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.user.Email))
-    .ForMember(dest => dest.ProfileType, opt => opt.MapFrom(src => src.userProfile.ProfileType));
+    .ForMember(dest => dest.ProfileType, opt => opt.MapFrom(src => src.userProfile.ProfileType))
+    .ForMember(dest => dest.specilizationId, opt => opt.MapFrom(src => src.userProfile.SpecializationId));
 
   }
 }

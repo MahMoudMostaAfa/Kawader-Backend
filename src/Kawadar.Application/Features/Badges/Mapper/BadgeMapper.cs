@@ -12,11 +12,11 @@ namespace Kawadar.Application.Features.Badges.Mapper
 
                 .ForMember(dest => dest.Id, op => op.MapFrom(src => src.Id))
 
-                .ForMember(dest => dest.title, op => op.MapFrom(src => src.Title))
+                .ForMember(dest => dest.Title, op => op.MapFrom(src => src.Title))
 
                 .ForMember(dest => dest.IconUrl, op => op.MapFrom(src => src.IconUrl))
 
-                .ForMember(dest => dest.description, op => op.MapFrom(src => src.Description));
+                .ForMember(dest => dest.Description, op => op.MapFrom(src => src.Description));
         }
     }
 }

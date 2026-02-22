@@ -5,6 +5,8 @@ using Kawadar.Domain.Portfolios.Items;
 using Kawadar.Domain.Portfolios.Project;
 using Kawadar.Domain.Portfolios.ProjectSkill;
 using Kawadar.Domain.Portfolios.ProjectView;
+using Kawadar.Domain.Skills;
+using Kawadar.Domain.Skills.FreelancerSkill;
 using Kawadar.Domain.Specilizations;
 using Kawadar.Domain.UserProfiles;
 using Kawadar.Infrastructure.Identity;
@@ -25,6 +27,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IMediator medi
     public DbSet<Specilization> Specilizations => Set<Specilization>();
     public DbSet<Badge> Badges => Set<Badge>();
     public DbSet<FreelancerBadge> FreelancerBadges => Set<FreelancerBadge>();
+    public DbSet<Skill> Skills => Set<Skill>();
+    public DbSet<FreelancerSkill> FreelacnerSkills => Set<FreelancerSkill>();
+
 
   public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
   {

@@ -128,6 +128,7 @@ public static class DependencyInjection
     service.AddScoped<IBadgeRepository, BadgeRepository>();
     service.AddScoped<ISpecilizationRepository, SpecilizationRepository>();
     service.AddScoped<IProjectViewRepository, ProjectViewRepository>();
+    service.AddScoped<ISkillRepository, SkillRepository>();
 
     service.AddScoped<IUnitOfWork, UnitOfWork>();
 

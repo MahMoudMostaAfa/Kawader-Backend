@@ -17,8 +17,5 @@ namespace Kawadar.Application.Common.Interfaces.Repositories
         public Result<Deleted> DeleteItem(PortfolioItem Item);
 
         public Task<IEnumerable<PortfolioItem>> GetProjectItemsByProjectId(Guid projectId);
-
-        // waiting for the skill entity implementation
-        //public Task addSkill(Guid Skill);
     }
 }

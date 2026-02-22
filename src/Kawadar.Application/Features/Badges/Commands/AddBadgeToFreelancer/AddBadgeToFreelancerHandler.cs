@@ -17,6 +17,9 @@ namespace Kawadar.Application.Features.Badges.Commands.AddBadgeToFreelancer
             var userId = user.Id;
             if (userId is null) return ApplicationErrors.UserIsNotAuthenticated;
 
+            var UserProfileResult = await usersRepository.GetUserProfileByIdAsync(request.FreelancerId);
+            if (UserProfileResult.IsError) return UserProfileResult.Errors;
+
             var BadgeResult = await badgeRepository.GetById(request.BadgeId);
             if (BadgeResult.IsError) return BadgeResult.Errors;
 
