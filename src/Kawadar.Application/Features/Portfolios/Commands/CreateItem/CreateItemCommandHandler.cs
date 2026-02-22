@@ -31,9 +31,8 @@ namespace Kawadar.Application.Features.Portfolios.Commands.CreateItem
 
             if (addResult.IsError) return addResult.Errors;
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
-
             var itemDTO = mapper.Map<ItemDTO>(Item);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return itemDTO;
 

@@ -39,9 +39,9 @@ namespace Kawadar.Application.Features.Portfolios.Commands.CreateProject
             if (resultProject.IsError) return resultProject.Errors;
 
             await projectRepository.AddAsync(resultProject.Value);
+            var projectDTO = mapper.Map<ProjectDTO>(resultProject.Value);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            var projectDTO = mapper.Map<ProjectDTO>(resultProject.Value);
             return projectDTO;
         }
     }

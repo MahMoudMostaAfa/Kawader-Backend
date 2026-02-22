@@ -136,7 +136,7 @@ namespace Kawadar.Api.Controllers.V1
                 errors => Problem(errors));
         }
 
-        [HttpPut("{Id:guid}/Image")]
+        [HttpPut("Image/{Id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]

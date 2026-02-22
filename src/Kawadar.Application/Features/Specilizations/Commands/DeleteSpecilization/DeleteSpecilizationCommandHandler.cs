@@ -2,7 +2,6 @@
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Domain.Common.Results;
-using Kawadar.Domain.Specilizations;
 using MediatR;
 
 namespace Kawadar.Application.Features.Specilizations.Commands.DeleteSpecilization
@@ -21,7 +20,7 @@ namespace Kawadar.Application.Features.Specilizations.Commands.DeleteSpecilizati
             if (deleteResult.IsError) return deleteResult.Errors;
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
-            return deleteResult;
+            return deleteResult.Value;
         }
     }
 }

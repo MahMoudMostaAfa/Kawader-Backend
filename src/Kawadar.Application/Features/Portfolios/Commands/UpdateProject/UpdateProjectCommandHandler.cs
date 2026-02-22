@@ -25,8 +25,11 @@ namespace Kawadar.Application.Features.Portfolios.Commands.UpdateProject
             var ImageUrl = string.Empty;
             var file = request.Image;
 
-            var deleteResult = await storageClient.DeleteFileAsync(project.ProjectImageUrl, Containers.PortfolioProjects);
-            if (deleteResult.IsError) return deleteResult.Errors;
+            if (project.ProjectImageUrl != string.Empty && project.ProjectImageUrl is not null)
+            {
+                var deleteResult = await storageClient.DeleteFileAsync(project.ProjectImageUrl, Containers.PortfolioProjects);
+                if (deleteResult.IsError) return deleteResult.Errors;
+            }
 
             using var stream = file.OpenReadStream();
             var uploadResult = await storageClient.UploadFileAsync(stream, file.FileName, Containers.PortfolioProjects, cancellationToken);

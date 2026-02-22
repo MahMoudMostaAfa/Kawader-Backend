@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Kawadar.Api.Controllers.V1
 {
     [ApiVersion("1.0")]
-    [Route("api/v{version:apiVersion}/Admin/Badge")]
+    [Route("api/v{version:apiVersion}")]
     public class BadgeController : ApiController
     {
         private ISender _sender;
@@ -24,7 +24,7 @@ namespace Kawadar.Api.Controllers.V1
             _sender = Sender;
         }
 
-        [HttpGet("{Id:guid}")]
+        [HttpGet("Admin/Badge/{Id:guid}")]
         [Authorize(Policy = Permissions.ViewBadges)]
         [ProducesResponseType(typeof(BadgeDTO), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -43,7 +43,7 @@ namespace Kawadar.Api.Controllers.V1
 
         }
 
-        [HttpGet("AcquiredBadges")]
+        [HttpGet("User/Badges")]
         [Authorize]
         [ProducesResponseType(typeof(BadgeDTO), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -62,7 +62,7 @@ namespace Kawadar.Api.Controllers.V1
 
         }
 
-        [HttpPost]
+        [HttpPost("Admin/Badge")]
         [Authorize(Policy = Permissions.CreateBadges)]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(typeof(BadgeDTO), StatusCodes.Status200OK)]
@@ -81,7 +81,7 @@ namespace Kawadar.Api.Controllers.V1
                 , errors => Problem(errors));
         }
 
-        [HttpPost("AddBadgeToFreelancer")]
+        [HttpPost("Badge/AddBadgeToFreelancer")]
         [Authorize]
         [ProducesResponseType(typeof(BadgeDTO), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -100,7 +100,7 @@ namespace Kawadar.Api.Controllers.V1
         }
 
 
-        [HttpDelete("{Id:guid}")]
+        [HttpDelete("Admin/Badge/{Id:guid}")]
         [Authorize(Policy = Permissions.DeleteBadges)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -119,7 +119,7 @@ namespace Kawadar.Api.Controllers.V1
         }
 
 
-        [HttpPut("{Id:guid}")]
+        [HttpPut("Admin/Badge/{Id:guid}")]
         [Authorize(Policy = Permissions.EditBadges)]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]

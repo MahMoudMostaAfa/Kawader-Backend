@@ -148,6 +148,10 @@ public class UserProfile : AuditableEntity
     return Result.Updated;
   }
 
-
+  public Result<Updated> updateSpecilization(Guid specilizationId)
+    {
+        SpecializationId = specilizationId;
+        return Result.Updated;
+    }
 
 }

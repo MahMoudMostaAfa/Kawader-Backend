@@ -1,4 +1,5 @@
-﻿using Kawadar.Application.Common.Constants;
+﻿using AutoMapper;
+using Kawadar.Application.Common.Constants;
 using Kawadar.Application.Common.Errors;
 using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Interfaces.Auth;
@@ -11,7 +12,8 @@ using MediatR;
 
 namespace Kawadar.Application.Features.Badges.Commands.CreateBadge
 {
-    public class CreateBadgeCommandHandler(IUnitOfWork unitOfWork,IUser user, IBadgeRepository badgeRepository, IStorageClient storageClient) : IRequestHandler<CreateBadgeCommand, Result<BadgeDTO>>
+    public class CreateBadgeCommandHandler(IUnitOfWork unitOfWork,IUser user, IBadgeRepository badgeRepository,
+        IStorageClient storageClient, IMapper mapper) : IRequestHandler<CreateBadgeCommand, Result<BadgeDTO>>
     {
         public async Task<Result<BadgeDTO>> Handle(CreateBadgeCommand request, CancellationToken cancellationToken)
         {
@@ -29,7 +31,8 @@ namespace Kawadar.Application.Features.Badges.Commands.CreateBadge
 
             await badgeRepository.AddAsync(result.Value);
             await unitOfWork.SaveChangesAsync(cancellationToken);
-            return new BadgeDTO { Id = result.Value.Id, title = result.Value.Title, description = result.Value.Description, IconUrl = result.Value.IconUrl};
+            var badgeDTO = mapper.Map<BadgeDTO>(result.Value);
+            return badgeDTO;
         }
     }
 }
