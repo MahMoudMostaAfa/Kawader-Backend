@@ -153,5 +153,47 @@ public class UserProfile : AuditableEntity
         SpecializationId = specilizationId;
         return Result.Updated;
     }
+  public Result<Updated> UpdateIdentityInfo(string? identityNumber, DateTime? dateOfBirth, string? identityLocation, string? identityName)
+  {
+    if (!string.IsNullOrWhiteSpace(identityNumber))
+    {
+      IdentityNumber = identityNumber;
+    }
+    if (dateOfBirth.HasValue)
+    {
+      DateOfBirth = dateOfBirth.Value;
+    }
+    if (!string.IsNullOrWhiteSpace(identityLocation))
+    {
+      IdentityLocation = identityLocation;
+    }
+    if (!string.IsNullOrWhiteSpace(identityName))
+    {
+      IdentityName = identityName;
+    }
 
+    return Result.Updated;
+  }
+
+
+
+  public Result<Updated> UpdateIdentityImages(string? frontImageUrl, string? backImageUrl)
+  {
+    if (!string.IsNullOrWhiteSpace(frontImageUrl))
+    {
+      IdentityImgUrl = frontImageUrl;
+    }
+    if (!string.IsNullOrWhiteSpace(backImageUrl))
+    {
+      IdentityImgBackUrl = backImageUrl;
+    }
+
+    return Result.Updated;
+  }
+
+  public Result<Updated> VerifyIdentity()
+  {
+    IsIdentityVerified = true;
+    return Result.Updated;
+  }
 }

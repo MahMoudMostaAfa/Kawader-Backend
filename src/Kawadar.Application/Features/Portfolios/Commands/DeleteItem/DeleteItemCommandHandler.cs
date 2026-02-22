@@ -1,6 +1,7 @@
 ﻿using Kawadar.Application.Common.Errors;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
+using Kawadar.Application.Common.Interfaces;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Portfolios.Project;
 using Kawadar.Domain.Portfolios.Items.Enum;
@@ -25,9 +26,9 @@ namespace Kawadar.Application.Features.Portfolios.Commands.DeleteItem
 
             var projectItems = await projectRepository.GetProjectItemsByProjectId(item.PortfolioProjectId);
 
-            foreach(var previousItem in projectItems)
+            foreach (var previousItem in projectItems)
             {
-                if(previousItem.DisplayOrder > item.DisplayOrder)
+                if (previousItem.DisplayOrder > item.DisplayOrder)
                     previousItem.UpdateDisplayOrder(previousItem.DisplayOrder - 1);
             }
 

@@ -3,6 +3,7 @@ using Kawadar.Application.Common.Constants;
 using Kawadar.Application.Common.Errors;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
+using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Features.Portfolios.DTOs;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Portfolios.Project;
@@ -25,7 +26,7 @@ namespace Kawadar.Application.Features.Portfolios.Commands.CreateProject
 
             var previousProjects = await projectRepository.GetAllByFreelancerId(freelancer.Id);
             var displayOrder = previousProjects.Count() + 1;
-            
+
             using var stream = request.ProjectImage.OpenReadStream();
             var uploadResult = await storageClient.UploadFileAsync(stream, request.ProjectImage.FileName,
                 Containers.PortfolioProjects, cancellationToken);

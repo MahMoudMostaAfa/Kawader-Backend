@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    
+    <PackageReference Include="NSubstitute" Version="5.3.0" />
+    
+    <PackageReference Include="xunit" Version="2.9.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Kawadar.Infrastructure\Kawadar.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Kawadar.Domain\Kawadar.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Kawadar.Application\Kawadar.Application.csproj" />
+  </ItemGroup>
+
+</Project>
