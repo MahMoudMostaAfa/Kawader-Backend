@@ -36,6 +36,19 @@ namespace kawadar.Domain.UnitTests.Portfolio
         }
 
         [Fact]
+        public void Create_NullContent_ShouldFail()
+        {
+            string? content = null;
+            int displayOrder = 1;
+            Guid projectId = Guid.NewGuid();
+
+            var result = PortfolioItem.Create(ItemType.Text, content, displayOrder, projectId);
+            Assert.True(result.IsError);
+            Assert.Equal(PortfolioItemErrors.ContentIsRequired.Code, result.TopError.Code);
+            Assert.Equal(PortfolioItemErrors.ContentIsRequired.Description, result.TopError.Description);
+        }
+
+        [Fact]
         public void Create_EmptyProjectId_ShouldFail()
         {
             string content = "This is the content of an Item";

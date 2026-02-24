@@ -66,10 +66,42 @@ namespace kawadar.Domain.UnitTests.Portfolio
         }
 
         [Fact]
+        public void Create_WithNullTitle_ShouldFail()
+        {
+            string? title = null;
+            string description = "A freelancing platform";
+            string ImageUrl = "www.image.com";
+            int displayOrder = 1;
+            Guid freelancerId = Guid.NewGuid();
+            string projectUrl = "www.Project.com";
+            var projectResult = PortfolioProject.Create(title, description, PortfolioProjectCategory.BackendDevelopment, freelancerId, ImageUrl, displayOrder, projectUrl);
+
+            Assert.True(projectResult.IsError);
+            Assert.Equal(PortfolioProjectErrors.TitleIsRequired.Code, projectResult.TopError.Code);
+            Assert.Equal(PortfolioProjectErrors.TitleIsRequired.Description, projectResult.TopError.Description);
+        }
+
+        [Fact]
         public void Create_WithEmptyDescription_ShouldFail()
         {
             string title = "Kawader";
             string description = "";
+            string ImageUrl = "www.image.com";
+            int displayOrder = 1;
+            Guid freelancerId = Guid.NewGuid();
+            string projectUrl = "www.Project.com";
+            var projectResult = PortfolioProject.Create(title, description, PortfolioProjectCategory.BackendDevelopment, freelancerId, ImageUrl, displayOrder, projectUrl);
+
+            Assert.True(projectResult.IsError);
+            Assert.Equal(PortfolioProjectErrors.DescriptionIsRequired.Code, projectResult.TopError.Code);
+            Assert.Equal(PortfolioProjectErrors.DescriptionIsRequired.Description, projectResult.TopError.Description);
+        }
+
+        [Fact]
+        public void Create_WithNullDescription_ShouldFail()
+        {
+            string title = "Kawader";
+            string? description = null;
             string ImageUrl = "www.image.com";
             int displayOrder = 1;
             Guid freelancerId = Guid.NewGuid();
