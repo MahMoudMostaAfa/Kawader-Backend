@@ -9,5 +9,8 @@ namespace Kawadar.Domain.Badges
 
         public static Error IconIsEmpty => Error.Validation("Badge.IconIsEmpty",
             "Icon Url can't be empty");
+
+        public static Error DescriptionIsEmpty => Error.Validation("Badge.DescriptionIsEmpty",
+            "Description can't be empty");
     }
 }

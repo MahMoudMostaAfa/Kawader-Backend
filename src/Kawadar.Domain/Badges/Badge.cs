@@ -31,6 +31,11 @@ namespace Kawadar.Domain.Badges
                 return BadgeErrors.IconIsEmpty;
             }
 
+            if (string.IsNullOrWhiteSpace(Description))
+            {
+                return BadgeErrors.DescriptionIsEmpty;
+            }
+
             var badge = new Badge(Title, IconUrl, Description);
             return badge;
         }
