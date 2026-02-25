@@ -1,6 +1,10 @@
+using Google.GenAI.Types;
 using Kawadar.Api.Requests.PortfolioProject.PortfolioItem;
 using Kawadar.Application.Common.Constants;
 using Kawadar.Application.Common.Interfaces;
+using Kawadar.Application.Common.Messaging;
+using Kawadar.Application.Common.Messaging.Messages;
+using Kawadar.Application.Features.Auth.Commands.Register;
 using Kawadar.Application.Features.ProfileManagment.Commands.UpdateProfile;
 using Kawadar.Application.Features.ProfileManagment.Commands.UploadIdentity;
 using Kawadar.Application.Features.ProfileManagment.Queries.GetUserProfile;
@@ -21,10 +25,15 @@ public class ProfileController : ApiController
 
   private readonly ISender _sender;
   private readonly IStorageClient _storageClient;
-  public ProfileController(ISender sender, IStorageClient storageClient)
+  private readonly IAIService _aiService;
+  private readonly IEventBus _eventBus;
+  public ProfileController(ISender sender, IStorageClient storageClient, IAIService aiService, IEventBus eventBus)
   {
     _sender = sender;
     _storageClient = storageClient;
+    _aiService = aiService;
+    _eventBus = eventBus;
+
   }
 
 
@@ -98,6 +107,41 @@ public class ProfileController : ApiController
         _ => NoContent(),
         errors => Problem(errors));
   }
+
+  // test endpoint for AI service
+  [HttpPost("test-ai")]
+  public async Task<IActionResult> TestAI([FromQuery] string prompt)
+  {
+    var schema = new Schema
+    {
+      Type = Google.GenAI.Types.Type.Object,
+      Properties = new System.Collections.Generic.Dictionary<string, Schema>
+      {
+        { "message", new Schema { Type = Google.GenAI.Types.Type.String } }
+      },
+      Required = new List<string> { "message" }
+    };
+
+    var result = await _aiService.GenrateStructuredResponseAsync<TestAIResponse>(prompt, schema);
+
+    return result.Match(
+        response => Ok(response),
+        errors => Problem(errors));
+  }
+
+  [HttpPost("test-rabbit")]
+  public async Task<IActionResult> TestRabbit(RegisterCommand registerCommand)
+  {
+
+    var message = new SendWelcomeEmailMessage(Email: registerCommand.Email, FullName: registerCommand.FirstName);
+    await _eventBus.PublishAsync<SendWelcomeEmailMessage>(message);
+
+    return Ok("registered");
+  }
 }
 
 
+internal class TestAIResponse
+{
+  public string Message { get; set; } = string.Empty;
+}
