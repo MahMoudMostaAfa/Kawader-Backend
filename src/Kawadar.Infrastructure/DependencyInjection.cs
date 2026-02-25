@@ -23,6 +23,11 @@ using Kawadar.Domain.Portfolios.ProjectView;
 using Azure.Storage.Blobs;
 using Azure.Identity;
 using Kawadar.Infrastructure.Services.CloudServices;
+using Kawadar.Infrastructure.Services.AIServices;
+using Kawadar.Application.Common.Messaging;
+using Kawadar.Infrastructure.Messaging;
+using MassTransit;
+using Kawadar.Infrastructure.Messaging.Consumers;
 
 public static class DependencyInjection
 {
@@ -88,6 +93,9 @@ public static class DependencyInjection
 
     var authBuilder = service.AddAuthorizationBuilder();
 
+    // add MassTransit and rabbitMq services 
+    service.AddMassTransitCfg(configuration);
+
     //Adding Azure Blob Storage
     service.AddSingleton(provider =>
     {
@@ -120,6 +128,8 @@ public static class DependencyInjection
     // Email services
     service.AddScoped<IEmailService, EmailService>();
     service.AddSingleton<IEmailTemplateService, EmailTemplateService>();
+    // AI services
+    service.AddScoped<IAIService, GeminiApiService>();
 
     // repositories and unit of work
     service.AddScoped<IUsersRepository, UsersRepository>();
@@ -131,8 +141,79 @@ public static class DependencyInjection
 
     service.AddScoped<IUnitOfWork, UnitOfWork>();
 
+
+
     service.AddTransient<IIdentityService, IdentityService>();
     return service;
+  }
+
+  public static IServiceCollection AddMassTransitCfg(this IServiceCollection services, IConfiguration configuration)
+  {
+
+    // Register EventBus abstraction
+    services.AddScoped<IEventBus, EventBus>();
+
+    services.AddMassTransit(x =>
+    {
+      // register all consumers
+      x.AddConsumer<SendWelcomeEmailConsumer>();
+
+
+      // rabbitMQ cfg
+      x.UsingRabbitMq((context, cfg) =>
+      {
+        cfg.Host(configuration["RabbitMQ:Host"], "/", h =>
+        {
+          h.Username(configuration["RabbitMQ:Username"]!);
+          h.Password(configuration["RabbitMQ:Password"]!);
+        });
+
+
+        // Email queue configuration
+        cfg.ReceiveEndpoint("email-welcome-queue", e =>
+        {
+          e.PrefetchCount = 10;
+
+          // Retry policy: 3 times with exponential backoff
+          e.UseMessageRetry(r => r.Exponential(
+                      retryLimit: 3,
+                      minInterval: TimeSpan.FromSeconds(5),
+                      maxInterval: TimeSpan.FromMinutes(2),
+                      intervalDelta: TimeSpan.FromSeconds(10)));
+
+          // Dead letter queue after all retries fail
+          e.SetQueueArgument("x-dead-letter-exchange", "email-welcome-dlx");
+          e.SetQueueArgument("x-dead-letter-routing-key", "email-welcome-dlq");
+
+
+          e.ConfigureConsumer<SendWelcomeEmailConsumer>(context);
+        });
+
+        // upload queue configuration
+
+
+
+
+        // Declare DLX and bind DLQ
+        cfg.ReceiveEndpoint("email-welcome-dlq", dlq =>
+        {
+          dlq.Bind("email-welcome-dlx", s =>
+          {
+            s.RoutingKey = "email-welcome-dlq";
+            s.ExchangeType = "direct";
+          });
+        });
+
+      });
+
+
+
+
+    });
+
+
+
+    return services;
   }
 
 }
