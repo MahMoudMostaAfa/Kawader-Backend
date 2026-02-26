@@ -23,6 +23,10 @@ namespace Kawadar.Infrastructure.Data.Configurations
                 .HasForeignKey(up => up.FreelancerId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasIndex(fb => fb.BadgeId).IsUnique(false);
+
+            builder.HasIndex(fb => fb.FreelancerId).IsUnique(false);
         }
     }
 }

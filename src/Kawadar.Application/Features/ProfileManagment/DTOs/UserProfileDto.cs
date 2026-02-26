@@ -6,6 +6,7 @@ public class UserProfileDto
   public string LastName { get; set; } = string.Empty;
 
   public string? Title { get; set; } = string.Empty;
+  public Guid? specilizationId { get; set; }
 
   public string? Bio { get; set; } = string.Empty;
   public ExperienceYear ExperienceYear { get; set; } = ExperienceYear.LessThanOneYear;

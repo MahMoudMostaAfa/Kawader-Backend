@@ -14,15 +14,15 @@ namespace Kawadar.Infrastructure.Data.Configurations
 
 
             builder.HasOne(p => p.PortfolioProject)
-                .WithOne()
-                .HasForeignKey<PortfolioProjectView>(p => p.PortfolioProjectId)
+                .WithMany()
+                .HasForeignKey(p => p.PortfolioProjectId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
 
 
             builder.HasOne(i => i.UserProfile)
-                .WithOne()
-                .HasForeignKey<PortfolioProjectView>(p => p.UserProfileId)
+                .WithMany()
+                .HasForeignKey(p => p.UserProfileId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
         }

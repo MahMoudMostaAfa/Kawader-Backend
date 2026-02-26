@@ -29,7 +29,7 @@ namespace Kawadar.Application.Features.Portfolios.Commands.DeleteProject
                     previousProject.UpdateOrder(previousProject.DisplayOrder - 1);
             }
 
-            if (project.ProjectImageUrl != string.Empty)
+            if (project.ProjectImageUrl != string.Empty && project.ProjectImageUrl is not null)
             {
                 var storageDeleteResult = await storageClient.DeleteFileAsync(project.ProjectImageUrl, Containers.PortfolioProjects);
                 if (storageDeleteResult.IsError) return storageDeleteResult.Errors;

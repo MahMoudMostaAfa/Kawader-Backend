@@ -2,6 +2,7 @@
 using Kawadar.Application.Common.Errors;
 using Kawadar.Application.Features.Specilizations.Commands.CreateSpecilization;
 using Kawadar.Application.Features.Specilizations.Commands.DeleteSpecilization;
+using Kawadar.Application.Features.Specilizations.Commands.SetSpecilization;
 using Kawadar.Application.Features.Specilizations.Commands.UpdateSpecilization;
 using Kawadar.Application.Features.Specilizations.DTO;
 using Kawadar.Application.Features.Specilizations.Queries.GetAllSpecilizations;
@@ -15,7 +16,7 @@ namespace Kawadar.Api.Controllers.V1
 {
     [Authorize]
     [ApiVersion("1.0")]
-    [Route("api/v{version:apiVersion}/Specilization")]
+    [Route("api/v{version:apiVersion}/Admin/Specilization")]
     public class SpecilizationController : ApiController
     {
         private ISender _sender;
@@ -108,6 +109,23 @@ namespace Kawadar.Api.Controllers.V1
         public async Task<IActionResult> UpdateSpecilization(Guid Id, [FromBody]UpdateSpecilizationRequest request, CancellationToken ct)
         {
             var command = new UpdateSpecilizationCommand(Id, request.Name, request.IsActive);
+            var result = await _sender.Send(command, ct);
+
+            return result.Match(
+                _ => NoContent()
+                , errors => Problem(errors));
+        }
+
+        [HttpPut("~/api/v{version:apiVersion}/User/Specialization")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [EndpointName("SetSpecilization")]
+        [EndpointSummary("Sets the specilization field")]
+        [EndpointDescription("Sets the specilization field for the userProfile using its name")]
+        public async Task<IActionResult> SetSpecilization([FromBody] SetSpecilizationRequest request, CancellationToken ct)
+        {
+            var command = new SetSpecilizationCommand(request.Name);
             var result = await _sender.Send(command, ct);
 
             return result.Match(
