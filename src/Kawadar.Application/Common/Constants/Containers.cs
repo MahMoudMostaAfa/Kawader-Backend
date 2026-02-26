@@ -11,5 +11,7 @@
 
         public const string IdentityImages = "identity-pics";
 
+        public const string ProfileImages = "profile-pics";
+
     }
 }

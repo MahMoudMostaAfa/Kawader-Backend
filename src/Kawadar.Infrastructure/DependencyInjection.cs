@@ -16,10 +16,6 @@ using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Infrastructure.Services;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Infrastructure.Services.Repositories;
-using Kawadar.Domain.Portfolios.Project;
-using Kawadar.Domain.Badges;
-using Kawadar.Domain.Specilizations;
-using Kawadar.Domain.Portfolios.ProjectView;
 using Azure.Storage.Blobs;
 using Azure.Identity;
 using Kawadar.Infrastructure.Services.CloudServices;
@@ -158,6 +154,9 @@ public static class DependencyInjection
     {
       // register all consumers
       x.AddConsumer<SendWelcomeEmailConsumer>();
+      x.AddConsumer<UpdateProfileImageConsumer>();
+      x.AddConsumer<UploadIdentityConsumer>();
+      x.AddConsumer<ProcessingIdentityDataConsumer>();
 
 
       // rabbitMQ cfg
@@ -190,10 +189,54 @@ public static class DependencyInjection
           e.ConfigureConsumer<SendWelcomeEmailConsumer>(context);
         });
 
-        // upload queue configuration
+        // upload files queue configuration
+        cfg.ReceiveEndpoint("upload-files-queue", e =>
+        {
+          e.PrefetchCount = 5;
+
+          // Retry policy: 3 times with exponential backoff
+          e.UseMessageRetry(r => r.Exponential(
+                      retryLimit: 3,
+                      minInterval: TimeSpan.FromSeconds(5),
+                      maxInterval: TimeSpan.FromMinutes(2),
+                      intervalDelta: TimeSpan.FromSeconds(10)));
+
+          // Dead letter queue after all retries fail
+          e.SetQueueArgument("x-dead-letter-exchange", "upload-files-dlx");
+          e.SetQueueArgument("x-dead-letter-routing-key", "upload-files-dlq");
 
 
+          e.ConfigureConsumer<UpdateProfileImageConsumer>(context);
+          e.ConfigureConsumer<UploadIdentityConsumer>(context);
+        });
 
+        // llm processing queue configuration
+        cfg.ReceiveEndpoint("llm-processing-queue", e =>
+        {
+          e.PrefetchCount = 5;
+
+          // Retry policy: 3 times with exponential backoff
+          e.UseMessageRetry(r => r.Exponential(
+                      retryLimit: 3,
+                      minInterval: TimeSpan.FromSeconds(5),
+                      maxInterval: TimeSpan.FromMinutes(2),
+                      intervalDelta: TimeSpan.FromSeconds(10)));
+
+          // Dead letter queue after all retries fail
+          e.SetQueueArgument("x-dead-letter-exchange", "llm-processing-dlx");
+          e.SetQueueArgument("x-dead-letter-routing-key", "llm-processing-dlq");
+          e.ConfigureConsumer<ProcessingIdentityDataConsumer>(context);
+        });
+
+        // Declare DLX and bind DLQ for llm processing queue
+        cfg.ReceiveEndpoint("llm-processing-dlq", dlq =>
+        {
+          dlq.Bind("llm-processing-dlx", s =>
+          {
+            s.RoutingKey = "llm-processing-dlq";
+            s.ExchangeType = "direct";
+          });
+        });
 
         // Declare DLX and bind DLQ
         cfg.ReceiveEndpoint("email-welcome-dlq", dlq =>
@@ -205,15 +248,23 @@ public static class DependencyInjection
           });
         });
 
+        // Declare DLX and bind DLQ for upload files queue  
+        cfg.ReceiveEndpoint("upload-files-dlq", dlq =>
+        {
+          dlq.Bind("upload-files-dlx", s =>
+          {
+            s.RoutingKey = "upload-files-dlq";
+            s.ExchangeType = "direct";
+          });
+        });
+
+
+
+
       });
 
 
-
-
     });
-
-
-
     return services;
   }
 

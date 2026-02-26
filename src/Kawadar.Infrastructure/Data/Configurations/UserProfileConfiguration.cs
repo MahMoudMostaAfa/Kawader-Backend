@@ -62,6 +62,7 @@ public class UserProfileConfiguration : IEntityTypeConfiguration<UserProfile>
         builder.Property(up => up.IdentityLocation).HasMaxLength(200);
         builder.Property(up => up.IdentityName).HasMaxLength(200);
         builder.Property(up => up.IdentityNumber).HasMaxLength(20);
+
         builder.Property(up => up.DateOfBirth).HasColumnType("date");
 
         builder.HasOne<AppUser>()

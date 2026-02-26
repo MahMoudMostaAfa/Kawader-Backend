@@ -16,4 +16,9 @@ public static class UserProfileErrors
 
   public static Error FreelancerOrClientOnlyCanRegister => Error.Failure("UserProfile.InvalidProfileType", "Invalid profile type. Only Freelancer and Client profile type is allowed for registration.");
 
+
+  public static Error ProfilePictureUrlIsRequired => Error.Validation("UserProfile.ProfilePictureUrlIsRequired", "Profile picture URL is required.");
+
+  static public Error IdentityAlreadyVerified => Error.Validation("UserProfile.IdentityAlreadyVerified", "The identity for this user profile has already been verified.");
+
 }
