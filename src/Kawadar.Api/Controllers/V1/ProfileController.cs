@@ -1,11 +1,7 @@
-using Google.GenAI.Types;
-using Kawadar.Api.Requests.PortfolioProject.PortfolioItem;
-using Kawadar.Application.Common.Constants;
+
 using Kawadar.Application.Common.Interfaces;
-using Kawadar.Application.Common.Messaging;
-using Kawadar.Application.Common.Messaging.Messages;
-using Kawadar.Application.Features.Auth.Commands.Register;
 using Kawadar.Application.Features.ProfileManagment.Commands.UpdateProfile;
+using Kawadar.Application.Features.ProfileManagment.Commands.UpdateProfileImage;
 using Kawadar.Application.Features.ProfileManagment.Commands.UploadIdentity;
 using Kawadar.Application.Features.ProfileManagment.Queries.GetUserProfile;
 using Kawadar.Application.Features.ProfileManagment.Queries.GetUserProfileByUserName;
@@ -24,15 +20,13 @@ public class ProfileController : ApiController
 {
 
   private readonly ISender _sender;
-  private readonly IStorageClient _storageClient;
   private readonly IAIService _aiService;
-  private readonly IEventBus _eventBus;
-  public ProfileController(ISender sender, IStorageClient storageClient, IAIService aiService, IEventBus eventBus)
+
+  public ProfileController(ISender sender, IAIService aiService)
   {
     _sender = sender;
-    _storageClient = storageClient;
     _aiService = aiService;
-    _eventBus = eventBus;
+
 
   }
 
@@ -94,7 +88,8 @@ public class ProfileController : ApiController
   [EndpointSummary("Uploads identity documents for the current user")]
   [EndpointDescription("Uploads identity front and back images for the current user.")]
   [ProducesResponseType(StatusCodes.Status204NoContent)]
-  [ProducesResponseType(StatusCodes.Status400BadRequest)]
+  [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
   public async Task<IActionResult> UploadIdentity([FromForm] UploadIdentityCommand command)
   {
 
@@ -108,40 +103,34 @@ public class ProfileController : ApiController
         errors => Problem(errors));
   }
 
-  // test endpoint for AI service
-  [HttpPost("test-ai")]
-  public async Task<IActionResult> TestAI([FromQuery] string prompt)
+
+
+  [Consumes("multipart/form-data")]
+  [HttpPut("update-profile-img")]
+  [EndpointName("updateProileImage")]
+  [EndpointSummary("update profile picture for current user")]
+  [EndpointDescription("update profile  image for the current user.")]
+  [ProducesResponseType(StatusCodes.Status204NoContent)]
+  [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  public async Task<IActionResult> UpdateProfilePicture([FromForm] UpdateProfileImageCommand command)
   {
-    var schema = new Schema
-    {
-      Type = Google.GenAI.Types.Type.Object,
-      Properties = new System.Collections.Generic.Dictionary<string, Schema>
-      {
-        { "message", new Schema { Type = Google.GenAI.Types.Type.String } }
-      },
-      Required = new List<string> { "message" }
-    };
-
-    var result = await _aiService.GenrateStructuredResponseAsync<TestAIResponse>(prompt, schema);
-
-    return result.Match(
-        response => Ok(response),
+    var uploadResult = await _sender.Send(command);
+    return uploadResult.Match(
+        _ => NoContent(),
         errors => Problem(errors));
   }
 
-  [HttpPost("test-rabbit")]
-  public async Task<IActionResult> TestRabbit(RegisterCommand registerCommand)
+  [HttpPost("test-ai")]
+  public async Task<IActionResult> TestAI()
   {
+    var response = await _aiService.GenerateStructuredResponseAsync<ResponseDto>("What is your name? and what is your purpose? and what you are good at? and are you able to provide the answer in Arabic?", default);
+    return Ok(response.Value);
 
-    var message = new SendWelcomeEmailMessage(Email: registerCommand.Email, FullName: registerCommand.FirstName);
-    await _eventBus.PublishAsync<SendWelcomeEmailMessage>(message);
 
-    return Ok("registered");
   }
+
 }
 
 
-internal class TestAIResponse
-{
-  public string Message { get; set; } = string.Empty;
-}
+public record ResponseDto(string Message, string Purpose, List<string> Skills, bool CanRespondInArabic);

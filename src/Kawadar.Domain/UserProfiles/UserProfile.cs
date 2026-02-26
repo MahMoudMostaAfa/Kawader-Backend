@@ -50,7 +50,7 @@ public class UserProfile : AuditableEntity
   // Identity Verification
   public string? IdentityNumber { get; private set; } = "";
 
-  public DateTime? DateOfBirth { get; private set; }
+  public DateOnly? DateOfBirth { get; private set; }
 
   public string? IdentityLocation { get; private set; } = "";
 
@@ -145,10 +145,12 @@ public class UserProfile : AuditableEntity
       PhoneNumber = phoneNumber;
     }
 
+    CheckProfileIsComplete();
+
     return Result.Updated;
   }
 
-  public Result<Updated> UpdateIdentityInfo(string? identityNumber, DateTime? dateOfBirth, string? identityLocation, string? identityName)
+  public Result<Updated> UpdateIdentityInfo(string? identityNumber, DateOnly? dateOfBirth, string? identityLocation, string? identityName)
   {
     if (!string.IsNullOrWhiteSpace(identityNumber))
     {
@@ -166,6 +168,8 @@ public class UserProfile : AuditableEntity
     {
       IdentityName = identityName;
     }
+
+    IsIdentityVerified = true;
 
     return Result.Updated;
   }
@@ -191,4 +195,40 @@ public class UserProfile : AuditableEntity
     IsIdentityVerified = true;
     return Result.Updated;
   }
+
+
+  public Result<Updated> UpdateProfilePicture(string profilePictureUrl)
+  {
+    if (string.IsNullOrWhiteSpace(profilePictureUrl))
+    {
+      return UserProfileErrors.ProfilePictureUrlIsRequired;
+    }
+
+    ProfilePictureUrl = profilePictureUrl;
+
+    CheckProfileIsComplete();
+    return Result.Updated;
+  }
+
+  private void CheckProfileIsComplete()
+  {
+    // This method can be used to check if the profile is complete based on required fields
+    // For example, you can check if FirstName, LastName, Title, Bio, ExperienceYear, and ProfilePictureUrl are not null or empty
+    if (!string.IsNullOrWhiteSpace(FirstName) &&
+        !string.IsNullOrWhiteSpace(LastName) &&
+        !string.IsNullOrWhiteSpace(Title) &&
+        !string.IsNullOrWhiteSpace(Bio) &&
+         !string.IsNullOrWhiteSpace(PhoneNumber) &&
+        !string.IsNullOrWhiteSpace(ProfilePictureUrl))
+    {
+      IsActivated = true;
+      ActivatedAt = DateTime.UtcNow;
+    }
+    else
+    {
+      IsActivated = false;
+      ActivatedAt = null;
+    }
+  }
+
 }

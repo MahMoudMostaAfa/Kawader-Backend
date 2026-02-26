@@ -1,9 +1,13 @@
 using Kawadar.Application.Common.Constants;
 using Kawadar.Application.Common.Errors;
-using Kawadar.Application.Common.Interfaces;
+using Kawadar.Application.Common.Helpers;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
+using Kawadar.Application.Common.Messaging;
+using Kawadar.Application.Common.Messaging.Messages;
+using Kawadar.Application.Common.Models;
 using Kawadar.Domain.Common.Results;
+using Kawadar.Domain.UserProfiles;
 using MediatR;
 
 namespace Kawadar.Application.Features.ProfileManagment.Commands.UploadIdentity;
@@ -11,21 +15,24 @@ namespace Kawadar.Application.Features.ProfileManagment.Commands.UploadIdentity;
 
 public class UploadIdentityCommandHandler : IRequestHandler<UploadIdentityCommand, Result<Success>>
 {
-  private readonly IStorageClient _storageClient;
   private readonly IIdentityService _identityService;
   private readonly IUser _user;
 
   private readonly IUsersRepository _usersRepository;
 
-  private readonly IUnitOfWork _unitOfWork;
+  private readonly IEventBus _eventBus;
 
-  public UploadIdentityCommandHandler(IStorageClient storageClient, IIdentityService identityService, IUser user, IUsersRepository usersRepository, IUnitOfWork unitOfWork)
+
+
+
+  public UploadIdentityCommandHandler(IIdentityService identityService, IUser user, IUsersRepository usersRepository, IEventBus eventBus)
   {
-    _storageClient = storageClient;
+
     _identityService = identityService;
     _user = user;
     _usersRepository = usersRepository;
-    _unitOfWork = unitOfWork;
+    _eventBus = eventBus;
+
   }
   public async Task<Result<Success>> Handle(UploadIdentityCommand request, CancellationToken cancellationToken)
   {
@@ -41,27 +48,29 @@ public class UploadIdentityCommandHandler : IRequestHandler<UploadIdentityComman
     if (userProfileResult.IsError) return userProfileResult.Errors;
     var userProfile = userProfileResult.Value;
 
-    // upload front and back images in parallel
-    using var stream = request.FrontImage.OpenReadStream();
-    using var backStream = request.BackImage.OpenReadStream();
+    if (userProfile.IsIdentityVerified == true) return UserProfileErrors.IdentityAlreadyVerified;
 
-    var frontTask = _storageClient.UploadFileAsync(stream, request.FrontImage.FileName, Containers.IdentityImages, cancellationToken);
-    var backTask = _storageClient.UploadFileAsync(backStream, request.BackImage.FileName, Containers.IdentityImages, cancellationToken);
+    var frontImageData = await MapIFormToFileData.MapToFileData(request.FrontImage);
+    var backImageData = await MapIFormToFileData.MapToFileData(request.BackImage);
 
-    await Task.WhenAll(frontTask, backTask);
+    var message = new UploadIdentityMessage
+    {
+      UserProfileId = userProfile.Id,
+      FileName = request.FrontImage.FileName,
+      IdentityBackPicData = backImageData.Data,
+      IdentityFrontPicData = frontImageData.Data,
+      ContainerName = Containers.IdentityImages
+    };
 
-    var frontImageUrlResult = frontTask.Result;
-    var backImageUrlResult = backTask.Result;
+    await _eventBus.PublishAsync(message, cancellationToken);
+    await _eventBus.PublishAsync(new ProcessingIdentityDataMessage
+    {
+      UserProfileId = userProfile.Id,
+      IdentityFrontPicData = frontImageData.Data
+    }, cancellationToken);
 
-    if (frontImageUrlResult.IsError) return frontImageUrlResult.Errors;
-    if (backImageUrlResult.IsError) return backImageUrlResult.Errors;
+    return Result.Success;
 
 
-    var UpdateIdentityImagesResult = userProfile.UpdateIdentityImages(frontImageUrlResult.Value, backImageUrlResult.Value);
-    if (UpdateIdentityImagesResult.IsError) return UpdateIdentityImagesResult.Errors;
-
-    return await _unitOfWork.SaveChangesAsync() > 0
-        ? Result.Success
-        : ApplicationErrors.FailedToUploadIdentity;
   }
 }
