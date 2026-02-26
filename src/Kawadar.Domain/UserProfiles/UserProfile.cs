@@ -151,11 +151,11 @@ public class UserProfile : AuditableEntity
   }
 
   public Result<Updated> updateSpecilization(Guid specilizationId)
-    {
-        SpecializationId = specilizationId;
-        return Result.Updated;
-    }
-  public Result<Updated> UpdateIdentityInfo(string? identityNumber, DateTime? dateOfBirth, string? identityLocation, string? identityName)
+  {
+    SpecializationId = specilizationId;
+    return Result.Updated;
+  }
+  public Result<Updated> UpdateIdentityInfo(string? identityNumber, DateOnly? dateOfBirth, string? identityLocation, string? identityName)
   {
     if (!string.IsNullOrWhiteSpace(identityNumber))
     {
