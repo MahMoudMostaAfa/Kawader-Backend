@@ -10,6 +10,11 @@ public static class Permissions
   public const string ApproveUsers = "Permissions.Users.Approve";
   public const string BanUsers = "Permissions.Users.Ban";
 
+    //Admins Management
+    public const string ViewAdmins = "Permissions.Admins.View";
+    public const string AddAdmin = "Permissions.Admins.Add";
+    public const string AddClaim = "Permissions.Admins.AddClaim";
+
 
   // Job Management
 

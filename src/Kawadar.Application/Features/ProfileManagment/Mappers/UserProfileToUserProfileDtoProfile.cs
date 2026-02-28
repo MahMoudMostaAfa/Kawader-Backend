@@ -27,7 +27,10 @@ class UserProfileToUserProfileDtoProfile : Profile
     .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.user.UserName))
     .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.user.Email))
     .ForMember(dest => dest.ProfileType, opt => opt.MapFrom(src => src.userProfile.ProfileType))
-    .ForMember(dest => dest.specilizationId, opt => opt.MapFrom(src => src.userProfile.SpecializationId));
+    .ForMember(dest => dest.specilizationId, opt => opt.MapFrom(src => src.userProfile.SpecializationId))
+    .ForMember(dest => dest.IsBanned, opt => opt.MapFrom(src => src.userProfile.IsBanned))
+    .ForMember(dest => dest.BannedUntil, opt => opt.MapFrom(src => src.userProfile.BannedUntil))
+    .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => src.userProfile.IsDeleted));
 
   }
 }

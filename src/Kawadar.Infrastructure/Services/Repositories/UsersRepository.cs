@@ -1,6 +1,7 @@
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.UserProfiles;
+using Kawadar.Domain.UserProfiles.Enums;
 using Kawadar.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,4 +35,16 @@ public class UsersRepository(AppDbContext appDbContext) : IUsersRepository
 
     return userProfile;
   }
+
+    public async Task<IEnumerable<UserProfile>> GetUsers()
+    {
+        var users = await appDbContext.UserProfiles.Where(x => x.ProfileType != ProfileType.Admin).ToListAsync();
+        return users;
+    }
+
+    public async Task<IEnumerable<UserProfile>> GetAdmins()
+    {
+        var admins = await appDbContext.UserProfiles.Where(x => x.ProfileType == ProfileType.Admin).ToListAsync();
+        return admins;
+    }
 }

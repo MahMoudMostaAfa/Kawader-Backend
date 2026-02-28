@@ -1,0 +1,112 @@
+﻿using Kawadar.Api.Requests.Admin;
+using Kawadar.Application.Features.Admins.Commands.BanUser;
+using Kawadar.Application.Features.Admins.Commands.CreateAdmin;
+using Kawadar.Application.Features.Admins.Commands.DeleteUser;
+using Kawadar.Application.Features.Admins.Dtos;
+using Kawadar.Application.Features.Admins.Queries.GetAdmins;
+using Kawadar.Application.Features.Admins.Queries.GetUsers;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Kawadar.Api.Controllers.V1
+{
+    [Authorize]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/Admin")]
+    public class AdminController : ApiController
+    {
+        private ISender _sender;
+
+        public AdminController(ISender sender)
+        {
+            _sender = sender;
+        }
+
+        [HttpGet("Users")]
+        [ProducesResponseType(typeof(List<UserProfileDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [EndpointName("GetUsers")]
+        [EndpointSummary("Gets the users and their data")]
+        [EndpointDescription("Gets the users and their data so that the admin can manage the users")]
+        public async Task<IActionResult> GetUsers(CancellationToken ct)
+        {
+            var query = new GetUserProfilesQuery();
+            var result = await _sender.Send(query, ct);
+
+            return result.Match(
+                UserProfiles => Ok(UserProfiles)
+                , errors => Problem(errors));
+
+        }
+
+        [HttpGet("Admins")]
+        [ProducesResponseType(typeof(List<AdminDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [EndpointName("GetAdmins")]
+        [EndpointSummary("Gets the Admins and their data")]
+        [EndpointDescription("Gets the Admins and their data so that the Master admin can manage the Admins")]
+        public async Task<IActionResult> GetAdmins(CancellationToken ct)
+        {
+            var query = new GetAdminsQuery();
+            var result = await _sender.Send(query, ct);
+
+            return result.Match(
+                Admins => Ok(Admins)
+                , errors => Problem(errors));
+
+        }
+
+        [HttpPut("Ban")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [EndpointName("BansUser")]
+        [EndpointSummary("Bans user by their userName")]
+        [EndpointDescription("Bans the user by their username for a period of time")]
+        public async Task<IActionResult> BanUser([FromBody] BanUserRequest request, CancellationToken ct)
+        {
+            var command = new BanUserCommand(request.UserName, request.BannedUntil);
+            var result = await _sender.Send(command, ct);
+
+            return result.Match(
+                _ => NoContent(),
+                errors => Problem(errors));
+        }
+
+        [HttpPut("Delete")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [EndpointName("DeletesUser")]
+        [EndpointSummary("Deletes user by their userName")]
+        [EndpointDescription("Soft delete the user by their username for a period of time")]
+        public async Task<IActionResult> DeleteUser([FromBody] DeleteUserRequest request, CancellationToken ct)
+        {
+            var command = new DeleteUserCommand(request.UserName);
+            var result = await _sender.Send(command, ct);
+
+            return result.Match(
+                _ => NoContent(),
+                errors => Problem(errors));
+        }
+
+        [HttpPost("Add")]
+        [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [EndpointName("Add admin")]
+        [EndpointSummary("Adds a new Admin.")]
+        [EndpointDescription("Adds a new Admin account with the provided registration details.")]
+        public async Task<IActionResult> Add([FromBody] CreateAdminCommand command, CancellationToken cancellationToken)
+        {
+            var result = await _sender.Send(command, cancellationToken);
+            return result.Match(
+              _ => Ok(new { Message = "Admin registered successfully." }),
+              Problem
+            );
+        }
+    }
+}

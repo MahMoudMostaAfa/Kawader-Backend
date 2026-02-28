@@ -17,4 +17,8 @@
    <ItemGroup>
     <ProjectReference Include="..\Kawadar.Tests.Common\Kawadar.Tests.Common.csproj" />
   </ItemGroup>
+
+   <ItemGroup>
+     <Folder Include="Mappers\Specilizations\" />
+   </ItemGroup>
 </Project>

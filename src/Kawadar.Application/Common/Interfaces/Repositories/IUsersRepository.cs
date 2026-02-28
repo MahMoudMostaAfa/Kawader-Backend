@@ -11,4 +11,7 @@ public interface IUsersRepository
   Task<Result<UserProfile>> GetUserProfileByUserIdAsync(string userId);
 
   Task<Result<UserProfile>> GetUserProfileByIdAsync(Guid id);
+
+    Task<IEnumerable<UserProfile>> GetUsers();
+    Task<IEnumerable<UserProfile>> GetAdmins();
 }

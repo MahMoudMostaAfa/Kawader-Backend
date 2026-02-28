@@ -405,4 +405,27 @@ public class IdentityService : IIdentityService
 
 
   }
+
+    public async Task<Result<IEnumerable<UserDto>>> GetUsersByIds(IEnumerable<string> Ids)
+    {
+        List<UserDto> UserDTOs = new();
+        foreach(var id in Ids)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user is null)
+            {
+                return Error.NotFound("User.NotFound", "User not found.");
+            }
+            var userDto = new UserDto
+            {
+                Id = user.Id,
+                Email = user.Email!,
+                UserName = user.UserName!,
+                EmailConfirmed = user.EmailConfirmed
+            };
+            UserDTOs.Add(userDto);
+        }
+
+        return UserDTOs;
+    }
 }

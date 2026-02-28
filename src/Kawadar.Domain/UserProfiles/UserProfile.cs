@@ -196,4 +196,17 @@ public class UserProfile : AuditableEntity
     IsIdentityVerified = true;
     return Result.Updated;
   }
+
+  public Result<Deleted> Delete()
+    {
+        IsDeleted = true;
+        return Result.Deleted;
+    }
+
+  public Result<Success> Ban(DateTime bannedUntil)
+    {
+        IsBanned = true;
+        BannedUntil = bannedUntil;
+        return Result.Success;
+    }
 }
