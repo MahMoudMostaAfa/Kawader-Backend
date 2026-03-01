@@ -53,7 +53,7 @@ public class Job : AuditableEntity
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
   private Job() { }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-  private Job(Guid postedById, Guid specilizationId, string title, string description, JobType jobType, BudgetRange budgetRange, HourlyRateRange hourlyRateRange, int durationInDays, string jobSlug, JobExperienceLevel experienceLevel) : base(Guid.NewGuid())
+  private Job(Guid postedById, Guid specilizationId, string title, string description, JobType jobType, BudgetRange budgetRange, HourlyRateRange hourlyRateRange, int durationInDays, string jobSlug, JobExperienceLevel experienceLevel, List<JobQuestion> questions, List<Skill> skills, List<JobFile> attachments) : base(Guid.NewGuid())
   {
     PostedById = postedById;
     SpecilizationId = specilizationId;
@@ -65,13 +65,16 @@ public class Job : AuditableEntity
     DurationInDays = durationInDays;
     JobSlug = jobSlug;
     ExperienceLevel = experienceLevel;
+    _questions = questions;
+    _skills = skills;
+    _attachments = attachments;
   }
 
 
-  public static Result<Job> Create(Guid postedById, Guid specilizationId, string title, string description, JobType jobType, BudgetRange budgetRange, HourlyRateRange hourlyRateRange, int durationInDays, string jobSlug)
+  public static Result<Job> Create(Guid postedById, Guid specilizationId, string title, string description, JobType jobType, BudgetRange budgetRange, HourlyRateRange hourlyRateRange, int durationInDays, JobExperienceLevel jobExperienceLevel, string jobSlug, List<JobQuestion> questions, List<Skill> skills, List<JobFile> attachments)
   {
 
-    return new Job(postedById, specilizationId, title, description, jobType, budgetRange, hourlyRateRange, durationInDays, jobSlug, JobExperienceLevel.EntryLevel);
+    return new Job(postedById, specilizationId, title, description, jobType, budgetRange, hourlyRateRange, durationInDays, jobSlug, jobExperienceLevel, questions, skills, attachments);
   }
 
   public Result<Updated> Update(string title, string description, JobType jobType, BudgetRange budgetRange, HourlyRateRange hourlyRateRange, int durationInDays, JobExperienceLevel experienceLevel)
@@ -88,6 +91,16 @@ public class Job : AuditableEntity
   }
 
   // Job Attachments Management
+
+  public static Result<string> GenerateSlug(string title)
+  {
+    // title is arabic or english or both, we need to generate a slug that is URL-friendly and unique. We can use a combination of the title and a unique identifier (like a timestamp or GUID) to ensure uniqueness.
+    var slugBase = title.ToLower().Replace(" ", "-").Replace(".", "").Replace(",", "");
+    var uniqueId = Guid.NewGuid().ToString().Substring(0, 8);
+    var slug = $"{slugBase}-{uniqueId}";
+
+    return slug;
+  }
   public Result<Updated> AddAttachment(JobFile jobFile)
   {
     if (_attachments.Count >= 5)

@@ -1,6 +1,9 @@
 using Kawadar.Domain.Badges;
 using Kawadar.Domain.Badges.FreelancerBadges;
 using Kawadar.Domain.Common;
+using Kawadar.Domain.Jobs;
+using Kawadar.Domain.Jobs.JobFiles;
+using Kawadar.Domain.Jobs.JobQuestions;
 using Kawadar.Domain.Portfolios.Items;
 using Kawadar.Domain.Portfolios.Project;
 using Kawadar.Domain.Portfolios.ProjectSkill;
@@ -20,15 +23,20 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IMediator medi
 {
 
   public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
-    public DbSet<PortfolioItem> PortfolioItems => Set<PortfolioItem>();
-    public DbSet<PortfolioProject> PortfolioProjects => Set<PortfolioProject>();
-    public DbSet<PortfolioProjectSkill> ProjectSkills => Set<PortfolioProjectSkill>();
-    public DbSet<PortfolioProjectView> ProjectViews => Set<PortfolioProjectView>();
-    public DbSet<Specilization> Specilizations => Set<Specilization>();
-    public DbSet<Badge> Badges => Set<Badge>();
-    public DbSet<FreelancerBadge> FreelancerBadges => Set<FreelancerBadge>();
-    public DbSet<Skill> Skills => Set<Skill>();
-    public DbSet<FreelancerSkill> FreelacnerSkills => Set<FreelancerSkill>();
+  public DbSet<PortfolioItem> PortfolioItems => Set<PortfolioItem>();
+  public DbSet<PortfolioProject> PortfolioProjects => Set<PortfolioProject>();
+  public DbSet<PortfolioProjectSkill> ProjectSkills => Set<PortfolioProjectSkill>();
+  public DbSet<PortfolioProjectView> ProjectViews => Set<PortfolioProjectView>();
+  public DbSet<Specilization> Specilizations => Set<Specilization>();
+  public DbSet<Badge> Badges => Set<Badge>();
+  public DbSet<FreelancerBadge> FreelancerBadges => Set<FreelancerBadge>();
+  public DbSet<Skill> Skills => Set<Skill>();
+  public DbSet<FreelancerSkill> FreelacnerSkills => Set<FreelancerSkill>();
+  public DbSet<Job> Jobs => Set<Job>();
+  public DbSet<JobQuestion> JobQuestions => Set<JobQuestion>();
+  public DbSet<JobFile> JobFiles => Set<JobFile>();
+
+
 
 
   public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
