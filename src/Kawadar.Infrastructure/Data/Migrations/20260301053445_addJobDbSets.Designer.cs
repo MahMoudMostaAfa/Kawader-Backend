@@ -4,6 +4,7 @@ using Kawadar.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kawadar.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260301053445_addJobDbSets")]
+    partial class addJobDbSets
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -157,7 +160,8 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.HasIndex("JobSlug")
                         .IsUnique();
 
-                    b.HasIndex("PostedById");
+                    b.HasIndex("PostedById")
+                        .IsUnique();
 
                     b.HasIndex("SpecilizationId");
 
@@ -800,8 +804,8 @@ namespace Kawadar.Infrastructure.Data.Migrations
             modelBuilder.Entity("Kawadar.Domain.Jobs.Job", b =>
                 {
                     b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", null)
-                        .WithMany()
-                        .HasForeignKey("PostedById")
+                        .WithOne()
+                        .HasForeignKey("Kawadar.Domain.Jobs.Job", "PostedById")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

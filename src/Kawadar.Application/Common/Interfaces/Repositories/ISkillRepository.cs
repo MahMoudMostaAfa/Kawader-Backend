@@ -15,5 +15,7 @@ namespace Kawadar.Application.Common.Interfaces.Repositories
         public Task<Result<Success>> addSkillToFreelacner(List<FreelancerSkill> freelancerSkill);
         public Task<Result<Success>> addSkillToProject(List<PortfolioProjectSkill> projectSkill);
 
+        public Task<Result<IEnumerable<Skill>>> GetBySkillIds(List<Guid> skillIds);
+
     }
 }

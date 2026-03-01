@@ -1,4 +1,5 @@
 using Kawadar.Domain.Common;
+using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Common.ValueObjects;
 
 namespace Kawadar.Domain.Jobs.JobFiles;
@@ -20,7 +21,7 @@ public class JobFile : AuditableEntity
 
   }
 
-  public static JobFile Create(Common.ValueObjects.FileInfo file)
+  public static Result<JobFile> Create(Common.ValueObjects.FileInfo file)
   {
     return new JobFile(file);
   }

@@ -53,5 +53,12 @@ namespace Kawadar.Infrastructure.Services.Repositories
             if (skill is null) return Error.NotFound("Skill.NotFound", "Skill not found");
             return skill;
         }
+
+        public async Task<Result<IEnumerable<Skill>>> GetBySkillIds(List<Guid> skillIds)
+        {
+            var skills = await appDbContext.Skills.Where(s => skillIds.Contains(s.Id)).ToListAsync();
+            if (skills.Count != skillIds.Count) return Error.NotFound("Skill.NotFound", "One or more skills not found");
+            return skills;
+        }
     }
 }
