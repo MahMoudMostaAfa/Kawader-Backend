@@ -2,6 +2,7 @@ using Kawadar.Api.Requests.Job;
 using Kawadar.Application.Features.Job.Commands.CreateJob;
 using Kawadar.Application.Features.Jobs.Commands.AddJobAttachment;
 using Kawadar.Application.Features.Jobs.Commands.CreateJob.DTOs;
+using Kawadar.Application.Features.Jobs.Commands.DeleteJob;
 using Kawadar.Application.Features.Jobs.Commands.DeleteJobAttachment;
 using Kawadar.Application.Features.Jobs.Commands.UpdateJob;
 using Kawadar.Application.Features.Jobs.Commands.UpdateJobQuestions;
@@ -207,6 +208,23 @@ public class JobsController : ApiController
 
     return result.Match(
         updated => NoContent(),
+        errors => Problem(errors)
+    );
+  }
+
+  [HttpDelete("{slug}")]
+  [EndpointSummary("Deletes a job")]
+  [EndpointDescription("Permanently deletes a job and all its attachments from storage. Only the job poster can perform this action.")]
+  [ProducesResponseType(StatusCodes.Status204NoContent)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  public async Task<IActionResult> DeleteJob([FromRoute] string slug, CancellationToken ct)
+  {
+    var command = new DeleteJobCommand(slug);
+    var result = await _sender.Send(command, ct);
+
+    return result.Match(
+        deleted => NoContent(),
         errors => Problem(errors)
     );
   }
