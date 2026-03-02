@@ -4,6 +4,7 @@ using Kawadar.Domain.Common;
 using Kawadar.Domain.Jobs;
 using Kawadar.Domain.Jobs.JobFiles;
 using Kawadar.Domain.Jobs.JobQuestions;
+using Kawadar.Domain.Jobs.JobViews;
 using Kawadar.Domain.Portfolios.Items;
 using Kawadar.Domain.Portfolios.Project;
 using Kawadar.Domain.Portfolios.ProjectSkill;
@@ -35,6 +36,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IMediator medi
   public DbSet<Job> Jobs => Set<Job>();
   public DbSet<JobQuestion> JobQuestions => Set<JobQuestion>();
   public DbSet<JobFile> JobFiles => Set<JobFile>();
+  public DbSet<JobView> JobViews => Set<JobView>();
 
 
 

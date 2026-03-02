@@ -2,6 +2,7 @@ using Kawadar.Api.Requests.Job;
 using Kawadar.Application.Features.Job.Commands.CreateJob;
 using Kawadar.Application.Features.Jobs.Commands.AddJobAttachment;
 using Kawadar.Application.Features.Jobs.Commands.CreateJob.DTOs;
+using Kawadar.Application.Features.Jobs.Commands.CreateJobView;
 using Kawadar.Application.Features.Jobs.Commands.DeleteJob;
 using Kawadar.Application.Features.Jobs.Commands.DeleteJobAttachment;
 using Kawadar.Application.Features.Jobs.Commands.UpdateJob;
@@ -208,6 +209,23 @@ public class JobsController : ApiController
 
     return result.Match(
         updated => NoContent(),
+        errors => Problem(errors)
+    );
+  }
+
+  [HttpPost("{slug}/views")]
+  [EndpointSummary("Records a job view")]
+  [EndpointDescription("Records that the authenticated user viewed the job. Duplicate views by the same user are ignored.")]
+  [ProducesResponseType(StatusCodes.Status201Created)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  public async Task<IActionResult> CreateJobView([FromRoute] string slug, CancellationToken ct)
+  {
+    var command = new CreateJobViewCommand(slug);
+    var result = await _sender.Send(command, ct);
+
+    return result.Match(
+        created => Created(),
         errors => Problem(errors)
     );
   }
