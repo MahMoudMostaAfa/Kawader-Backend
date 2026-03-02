@@ -1,6 +1,8 @@
 using Kawadar.Api.Requests.Job;
 using Kawadar.Application.Features.Job.Commands.CreateJob;
+using Kawadar.Application.Features.Jobs.Commands.AddJobAttachment;
 using Kawadar.Application.Features.Jobs.Commands.CreateJob.DTOs;
+using Kawadar.Application.Features.Jobs.Commands.DeleteJobAttachment;
 using Kawadar.Application.Features.Jobs.Commands.UpdateJob;
 using Kawadar.Application.Features.Jobs.Commands.UpdateJobQuestions;
 using Kawadar.Application.Features.Jobs.Commands.UpdateJobSkills;
@@ -205,6 +207,42 @@ public class JobsController : ApiController
 
     return result.Match(
         updated => NoContent(),
+        errors => Problem(errors)
+    );
+  }
+
+  [HttpPost("{slug}/attachments")]
+  [Consumes("multipart/form-data")]
+  [EndpointSummary("Adds an attachment to a job")]
+  [EndpointDescription("Uploads a file or adds an external URL as an attachment to the job. Only the job poster can perform this action. Maximum 5 attachments per job.")]
+  [ProducesResponseType(StatusCodes.Status201Created)]
+  [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  public async Task<IActionResult> AddJobAttachment([FromRoute] string slug, [FromForm] AddJobAttachmentRequest request, CancellationToken ct)
+  {
+    var command = new AddJobAttachmentCommand(slug, request.File, request.ExternalUrl);
+    var result = await _sender.Send(command, ct);
+
+    return result.Match(
+        created => Created(),
+        errors => Problem(errors)
+    );
+  }
+
+  [HttpDelete("{slug}/attachments/{attachmentId:guid}")]
+  [EndpointSummary("Deletes a job attachment")]
+  [EndpointDescription("Removes an attachment from the job and deletes the file from storage if it was uploaded. Only the job poster can perform this action.")]
+  [ProducesResponseType(StatusCodes.Status204NoContent)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  public async Task<IActionResult> DeleteJobAttachment([FromRoute] string slug, [FromRoute] Guid attachmentId, CancellationToken ct)
+  {
+    var command = new DeleteJobAttachmentCommand(slug, attachmentId);
+    var result = await _sender.Send(command, ct);
+
+    return result.Match(
+        deleted => NoContent(),
         errors => Problem(errors)
     );
   }
