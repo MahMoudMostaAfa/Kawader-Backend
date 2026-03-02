@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kawadar.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260302090452_AddJobViewTable")]
+    [Migration("20260302090626_AddJobViewTable")]
     partial class AddJobViewTable
     {
         /// <inheritdoc />

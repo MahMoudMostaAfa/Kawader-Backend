@@ -1,9 +1,11 @@
 using AutoMapper;
 using Kawadar.Application.Common.Errors;
+using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Application.Features.Jobs.DTOs;
 using Kawadar.Domain.Common.Results;
+using Kawadar.Domain.Jobs.JobViews;
 using MediatR;
 
 namespace Kawadar.Application.Features.Jobs.Queries.GetJobBySlug;
@@ -11,20 +13,29 @@ namespace Kawadar.Application.Features.Jobs.Queries.GetJobBySlug;
 public class GetJobBySlugQueryHandler : IRequestHandler<GetJobBySlugQuery, Result<JobDetailsDto>>
 {
   private readonly IJobsRepository _jobsRepository;
+  private readonly IJobViewRepository _jobViewRepository;
   private readonly IMapper _mapper;
   private readonly IIdentityService _identityService;
   private readonly IUser _user;
   private readonly IUsersRepository _usersRepository;
+  private readonly IUnitOfWork _unitOfWork;
 
-  public GetJobBySlugQueryHandler(IJobsRepository jobsRepository, IMapper mapper, IIdentityService identityService, IUser user, IUsersRepository usersRepository)
+  public GetJobBySlugQueryHandler(
+    IJobsRepository jobsRepository,
+    IJobViewRepository jobViewRepository,
+    IMapper mapper,
+    IIdentityService identityService,
+    IUser user,
+    IUsersRepository usersRepository,
+    IUnitOfWork unitOfWork)
   {
     _jobsRepository = jobsRepository;
+    _jobViewRepository = jobViewRepository;
     _mapper = mapper;
     _identityService = identityService;
     _user = user;
     _usersRepository = usersRepository;
-
-
+    _unitOfWork = unitOfWork;
   }
   public async Task<Result<JobDetailsDto>> Handle(GetJobBySlugQuery request, CancellationToken cancellationToken)
   {
@@ -43,6 +54,23 @@ public class GetJobBySlugQueryHandler : IRequestHandler<GetJobBySlugQuery, Resul
     var posterIdentityResult = await _identityService.GetUserByIdAsync(userProfile.UserId);
     if (posterIdentityResult.IsError) return posterIdentityResult.Errors;
     var posterIdentity = posterIdentityResult.Value;
+
+    // Record the view implicitly
+    var viewerProfileResult = await _usersRepository.GetUserProfileByUserIdAsync(userId);
+    if (!viewerProfileResult.IsError)
+    {
+      var viewerProfile = viewerProfileResult.Value;
+      var alreadyViewed = await _jobViewRepository.HasViewedAsync(job.Id, viewerProfile.Id);
+      if (!alreadyViewed)
+      {
+        var jobViewResult = JobView.Create(job.Id, viewerProfile.Id);
+        if (!jobViewResult.IsError)
+        {
+          await _jobViewRepository.AddAsync(jobViewResult.Value);
+          await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+      }
+    }
 
     var jobDetailsDto = _mapper.Map<JobDetailsDto>((job, userProfile, posterIdentity));
 
