@@ -1,6 +1,29 @@
 # docker-compose.yml
-version: "3.8"
 services:
+  # ───────────────────────────────────────────────
+  # Kawadar API
+  # ───────────────────────────────────────────────
+  kawadar-api:
+    container_name: "kawadar-api"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080" # API (http://localhost:8080)
+    environment:
+      ASPNETCORE_ENVIRONMENT: Docker
+      ASPNETCORE_URLS: http://+:8080
+    volumes:
+      - api_logs:/app/Logs
+    depends_on:
+      rabbitmq:
+        condition: service_started
+      loki:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - kawadar-network
+
   rabbitmq:
     container_name: "rabbitmq"
     image: rabbitmq:3-management
@@ -12,6 +35,87 @@ services:
       RABBITMQ_DEFAULT_PASS: guest
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    restart: unless-stopped
+    networks:
+      - kawadar-network
+
+  # ───────────────────────────────────────────────
+  # Monitoring Stack
+  # ───────────────────────────────────────────────
+
+  prometheus:
+    container_name: "prometheus"
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090" # Prometheus UI (http://localhost:9090)
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=30d"
+      - "--web.enable-lifecycle"
+    depends_on:
+      - kawadar-api
+    restart: unless-stopped
+    networks:
+      - kawadar-network
+
+  grafana:
+    container_name: "grafana"
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000" # Grafana UI (http://localhost:3000)
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - prometheus
+      - loki
+    restart: unless-stopped
+    networks:
+      - kawadar-network
+
+  loki:
+    container_name: "loki"
+    image: grafana/loki:latest
+    ports:
+      - "3100:3100" # Loki API
+    volumes:
+      - ./monitoring/loki/loki-config.yml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
+    networks:
+      - kawadar-network
+
+  promtail:
+    container_name: "promtail"
+    image: grafana/promtail:latest
+    volumes:
+      - ./monitoring/promtail/promtail-config.yml:/etc/promtail/config.yml
+      - api_logs:/var/log/kawadar:ro
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+      - kawadar-api
+    restart: unless-stopped
+    networks:
+      - kawadar-network
+
+networks:
+  kawadar-network:
+    driver: bridge
 
 volumes:
   rabbitmq_data:
+  prometheus_data:
+  grafana_data:
+  loki_data:
+  api_logs:
