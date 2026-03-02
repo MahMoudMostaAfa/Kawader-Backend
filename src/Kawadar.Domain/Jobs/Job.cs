@@ -1,3 +1,5 @@
+namespace Kawadar.Domain.Jobs;
+
 using Kawadar.Domain.Common;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Jobs.Enums;
@@ -7,7 +9,6 @@ using Kawadar.Domain.Skills;
 using Kawadar.Domain.Specilizations;
 
 
-namespace Kawadar.Domain.Jobs;
 
 public class Job : AuditableEntity
 {
@@ -77,17 +78,27 @@ public class Job : AuditableEntity
     return new Job(postedById, specilizationId, title, description, jobType, budgetRange, hourlyRateRange, durationInDays, jobSlug, jobExperienceLevel, questions, skills, attachments);
   }
 
-  public Result<Updated> Update(string title, string description, JobType jobType, BudgetRange budgetRange, HourlyRateRange hourlyRateRange, int durationInDays, JobExperienceLevel experienceLevel)
+  public Result<Updated> Update(string? title, string? description, JobType? jobType, BudgetRange? budgetRange, HourlyRateRange? hourlyRateRange, int? durationInDays, JobExperienceLevel? experienceLevel, Guid? specilizationId)
   {
-    Title = title;
-    Description = description;
-    JobType = jobType;
-    BudgetRange = budgetRange;
-    HourlyRateRange = hourlyRateRange;
-    DurationInDays = durationInDays;
-    ExperienceLevel = experienceLevel;
+    if (!string.IsNullOrWhiteSpace(title) && title != Title)
+    {
+      var slugResult = GenerateSlug(title);
+      if (slugResult.IsError) return slugResult.Errors;
+      JobSlug = slugResult.Value;
+      Title = title;
+    }
+    if (!string.IsNullOrWhiteSpace(description)) Description = description;
+    if (jobType.HasValue) JobType = jobType.Value;
+    if (budgetRange.HasValue) BudgetRange = budgetRange.Value;
+    if (hourlyRateRange.HasValue) HourlyRateRange = hourlyRateRange.Value;
+    if (durationInDays.HasValue) DurationInDays = durationInDays.Value;
+    if (experienceLevel.HasValue) ExperienceLevel = experienceLevel.Value;
+
+    if (specilizationId.HasValue && !Guid.Equals(SpecilizationId, specilizationId.Value)) SpecilizationId = specilizationId.Value;
 
     return Result.Updated;
+
+
   }
 
   // Job Attachments Management
@@ -150,6 +161,10 @@ public class Job : AuditableEntity
   // Job Skills Management
   public Result<Updated> AddSkill(Skill skill)
   {
+    if (_skills.Count >= 10)
+    {
+      return JobErrors.MaxSkillsExceeded;
+    }
     if (_skills.Any(s => s.Id == skill.Id))
     {
       return JobErrors.JobSkillAlreadyAdded;
@@ -161,6 +176,7 @@ public class Job : AuditableEntity
 
   public Result<Deleted> RemoveSkill(Guid skillId)
   {
+
     var skill = _skills.FirstOrDefault(s => s.Id == skillId);
     if (skill == null)
     {
