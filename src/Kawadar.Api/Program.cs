@@ -1,3 +1,4 @@
+using Hangfire;
 using Kawadar.Api;
 using Kawadar.Api.Infrastructure;
 using Kawadar.Application;
@@ -67,6 +68,9 @@ try
   app.MapScalarApiReference();
 
   await app.InitialiseDatabaseAsync();
+
+  // Hangfire dashboard (development only for security)
+  app.UseHangfireDashboard("/hangfire");
 
   app.UseCoreMiddleware(builder.Configuration);
 

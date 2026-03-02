@@ -24,6 +24,8 @@ using Kawadar.Application.Common.Messaging;
 using Kawadar.Infrastructure.Messaging;
 using MassTransit;
 using Kawadar.Infrastructure.Messaging.Consumers;
+using Hangfire;
+using Hangfire.SqlServer;
 
 public static class DependencyInjection
 {
@@ -143,6 +145,25 @@ public static class DependencyInjection
 
 
     service.AddTransient<IIdentityService, IdentityService>();
+
+    // Hangfire configuration
+    service.AddHangfire(config => config
+      .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+      .UseSimpleAssemblyNameTypeSerializer()
+      .UseRecommendedSerializerSettings()
+      .UseSqlServerStorage(connectionString, new SqlServerStorageOptions
+      {
+        CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+        SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+        QueuePollInterval = TimeSpan.Zero,
+        UseRecommendedIsolationLevel = true,
+        DisableGlobalLocks = true
+      }));
+    service.AddHangfireServer();
+
+    // Account deletion scheduler
+    service.AddScoped<IAccountDeletionScheduler, HangfireAccountDeletionScheduler>();
+
     return service;
   }
 
