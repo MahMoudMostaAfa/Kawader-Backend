@@ -45,6 +45,9 @@ public class CreateJobCommandHandler : IRequestHandler<CreateJobCommand, Result<
     if (userProfileResult.IsError) return userProfileResult.Errors;
 
     var userProfileId = userProfileResult.Value.Id;
+    var userProfile = userProfileResult.Value;
+    if (userProfile.IsBanned || userProfile.IsDeleted) return ApplicationErrors.UnauthorizedAccess;
+    if (userProfile.IsActivated == false || userProfile.IsIdentityVerified == false) return ApplicationErrors.UserAccountNotActivated;
 
     var SpecilizationResult = await _specilizationRepository.GetById(request.SpecilizationId);
     if (SpecilizationResult.IsError) return SpecilizationResult.Errors;

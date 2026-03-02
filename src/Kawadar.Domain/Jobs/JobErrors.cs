@@ -13,4 +13,8 @@ public class JobErrors
   public static Error JobSkillAlreadyAdded => Error.Validation("Skill already added to the job.");
 
   public static Error JobSkillNotFound => Error.NotFound("Skill not found in the job.");
+
+  public static Error JobNotOpen => Error.Validation("Only open jobs can be updated.");
+
+  public static Error MaxSkillsExceeded => Error.Validation("Maximum number of skills (10) exceeded.");
 }
