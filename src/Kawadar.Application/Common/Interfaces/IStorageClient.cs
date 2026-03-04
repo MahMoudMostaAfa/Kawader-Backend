@@ -4,7 +4,7 @@ namespace Kawadar.Application.Common.Interfaces;
 
 public interface IStorageClient
 {
-    public Task<Result<String>> UploadFileAsync(Stream stream, string fileName, string container, CancellationToken cancellationToken);
+    public Task<Result<String>> UploadFileAsync(Stream stream, string fileName, string container, CancellationToken cancellationToken = default);
 
     public Task<Result<Deleted>> DeleteFileAsync(string fileUrl, string container);
     public Task<Result<Success>> DownloadFileAsync(string blobName, string container,

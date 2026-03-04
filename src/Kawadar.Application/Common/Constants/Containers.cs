@@ -11,5 +11,9 @@
 
         public const string IdentityImages = "identity-pics";
 
+        public const string ProfileImages = "profile-pics";
+
+        public const string JobAttachements = "public-attachments";
+
     }
 }

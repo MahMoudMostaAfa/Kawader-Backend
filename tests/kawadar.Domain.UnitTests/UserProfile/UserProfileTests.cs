@@ -191,7 +191,7 @@ public class UserProfileTests
     {
         var userProfile = CreateValidUserProfile();
         var identityNumber = "ID123456";
-        var dateOfBirth = new DateTime(1990, 1, 1);
+        var dateOfBirth = new DateOnly(1990, 1, 1);
         var identityLocation = "New York";
         var identityName = "John Doe";
 
@@ -281,7 +281,7 @@ public class UserProfileTests
     {
         var userProfile = CreateValidUserProfile();
         var originalIdentityNumber = userProfile.IdentityNumber;
-        var newDateOfBirth = new DateTime(1995, 5, 15);
+        var newDateOfBirth = new DateOnly(1995, 5, 15);
         var newIdentityLocation = "Los Angeles";
 
         var result = userProfile.UpdateIdentityInfo(null, newDateOfBirth, newIdentityLocation, null);

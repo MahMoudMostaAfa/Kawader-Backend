@@ -1,6 +1,5 @@
 ﻿using Kawadar.Domain.Portfolios.Project;
 using Kawadar.Domain.Portfolios.ProjectView;
-using Kawadar.Domain.UserProfiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

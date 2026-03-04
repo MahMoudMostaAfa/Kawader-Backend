@@ -1,64 +1,96 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Google.GenAI;
 using Google.GenAI.Types;
 using Kawadar.Application.Common.Interfaces;
 using Kawadar.Domain.Common.Results;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace Kawadar.Infrastructure.Services.AIServices;
 
 public class GeminiApiService : IAIService
 {
   private readonly Client _client;
+  private readonly ILogger<GeminiApiService> _logger;
   private const string MODEL_NAME = "gemini-3-flash-preview";
 
-  public GeminiApiService(IConfiguration configuration)
+  private static readonly JsonSerializerOptions _jsonOptions = new()
   {
-    string apiKey = configuration["Gemini:ApiKey"]!;
+    PropertyNameCaseInsensitive = true,
+    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+  };
+
+  public GeminiApiService(IConfiguration configuration, ILogger<GeminiApiService> logger)
+  {
+    _logger = logger;
+    string apiKey = configuration["Gemini:ApiKey"]
+        ?? throw new InvalidOperationException("Gemini:ApiKey is not configured.");
     _client = new Client(apiKey: apiKey);
   }
-  public async Task<Result<T>> GenrateStructuredResponseAsync<T>(string prompt, object Schema, CancellationToken ct = default) where T : class
+
+  public Task<Result<T>> GenerateStructuredResponseAsync<T>(
+      string prompt, CancellationToken ct = default) where T : class
   {
-    return await ExecuteInternalAsync<T>(new List<Part> { new() { Text = prompt } }, Schema, ct);
+    var parts = new List<Part> { new() { Text = prompt } };
+    return ExecuteInternalAsync<T>(parts, ct);
   }
 
-  public async Task<Result<T>> GenrateStructuredResponseAsync<T>(string prompt, IEnumerable<Application.Common.Interfaces.FileData> images, Object Schema, CancellationToken ct = default) where T : class
+  public Task<Result<T>> GenerateStructuredResponseAsync<T>(
+      string prompt, IEnumerable<Application.Common.Interfaces.FileData> images, CancellationToken ct = default) where T : class
   {
-    var parts = new List<Part> { new Part { Text = prompt } };
+    var parts = new List<Part> { new() { Text = prompt } };
 
     foreach (var image in images)
-    {
       parts.Add(new Part
       {
         InlineData = new Blob { Data = image.Data, MimeType = image.MimeType }
       });
-    }
-    return await ExecuteInternalAsync<T>(parts, Schema, ct);
+
+    return ExecuteInternalAsync<T>(parts, ct);
   }
 
-  private async Task<Result<T>> ExecuteInternalAsync<T>(List<Part> parts, object schema, CancellationToken ct = default) where T : class
+  private async Task<Result<T>> ExecuteInternalAsync<T>(
+      List<Part> parts, CancellationToken ct) where T : class
   {
-    var config = new GenerateContentConfig
+    try
     {
-      ResponseMimeType = "application/json",
-      ResponseSchema = (Schema)schema
-    };
+      var schema = SchemaGenerator.FromType<T>();
 
+      var config = new GenerateContentConfig
+      {
+        ResponseMimeType = "application/json",
+        ResponseSchema = schema
+      };
 
-    var content = new Content { Parts = parts };
-    var response = await _client.Models.GenerateContentAsync(MODEL_NAME, content, config, ct);
+      var content = new Content { Parts = parts };
+      var response = await _client.Models.GenerateContentAsync(MODEL_NAME, content, config, ct);
 
-    var contentText = response.Candidates?[0]?.Content?.Parts[0].Text;
+      var text = response.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
 
-    Console.WriteLine(contentText);
+      if (string.IsNullOrWhiteSpace(text))
+      {
+        _logger.LogWarning("Gemini returned empty content for type {Type}", typeof(T).Name);
+        return Error.Failure("AI.EmptyResponse", "The AI returned an empty response.");
+      }
 
+      _logger.LogDebug("Gemini raw response: {Response}", text);
 
-    var result = JsonSerializer.Deserialize<T>(contentText!, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+      var result = JsonSerializer.Deserialize<T>(text, _jsonOptions);
 
-    if (result is null)
-      return Error.Failure();
-
-    return result;
-
+      return result is null
+          ? Error.Failure("AI.DeserializationFailed", $"Could not deserialize response to {typeof(T).Name}.")
+          : result;
+    }
+    catch (JsonException ex)
+    {
+      _logger.LogError(ex, "Failed to deserialize Gemini response to {Type}", typeof(T).Name);
+      return Error.Failure("AI.InvalidJson", "The AI response was not valid JSON.");
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex, "Gemini API call failed");
+      return Error.Failure("AI.RequestFailed", ex.Message);
+    }
   }
 }
