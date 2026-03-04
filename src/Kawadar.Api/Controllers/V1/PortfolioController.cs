@@ -67,9 +67,8 @@ namespace Kawadar.Api.Controllers.V1
         [EndpointName("GetProjectsById")]
         [EndpointSummary("Gets projects by freelancer Id")]
         [EndpointDescription("Gets freelancer projects by his unique identifier.")]
-        public async Task<IActionResult> GetAllPortfolioProjectsById(Guid Id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAllPortfolioProjectsById(GetAllProjectsByFreelancerUserNameQuery query, CancellationToken cancellationToken)
         {
-            var query = new GetAllProjectsByFreelancerIdQuery(Id);
             var result = await _sender.Send(query, cancellationToken);
 
             return result.Match(

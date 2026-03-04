@@ -1,17 +1,18 @@
 ﻿using Kawadar.Api.Requests.Admin;
+using Kawadar.Application.Features.Admins.Commands.AddClaim;
 using Kawadar.Application.Features.Admins.Commands.BanUser;
 using Kawadar.Application.Features.Admins.Commands.CreateAdmin;
 using Kawadar.Application.Features.Admins.Commands.DeleteUser;
 using Kawadar.Application.Features.Admins.Dtos;
 using Kawadar.Application.Features.Admins.Queries.GetAdmins;
 using Kawadar.Application.Features.Admins.Queries.GetUsers;
+using Kawadar.Domain.Common.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kawadar.Api.Controllers.V1
 {
-    [Authorize]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/Admin")]
     public class AdminController : ApiController
@@ -24,6 +25,7 @@ namespace Kawadar.Api.Controllers.V1
         }
 
         [HttpGet("Users")]
+        [Authorize(Policy = Permissions.ViewUsers)]
         [ProducesResponseType(typeof(List<UserProfileDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
@@ -42,6 +44,7 @@ namespace Kawadar.Api.Controllers.V1
         }
 
         [HttpGet("Admins")]
+        [Authorize(Policy = Permissions.ViewAdmins)]
         [ProducesResponseType(typeof(List<AdminDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
@@ -60,6 +63,7 @@ namespace Kawadar.Api.Controllers.V1
         }
 
         [HttpPut("Ban")]
+        [Authorize(Policy = Permissions.BanUsers)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
@@ -77,6 +81,7 @@ namespace Kawadar.Api.Controllers.V1
         }
 
         [HttpPut("Delete")]
+        [Authorize(Policy = Permissions.DeleteUsers)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
@@ -94,6 +99,7 @@ namespace Kawadar.Api.Controllers.V1
         }
 
         [HttpPost("Add")]
+        [Authorize(Policy = Permissions.AddAdmin)]
         [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
@@ -105,6 +111,23 @@ namespace Kawadar.Api.Controllers.V1
             var result = await _sender.Send(command, cancellationToken);
             return result.Match(
               _ => Ok(new { Message = "Admin registered successfully." }),
+              Problem
+            );
+        }
+
+        [HttpPost("AddPermission")]
+        [Authorize(Policy = Permissions.AddClaim)]
+        [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [EndpointName("AddPermission")]
+        [EndpointSummary("Adds a permission to an Admin.")]
+        [EndpointDescription("Adds a permission to an Admin using its userName.")]
+        public async Task<IActionResult> AddPermission([FromBody] AddClaimCommand command, CancellationToken cancellationToken)
+        {
+            var result = await _sender.Send(command, cancellationToken);
+            return result.Match(
+              _ => Ok(new { Message = "Permission Added successfully." }),
               Problem
             );
         }

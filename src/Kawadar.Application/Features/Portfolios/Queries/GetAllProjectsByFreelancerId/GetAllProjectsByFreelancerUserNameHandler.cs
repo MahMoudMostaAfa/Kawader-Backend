@@ -9,21 +9,27 @@ using MediatR;
 
 namespace Kawadar.Application.Features.Portfolios.Queries.GetAllProjectsByFreelancerId
 {
-    public class GetAllProjectsByFreelancerIdHandler(IUser user, IPortfolioProjectRepository projectRepository, 
-        IUsersRepository usersRepository, IMapper mapper) : IRequestHandler<GetAllProjectsByFreelancerIdQuery, Result<List<ProjectDTO>>>
+    public class GetAllProjectsByFreelancerUserNameHandler(IUser user, IPortfolioProjectRepository projectRepository, 
+        IUsersRepository usersRepository, IIdentityService identityService, IMapper mapper) : IRequestHandler<GetAllProjectsByFreelancerUserNameQuery, Result<List<ProjectDTO>>>
     {
-        public async Task<Result<List<ProjectDTO>>> Handle(GetAllProjectsByFreelancerIdQuery request, CancellationToken cancellationToken)
+        public async Task<Result<List<ProjectDTO>>> Handle(GetAllProjectsByFreelancerUserNameQuery request, CancellationToken cancellationToken)
         {
             var userId = user.Id;
             if (userId is null) return ApplicationErrors.UserIsNotAuthenticated;
+
+            var UserDtoResult = await identityService.GetUserByUserNameAsync(request.UserName);
+            if (UserDtoResult.IsError) return UserDtoResult.Errors;
+
+            var freelancerProfileResult = await usersRepository.GetUserProfileByUserIdAsync(UserDtoResult.Value.Id);
+            if (freelancerProfileResult.IsError) return freelancerProfileResult.Errors;
 
             var userProfileResult = await usersRepository.GetUserProfileByUserIdAsync(userId);
             if (userProfileResult.IsError) return userProfileResult.Errors;
             var userProfileId = userProfileResult.Value.Id;
 
-            var projects = await projectRepository.GetAllByFreelancerId(request.Id);
+            var projects = await projectRepository.GetAllByFreelancerId(freelancerProfileResult.Value.Id);
 
-            if(userProfileId == request.Id)
+            if(userProfileId == freelancerProfileResult.Value.Id)
             {
                 var projectsDTO = mapper.Map<List<ProjectDTO>>(projects);
                 return projectsDTO;
