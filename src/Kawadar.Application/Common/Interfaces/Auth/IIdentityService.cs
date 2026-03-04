@@ -28,4 +28,5 @@ public interface IIdentityService
   Task<Result<UserDto>> GetUserByUserNameAsync(string userName);
 
   Task<Result<string>> GenerateUserNameAsync(string firstName, string lastName);
+  Task<Result<IEnumerable<UserDto>>> GetUsersByIds(IEnumerable<string> Ids);
 }

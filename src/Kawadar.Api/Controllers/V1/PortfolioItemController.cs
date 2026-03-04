@@ -10,7 +10,6 @@ using Kawadar.Application.Features.Portfolios.Queries.GetProjectItemById;
 using Kawadar.Application.Features.Portfolios.Queries.GetProjectItemsById;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kawadar.Api.Controllers.V1

@@ -4,5 +4,5 @@ using MediatR;
 
 namespace Kawadar.Application.Features.Portfolios.Queries.GetAllProjectsByFreelancerId
 {
-    public record GetAllProjectsByFreelancerIdQuery(Guid Id) : IRequest<Result<List<ProjectDTO>>>;
+    public record GetAllProjectsByFreelancerUserNameQuery(string UserName) : IRequest<Result<List<ProjectDTO>>>;
 }

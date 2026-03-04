@@ -17,6 +17,11 @@ public class UserProfileDto
   // availability Status
   public bool IsAvailable { get; set; } = true;
 
+    public bool IsDeleted { get; set; } = false;
+
+    public bool IsBanned { get; set; } = false;
+    public DateTime? BannedUntil { get; set; }
+
 
 
   // activation Status
