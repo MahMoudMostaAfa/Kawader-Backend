@@ -1,3 +1,4 @@
+using Hangfire;
 using Kawadar.Api;
 using Kawadar.Api.Infrastructure;
 using Kawadar.Application;
@@ -69,6 +70,12 @@ try
   await app.InitialiseDatabaseAsync();
 
   app.UseCoreMiddleware(builder.Configuration);
+
+  // Hangfire dashboard (development only for security)
+  app.UseHangfireDashboard("/hangfire", new DashboardOptions
+  {
+    Authorization = [new HangfireAuthorizationFilter()]
+  });
 
   app.MapControllers();
 

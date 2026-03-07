@@ -22,6 +22,11 @@ public class JobsRepository : IJobsRepository
     await _context.Jobs.AddAsync(job, cancellationToken);
   }
 
+  public void Delete(Job job)
+  {
+    _context.Jobs.Remove(job);
+  }
+
   public async Task<Result<Job>> GetJobBySlugAsync(string slug)
   {
     var job = await _context.Jobs.Include(j => j.Attachments).Include(j => j.Specilization)

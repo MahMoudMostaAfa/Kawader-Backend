@@ -155,7 +155,19 @@ public class Job : AuditableEntity
 
     _questions.Remove(question);
 
+    ReorderQuestions();
+
     return Result.Deleted;
+  }
+
+  public void ReorderQuestions()
+  {
+    var ordered = _questions.OrderBy(q => q.DisplayOrder).ToList();
+    int displayOrder = 1;
+    foreach (var q in ordered)
+    {
+      q.Update(q.Question, q.IsRequired, displayOrder++);
+    }
   }
 
   // Job Skills Management

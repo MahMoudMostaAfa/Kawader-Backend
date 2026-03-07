@@ -11,6 +11,7 @@ public class JobFileConfiguration : IEntityTypeConfiguration<JobFile>
   {
 
     builder.HasKey(jf => jf.Id);
+    builder.Property(jf => jf.Id).ValueGeneratedNever();
     builder.OwnsOne(jf => jf.File, fi =>
     {
       fi.Property(f => f.FileName).HasMaxLength(255).IsRequired();

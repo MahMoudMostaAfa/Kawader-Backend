@@ -21,4 +21,7 @@ public static class UserProfileErrors
 
   static public Error IdentityAlreadyVerified => Error.Validation("UserProfile.IdentityAlreadyVerified", "The identity for this user profile has already been verified.");
 
+  public static Error AccountAlreadyMarkedForDeletion => Error.Conflict("UserProfile.AccountAlreadyMarkedForDeletion", "This account is already marked for deletion.");
+
+  public static Error AccountIsDeleted => Error.Forbidden("UserProfile.AccountIsDeleted", "This account has been deleted. Logging in will cancel the scheduled permanent deletion.");
 }

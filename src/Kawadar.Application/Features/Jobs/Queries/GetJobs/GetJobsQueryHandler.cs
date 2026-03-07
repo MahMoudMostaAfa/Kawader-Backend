@@ -40,6 +40,8 @@ public class GetJobsQueryHandler : IRequestHandler<GetJobsQuery, Result<Paginate
       request.SortBy
     );
 
+
+
     var jobs = result.Items.Select(job => _mapper.Map<JobSummaryDto>(job)).ToList();
 
     return new PaginatedList<JobSummaryDto>(jobs, result.TotalCount, result.PageNumber, request.PageSize);
