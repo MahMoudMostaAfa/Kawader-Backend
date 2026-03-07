@@ -99,24 +99,24 @@ public class ApplicationDbContextInitialiser(
       }
     }
 
-    if(await _userManager.FindByEmailAsync("omartamer244@gmail.com") == null)
+    if (await _userManager.FindByEmailAsync("omartamer244@gmail.com") == null)
+    {
+      var coAdmin = new AppUser
+      {
+        UserName = "Omar244",
+        Email = "omartamer244@gmail.com",
+        EmailConfirmed = true,
+      };
+      var result = await _userManager.CreateAsync(coAdmin, "Omar@123");
+      if (result.Succeeded)
+      {
+        await _userManager.AddToRoleAsync(coAdmin, DefaultRoles.Admin);
+        foreach (var permission in Permissions.GetAllPermissions())
         {
-            var coAdmin = new AppUser
-            {
-                UserName = "Omar244",
-                Email = "omartamer244@gmail.com",
-                EmailConfirmed = true,
-            };
-            var result = await _userManager.CreateAsync(coAdmin, "Omar@123");
-            if (result.Succeeded)
-            {
-                await _userManager.AddToRoleAsync(coAdmin, DefaultRoles.Admin);
-                foreach (var permission in Permissions.GetAllPermissions())
-                {
-                    await _userManager.AddClaimAsync(coAdmin, new Claim("Permission", permission));
-                }
-            }
+          await _userManager.AddClaimAsync(coAdmin, new Claim("Permission", permission));
         }
+      }
+    }
   }
 }
 

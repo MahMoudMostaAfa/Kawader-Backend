@@ -1,11 +1,14 @@
 using Kawadar.Api.Requests.Job;
 using Kawadar.Application.Features.Job.Commands.CreateJob;
 using Kawadar.Application.Features.Jobs.Commands.AddJobAttachment;
+using Kawadar.Application.Features.Jobs.Commands.AddJobQuestion;
 using Kawadar.Application.Features.Jobs.Commands.CreateJob.DTOs;
 using Kawadar.Application.Features.Jobs.Commands.DeleteJob;
 using Kawadar.Application.Features.Jobs.Commands.DeleteJobAttachment;
+using Kawadar.Application.Features.Jobs.Commands.DeleteJobQuestion;
+using Kawadar.Application.Features.Jobs.Commands.GenerateJobDescription;
 using Kawadar.Application.Features.Jobs.Commands.UpdateJob;
-using Kawadar.Application.Features.Jobs.Commands.UpdateJobQuestions;
+using Kawadar.Application.Features.Jobs.Commands.UpdateJobQuestion;
 using Kawadar.Application.Features.Jobs.Commands.UpdateJobSkills;
 using Kawadar.Application.Features.Jobs.Queries.GetJobBySlug;
 using Kawadar.Application.Features.Jobs.Queries.GetJobs;
@@ -191,23 +194,55 @@ public class JobsController : ApiController
     );
   }
 
-  [HttpPut("{slug}/questions")]
-  [EndpointSummary("Replaces job questions")]
-  [EndpointDescription("Updates, adds, or removes job questions. Existing questions are matched by Id; new questions have a null Id. Questions not in the payload are removed. Only the job poster can perform this action.")]
+  [HttpPost("{slug}/questions")]
+  [EndpointSummary("Adds a question to a job")]
+  [EndpointDescription("Adds a new question to the job. The display order is automatically set to the next available position. Maximum 5 questions per job. Only the job poster can perform this action.")]
+  [ProducesResponseType(StatusCodes.Status201Created)]
+  [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  public async Task<IActionResult> AddJobQuestion([FromRoute] string slug, [FromBody] AddJobQuestionRequest request, CancellationToken ct)
+  {
+    var command = new AddJobQuestionCommand(slug, request.Question, request.IsRequired);
+    var result = await _sender.Send(command, ct);
+
+    return result.Match(
+        created => Created(),
+        errors => Problem(errors)
+    );
+  }
+
+  [HttpPut("{slug}/questions/{questionId:guid}")]
+  [EndpointSummary("Updates a job question")]
+  [EndpointDescription("Updates the question text and whether it is required. Only the job poster can perform this action.")]
   [ProducesResponseType(StatusCodes.Status204NoContent)]
   [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
   [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
   [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-  public async Task<IActionResult> UpdateJobQuestions([FromRoute] string slug, [FromBody] UpdateJobQuestionsRequest request, CancellationToken ct)
+  public async Task<IActionResult> UpdateJobQuestion([FromRoute] string slug, [FromRoute] Guid questionId, [FromBody] UpdateJobQuestionRequest request, CancellationToken ct)
   {
-    var command = new UpdateJobQuestionsCommand(
-        slug,
-        request.Questions.Select(q => new UpdateQuestionItemDto(q.Id, q.Question, q.IsRequired)).ToList()
-    );
+    var command = new UpdateJobQuestionCommand(slug, questionId, request.Question, request.IsRequired);
     var result = await _sender.Send(command, ct);
 
     return result.Match(
         updated => NoContent(),
+        errors => Problem(errors)
+    );
+  }
+
+  [HttpDelete("{slug}/questions/{questionId:guid}")]
+  [EndpointSummary("Deletes a job question")]
+  [EndpointDescription("Removes a question from the job and reorders remaining questions. Only the job poster can perform this action.")]
+  [ProducesResponseType(StatusCodes.Status204NoContent)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  public async Task<IActionResult> DeleteJobQuestion([FromRoute] string slug, [FromRoute] Guid questionId, CancellationToken ct)
+  {
+    var command = new DeleteJobQuestionCommand(slug, questionId);
+    var result = await _sender.Send(command, ct);
+
+    return result.Match(
+        deleted => NoContent(),
         errors => Problem(errors)
     );
   }
@@ -261,6 +296,23 @@ public class JobsController : ApiController
 
     return result.Match(
         deleted => NoContent(),
+        errors => Problem(errors)
+    );
+  }
+
+  [HttpPost("generate-description")]
+  [EndpointSummary("Generates a job description using AI")]
+  [EndpointDescription("Generates a clear and detailed job description based on the provided context. The description is generated in the same language as the context.")]
+  [ProducesResponseType(typeof(GeneratedJobDescriptionDto), StatusCodes.Status200OK)]
+  [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  public async Task<IActionResult> GenerateJobDescription([FromBody] GenerateJobDescriptionRequest request, CancellationToken ct)
+  {
+    var command = new GenerateJobDescriptionCommand(request.Context);
+    var result = await _sender.Send(command, ct);
+
+    return result.Match(
+        description => Ok(description),
         errors => Problem(errors)
     );
   }

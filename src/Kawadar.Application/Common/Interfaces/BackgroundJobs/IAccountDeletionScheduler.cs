@@ -1,4 +1,4 @@
-namespace Kawadar.Application.Common.Interfaces;
+namespace Kawadar.Application.Common.Interfaces.BackgroundJobs;
 
 public interface IAccountDeletionScheduler
 {

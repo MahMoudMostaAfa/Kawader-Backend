@@ -39,7 +39,7 @@ public class DeleteJobCommandHandler : IRequestHandler<DeleteJobCommand, Result<
     if (userProfileResult.IsError) return userProfileResult.Errors;
     var userProfile = userProfileResult.Value;
 
-    var jobResult = await _jobsRepository.GetJobBySlugAsync(request.Slug);
+    var jobResult = await _jobsRepository.GetJobBySlugAsync(Uri.UnescapeDataString(request.Slug));
     if (jobResult.IsError) return jobResult.Errors;
     var job = jobResult.Value;
 

@@ -1,36 +1,32 @@
 using Kawadar.Application.Common.Errors;
-using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Domain.Common.Results;
-using Kawadar.Domain.Jobs.JobViews;
+using Kawadar.Domain.Jobs;
 using MediatR;
 
-namespace Kawadar.Application.Features.Jobs.Commands.CreateJobView;
+namespace Kawadar.Application.Features.Jobs.Commands.UpdateJobQuestion;
 
-public class CreateJobViewCommandHandler : IRequestHandler<CreateJobViewCommand, Result<Created>>
+public class UpdateJobQuestionCommandHandler : IRequestHandler<UpdateJobQuestionCommand, Result<Updated>>
 {
   private readonly IUser _user;
   private readonly IJobsRepository _jobsRepository;
-  private readonly IJobViewRepository _jobViewRepository;
   private readonly IUsersRepository _usersRepository;
   private readonly IUnitOfWork _unitOfWork;
 
-  public CreateJobViewCommandHandler(
+  public UpdateJobQuestionCommandHandler(
     IUser user,
     IJobsRepository jobsRepository,
-    IJobViewRepository jobViewRepository,
     IUsersRepository usersRepository,
     IUnitOfWork unitOfWork)
   {
     _user = user;
     _jobsRepository = jobsRepository;
-    _jobViewRepository = jobViewRepository;
     _usersRepository = usersRepository;
     _unitOfWork = unitOfWork;
   }
 
-  public async Task<Result<Created>> Handle(CreateJobViewCommand request, CancellationToken cancellationToken)
+  public async Task<Result<Updated>> Handle(UpdateJobQuestionCommand request, CancellationToken cancellationToken)
   {
     var userId = _user.Id;
     if (userId is null) return ApplicationErrors.UserIsNotAuthenticated;
@@ -43,17 +39,17 @@ public class CreateJobViewCommandHandler : IRequestHandler<CreateJobViewCommand,
     if (jobResult.IsError) return jobResult.Errors;
     var job = jobResult.Value;
 
-    // Check if the user has already viewed this job
-    var alreadyViewed = await _jobViewRepository.HasViewedAsync(job.Id, userProfile.Id);
-    if (alreadyViewed)
-      return Result.Created;
+    if (job.PostedById != userProfile.Id)
+      return ApplicationErrors.UnauthorizedAccess;
 
-    var jobViewResult = JobView.Create(job.Id, userProfile.Id);
-    if (jobViewResult.IsError) return jobViewResult.Errors;
+    var existingQuestion = job.Questions.FirstOrDefault(q => q.Id == request.QuestionId);
+    if (existingQuestion is null)
+      return JobErrors.JobQuestionNotFound;
 
-    await _jobViewRepository.AddAsync(jobViewResult.Value);
+    existingQuestion.Update(request.Question, request.IsRequired, existingQuestion.DisplayOrder);
+
     await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-    return Result.Created;
+    return Result.Updated;
   }
 }

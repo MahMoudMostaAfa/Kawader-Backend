@@ -1,7 +1,7 @@
 using Hangfire;
-using Kawadar.Application.Common.Interfaces;
+using Kawadar.Application.Common.Interfaces.BackgroundJobs;
 
-namespace Kawadar.Infrastructure.Services;
+namespace Kawadar.Infrastructure.Services.BackgroundJobs;
 
 public class HangfireAccountDeletionScheduler : IAccountDeletionScheduler
 {

@@ -4,6 +4,7 @@ using Kawadar.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kawadar.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260307044221_MakeJobQuestionJobIdRequired")]
+    partial class MakeJobQuestionJobIdRequired
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -167,12 +170,13 @@ namespace Kawadar.Infrastructure.Data.Migrations
             modelBuilder.Entity("Kawadar.Domain.Jobs.JobFiles.JobFile", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("JobId")
+                    b.Property<Guid?>("JobId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -188,6 +192,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
             modelBuilder.Entity("Kawadar.Domain.Jobs.JobQuestions.JobQuestion", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
@@ -847,8 +852,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.HasOne("Kawadar.Domain.Jobs.Job", null)
                         .WithMany("Attachments")
                         .HasForeignKey("JobId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.OwnsOne("Kawadar.Domain.Common.ValueObjects.FileInfo", "File", b1 =>
                         {

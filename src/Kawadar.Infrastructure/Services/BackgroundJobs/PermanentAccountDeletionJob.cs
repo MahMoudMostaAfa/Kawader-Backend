@@ -2,7 +2,7 @@ using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Microsoft.Extensions.Logging;
 
-namespace Kawadar.Infrastructure.Services;
+namespace Kawadar.Infrastructure.Services.BackgroundJobs;
 
 public class PermanentAccountDeletionJob
 {

@@ -69,10 +69,13 @@ try
 
   await app.InitialiseDatabaseAsync();
 
-  // Hangfire dashboard (development only for security)
-  app.UseHangfireDashboard("/hangfire");
-
   app.UseCoreMiddleware(builder.Configuration);
+
+  // Hangfire dashboard (development only for security)
+  app.UseHangfireDashboard("/hangfire", new DashboardOptions
+  {
+    Authorization = [new HangfireAuthorizationFilter()]
+  });
 
   app.MapControllers();
 

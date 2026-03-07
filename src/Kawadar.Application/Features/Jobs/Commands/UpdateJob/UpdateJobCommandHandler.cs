@@ -42,7 +42,7 @@ public class UpdateJobCommandHandler : IRequestHandler<UpdateJobCommand, Result<
     var userProfile = userProfileResult.Value;
 
 
-    var JobResult = await _jobRepository.GetJobBySlugAsync(request.Slug);
+    var JobResult = await _jobRepository.GetJobBySlugAsync(Uri.UnescapeDataString(request.Slug));
     if (JobResult.IsError) return JobResult.Errors;
     var job = JobResult.Value;
     if (job.PostedById != userProfile.Id) return ApplicationErrors.UnauthorizedAccess;

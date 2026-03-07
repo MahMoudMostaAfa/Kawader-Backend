@@ -41,7 +41,7 @@ public class GetJobBySlugQueryHandler : IRequestHandler<GetJobBySlugQuery, Resul
     var userId = _user.Id;
     if (userId is null) return ApplicationErrors.UserIsNotAuthenticated;
 
-    var jobResult = await _jobsRepository.GetJobBySlugAsync(request.Slug);
+    var jobResult = await _jobsRepository.GetJobBySlugAsync(Uri.UnescapeDataString(request.Slug));
     if (jobResult.IsError) return jobResult.Errors;
 
     var job = jobResult.Value;
@@ -71,7 +71,7 @@ public class GetJobBySlugQueryHandler : IRequestHandler<GetJobBySlugQuery, Resul
       }
     }
 
-    var jobDetailsDto = _mapper.Map<JobDetailsDto>((job, userProfile, posterIdentity));
+    var jobDetailsDto = _mapper.Map<JobDetailsDto>((job, posterIdentity, userProfile));
 
     return jobDetailsDto;
 
