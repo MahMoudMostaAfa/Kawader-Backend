@@ -2,6 +2,8 @@ using Kawadar.Application.Common.Models;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Jobs;
 using Kawadar.Domain.Jobs.Enums;
+using Kawadar.Domain.Jobs.JobReports;
+using Kawadar.Domain.Jobs.JobReports.Enums;
 
 namespace Kawadar.Application.Common.Interfaces.Repositories;
 
@@ -21,4 +23,11 @@ public interface IJobsRepository
     int pageSize,
     string sortBy
   );
+  public Task AddJobReport(JobReport jobReport, CancellationToken cancellationToken = default);
+
+    public Task<Result<List<Job>>> GetJobsByIds(IEnumerable<Guid> Ids);
+  public Task<PaginatedList<JobReport>> GetJobReports(ReportType? reportType, ReportStatus? reportStatus, string sortBy, int page, int pageSize);
+  public Task<Result<JobReport>> GetJobReportById(Guid Id);
+    public Task<Result<Job>> GetJobByIdAsync(Guid Id);
+    public Task<Result<List<JobReport>>> GetReportsByJobSlug(string slug);
 }

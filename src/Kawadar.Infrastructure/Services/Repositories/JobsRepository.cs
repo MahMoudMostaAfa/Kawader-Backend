@@ -3,8 +3,11 @@ using Kawadar.Application.Common.Models;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Jobs;
 using Kawadar.Domain.Jobs.Enums;
+using Kawadar.Domain.Jobs.JobReports;
+using Kawadar.Domain.Jobs.JobReports.Enums;
 using Kawadar.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace Kawadar.Infrastructure.Services.Repositories;
 
@@ -101,4 +104,76 @@ public class JobsRepository : IJobsRepository
 
     return new PaginatedList<Job>(items, totalCount, page, pageSize);
   }
+
+  public async Task AddJobReport(JobReport jobReport, CancellationToken cancellationToken = default)
+    {
+        await _context.JobReports.AddAsync(jobReport, cancellationToken);
+    }
+
+    public async Task<PaginatedList<JobReport>> GetJobReports(ReportType? reportType, ReportStatus? reportStatus, string sortBy, int page, int pageSize)
+    {
+        var query = _context.JobReports.AsQueryable();
+
+        if (reportType.HasValue)
+        {
+            query = query.Where(x => x.ReportType == reportType);
+        }
+
+        if (reportStatus.HasValue)
+        {
+            query = query.Where(x => x.ReportStatus == reportStatus);
+        }
+
+        query = sortBy == "oldest" ? query.OrderBy(j => j.CreatedAt) : query.OrderByDescending(j => j.CreatedAt);
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return new PaginatedList<JobReport>(items, totalCount, page, pageSize);
+    }
+    
+    public async Task<Result<JobReport>> GetJobReportById(Guid Id)
+    {
+        var jobReport = await _context.JobReports.FirstOrDefaultAsync(x => x.Id == Id);
+        if (jobReport is null) return Error.NotFound("Job Report not found");
+
+        return jobReport;
+    }
+
+    public async Task<Result<Job>> GetJobByIdAsync(Guid Id)
+    {
+        var job = await _context.Jobs.FirstOrDefaultAsync(j => j.Id == Id);
+
+        if (job == null)
+        {
+            return Error.NotFound("Job not found.");
+        }
+
+        return job;
+    }
+
+    public async Task<Result<List<Job>>> GetJobsByIds(IEnumerable<Guid> Ids)
+    {
+        List<Job> jobs = new();
+        foreach(var id in Ids)
+        {
+            var job = await _context.Jobs.FirstOrDefaultAsync(x => x.Id == id);
+            if(job is null) return Error.NotFound("Job not found.");
+
+            jobs.Add(job);
+        }
+        return jobs;
+    }
+
+    public async Task<Result<List<JobReport>>> GetReportsByJobSlug(string slug)
+    {
+        var job = await _context.Jobs.FirstOrDefaultAsync(x => x.JobSlug == slug);
+        if(job is null) return Error.NotFound("Job not found.");
+        var jobReports = await _context.JobReports.Where(x => x.JobId == job.Id).ToListAsync();
+        return jobReports;
+    }
 }

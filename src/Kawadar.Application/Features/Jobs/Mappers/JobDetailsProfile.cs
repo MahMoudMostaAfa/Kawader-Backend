@@ -1,8 +1,10 @@
 using AutoMapper;
 using Kawadar.Application.Common.Models;
 using Kawadar.Application.Features.Jobs.DTOs;
+using Kawadar.Domain.Jobs;
 using Kawadar.Domain.Jobs.JobFiles;
 using Kawadar.Domain.Jobs.JobQuestions;
+using Kawadar.Domain.Jobs.JobReports;
 using Kawadar.Domain.Skills;
 using Kawadar.Domain.UserProfiles;
 
@@ -60,5 +62,21 @@ public class JobDetailsProfile : Profile
     .ForMember(dest => dest.JobStatus, opt => opt.MapFrom(src => src.JobStatus))
     .ForMember(dest => dest.Skills, opt => opt.MapFrom(src => src.Skills))
     .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
-  }
+
+    CreateMap<(JobReport jobReport, Kawadar.Domain.Jobs.Job job, UserDto userDto), FullJobReportDto>()
+    .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.jobReport.Id))
+    .ForMember(dest => dest.JobSlug, opt => opt.MapFrom(src => src.job.JobSlug))
+    .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.userDto.UserName))
+    .ForMember(dest => dest.ReportStatus, opt => opt.MapFrom(src => src.jobReport.ReportStatus))
+    .ForMember(dest => dest.ReportType, opt => opt.MapFrom(src => src.jobReport.ReportType))
+    .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.jobReport.Content))
+    .ForMember(dest => dest.ActionTaken, opt => opt.MapFrom(src => src.jobReport.ActionTaken));
+
+        CreateMap<(JobReport jobReport, Kawadar.Domain.Jobs.Job job, UserDto userDto), BriefJobReportDto>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.jobReport.Id))
+            .ForMember(dest => dest.JobTitle, opt => opt.MapFrom(src => src.job.Title))
+            .ForMember(dest => dest.ReporterUserName, opt => opt.MapFrom(src => src.userDto.UserName))
+            .ForMember(dest => dest.ReportStatus, opt => opt.MapFrom(src => src.jobReport.ReportStatus))
+            .ForMember(dest => dest.ReportType, opt => opt.MapFrom(src => src.jobReport.ReportType));
+    }
 }

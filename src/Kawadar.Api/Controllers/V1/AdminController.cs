@@ -1,4 +1,5 @@
 ﻿using Kawadar.Api.Requests.Admin;
+using Kawadar.Application.Common.Models;
 using Kawadar.Application.Features.Admins.Commands.AddClaim;
 using Kawadar.Application.Features.Admins.Commands.BanUser;
 using Kawadar.Application.Features.Admins.Commands.CreateAdmin;
@@ -7,6 +8,7 @@ using Kawadar.Application.Features.Admins.Dtos;
 using Kawadar.Application.Features.Admins.Queries.GetAdmins;
 using Kawadar.Application.Features.Admins.Queries.GetUsers;
 using Kawadar.Domain.Common.Constants;
+using Kawadar.Domain.UserProfiles.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,15 +28,29 @@ namespace Kawadar.Api.Controllers.V1
 
         [HttpGet("Users")]
         [Authorize(Policy = Permissions.ViewUsers)]
-        [ProducesResponseType(typeof(List<UserProfileDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(PaginatedList<UserProfileDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [EndpointName("GetUsers")]
         [EndpointSummary("Gets the users and their data")]
         [EndpointDescription("Gets the users and their data so that the admin can manage the users")]
-        public async Task<IActionResult> GetUsers(CancellationToken ct)
+        public async Task<IActionResult> GetUsers(
+            [FromQuery] bool? IsDeleted,
+            [FromQuery] bool? IsBanned,
+            [FromQuery] ExperienceYear? ExperienceYear,
+            [FromQuery] Guid? specilizationId,
+            [FromQuery] int page,
+            [FromQuery] int pageSize,
+            [FromQuery] string sortBy,
+            CancellationToken ct = default)
         {
-            var query = new GetUserProfilesQuery();
+            var query = new GetUserProfilesQuery(IsDeleted,
+                IsBanned,
+                ExperienceYear,
+                specilizationId,
+                page,
+                pageSize,
+                sortBy);
             var result = await _sender.Send(query, ct);
 
             return result.Match(
@@ -45,15 +61,25 @@ namespace Kawadar.Api.Controllers.V1
 
         [HttpGet("Admins")]
         [Authorize(Policy = Permissions.ViewAdmins)]
-        [ProducesResponseType(typeof(List<AdminDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(PaginatedList<AdminDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [EndpointName("GetAdmins")]
         [EndpointSummary("Gets the Admins and their data")]
         [EndpointDescription("Gets the Admins and their data so that the Master admin can manage the Admins")]
-        public async Task<IActionResult> GetAdmins(CancellationToken ct)
+        public async Task<IActionResult> GetAdmins(
+            [FromQuery] bool? IsOnline,
+            [FromQuery] bool? IsDeleted,
+            [FromQuery] int page,
+            [FromQuery] int pageSize,
+            [FromQuery] string sortBy,
+            CancellationToken ct)
         {
-            var query = new GetAdminsQuery();
+            var query = new GetAdminsQuery(IsOnline,
+                IsDeleted,
+                page,
+                pageSize,
+                sortBy);
             var result = await _sender.Send(query, ct);
 
             return result.Match(
@@ -100,7 +126,7 @@ namespace Kawadar.Api.Controllers.V1
 
         [HttpPost("Add")]
         [Authorize(Policy = Permissions.AddAdmin)]
-        [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(void), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [EndpointName("Add admin")]
@@ -110,14 +136,14 @@ namespace Kawadar.Api.Controllers.V1
         {
             var result = await _sender.Send(command, cancellationToken);
             return result.Match(
-              _ => Ok(new { Message = "Admin registered successfully." }),
-              Problem
+              _ => Created(),
+              errors => Problem(errors)
             );
         }
 
         [HttpPost("AddPermission")]
         [Authorize(Policy = Permissions.AddClaim)]
-        [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(void), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [EndpointName("AddPermission")]
@@ -127,8 +153,8 @@ namespace Kawadar.Api.Controllers.V1
         {
             var result = await _sender.Send(command, cancellationToken);
             return result.Match(
-              _ => Ok(new { Message = "Permission Added successfully." }),
-              Problem
+              _ => Created(),
+              errors =>Problem(errors)
             );
         }
     }

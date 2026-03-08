@@ -1,5 +1,7 @@
+using Kawadar.Application.Common.Models;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.UserProfiles;
+using Kawadar.Domain.UserProfiles.Enums;
 
 namespace Kawadar.Application.Common.Interfaces.Repositories;
 
@@ -12,6 +14,19 @@ public interface IUsersRepository
 
   Task<Result<UserProfile>> GetUserProfileByIdAsync(Guid id);
 
-    Task<IEnumerable<UserProfile>> GetUsers();
-    Task<IEnumerable<UserProfile>> GetAdmins();
+    Task<PaginatedList<UserProfile>> GetUsers(
+        bool? IsDeleted,
+        bool? IsBanned,
+        ExperienceYear? ExperienceYear,
+        Guid? specilizationId,
+        int page,
+        int pageSize,
+        string sortBy);
+    Task<PaginatedList<UserProfile>> GetAdmins(
+        bool? IsOnline,
+        bool? IsDeleted,
+        int page,
+        int pageSize,
+        string sortBy);
+    Task<Result<IEnumerable<UserProfile>>> GetUsersbyIds(IEnumerable<Guid> Ids);
 }
