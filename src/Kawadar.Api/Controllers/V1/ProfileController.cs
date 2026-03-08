@@ -121,16 +121,8 @@ public class ProfileController : ApiController
         errors => Problem(errors));
   }
 
-  [HttpPost("test-ai")]
-  public async Task<IActionResult> TestAI()
-  {
-    var response = await _aiService.GenerateStructuredResponseAsync<ResponseDto>("What is your name? and what is your purpose? and what you are good at? and are you able to provide the answer in Arabic?", default);
-    return Ok(response.Value);
 
-
-  }
 
 }
 
 
-public record ResponseDto(string Message, string Purpose, List<string> Skills, bool CanRespondInArabic);
