@@ -1,3 +1,4 @@
+using Kawadar.Domain.Proposals;
 using Kawadar.Domain.Proposals.ProposalMilestones;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -23,7 +24,7 @@ public class MilestoneConfiguration : IEntityTypeConfiguration<ProposalMilestone
     builder.Property(m => m.Status).HasConversion<string>()
            .IsRequired();
 
-    builder.HasOne<ProposalMilestone>()
+    builder.HasOne<JobProposal>()
            .WithMany()
            .HasForeignKey(m => m.JobProposalId)
            .OnDelete(DeleteBehavior.Cascade);
