@@ -39,9 +39,9 @@ namespace Kawadar.Api.Controllers.V1
             [FromQuery] bool? IsBanned,
             [FromQuery] ExperienceYear? ExperienceYear,
             [FromQuery] Guid? specilizationId,
-            [FromQuery] int page,
-            [FromQuery] int pageSize,
-            [FromQuery] string sortBy,
+            [FromQuery] int page =1,
+            [FromQuery] int pageSize =10,
+            [FromQuery] string sortBy ="newest",
             CancellationToken ct = default)
         {
             var query = new GetUserProfilesQuery(IsDeleted,
@@ -70,10 +70,10 @@ namespace Kawadar.Api.Controllers.V1
         public async Task<IActionResult> GetAdmins(
             [FromQuery] bool? IsOnline,
             [FromQuery] bool? IsDeleted,
-            [FromQuery] int page,
-            [FromQuery] int pageSize,
-            [FromQuery] string sortBy,
-            CancellationToken ct)
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string sortBy = "newest",
+            CancellationToken ct = default)
         {
             var query = new GetAdminsQuery(IsOnline,
                 IsDeleted,
