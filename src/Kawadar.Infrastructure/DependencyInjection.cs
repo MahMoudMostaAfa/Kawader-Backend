@@ -139,6 +139,7 @@ public static class DependencyInjection
     service.AddScoped<ISkillRepository, SkillRepository>();
     service.AddScoped<IJobsRepository, JobsRepository>();
     service.AddScoped<IJobViewRepository, JobViewRepository>();
+    service.AddScoped<IProposalsRepository, ProposalsRepository>();
     service.AddScoped<IUnitOfWork, UnitOfWork>();
     service.AddTransient<IIdentityService, IdentityService>();
 
