@@ -1,5 +1,6 @@
 ﻿using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Application.Common.Models;
+using Kawadar.Application.Features.Reviews.Dtos;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Reviews;
 using Kawadar.Infrastructure.Data;
@@ -14,11 +15,15 @@ namespace Kawadar.Infrastructure.Services.Repositories
             await appDbContext.Reviews.AddAsync(review, ct);
         }
 
-        public async Task<Result<float>> GetAverageReviewScore(Guid UserProfileId)
+        public async Task<Result<ReviewStatisticsDto>> GetReviewsStatistics(Guid UserProfileId)
         {
-            var reviewScores = appDbContext.Reviews.Where(x =>x.RevieweeId == UserProfileId).Select(x => x.Rating);
-            var average = await reviewScores.AverageAsync();
-            return average;
+            var count = await appDbContext.Reviews.Where(x => x.RevieweeId == UserProfileId).CountAsync();
+            var average = await appDbContext.Reviews.Where(x => x.RevieweeId == UserProfileId).Select(x => x.Rating).AverageAsync();
+            return new ReviewStatisticsDto
+            {
+                AverageRating = average,
+                ReviewsCount = count
+            };
         }
 
         public async Task<Result<Review>> GetReviewById(Guid Id)
@@ -28,7 +33,7 @@ namespace Kawadar.Infrastructure.Services.Repositories
             return review;
         }
 
-        public async Task<Result<PaginatedList<Review>>> GetReviewsByUserProfileId(float? Rating, int page, int pageSize, string sortBy, Guid Id)
+        public async Task<PaginatedList<Review>> GetReviewsByUserProfileId(float? Rating, int page, int pageSize, string sortBy, Guid Id)
         {
             var query = appDbContext.Reviews.AsQueryable();
             if (Rating.HasValue)

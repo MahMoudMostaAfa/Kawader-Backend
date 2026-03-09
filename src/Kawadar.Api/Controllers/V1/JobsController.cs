@@ -20,6 +20,7 @@ using Kawadar.Application.Features.Jobs.Queries.GetJobReports;
 using Kawadar.Application.Features.Jobs.Queries.GetJobReport;
 using Kawadar.Application.Features.Jobs.Commands.UpdateJobReport;
 using Kawadar.Application.Features.Jobs.Queries.GetReportsByJobSlug;
+using Kawadar.Application.Features.Reviews.Commands.CreateReview;
 
 namespace Kawadar.Api.Controllers.V1;
 
@@ -111,8 +112,6 @@ public class JobsController : ApiController
         errors => Problem(errors)
     );
   }
-
-
 
 
   [HttpGet("{slug}")]
@@ -309,7 +308,7 @@ public class JobsController : ApiController
         );
     }
 
-    [HttpPut("Reports/{Id:guid}")]
+    [HttpPut("reports/{Id:guid}")]
     [EndpointSummary("Updates a Job Report")]
     [EndpointDescription("Updates Job Report Status and Action Taken")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -326,7 +325,7 @@ public class JobsController : ApiController
         );
     }
 
-    [HttpGet("{slug}/Reports")]
+    [HttpGet("{slug}/reports")]
     [EndpointSummary("Gets job reports")]
     [EndpointDescription("Gets job reports using the job slug")]
     [ProducesResponseType(typeof(List<BriefJobReportDto>), StatusCodes.Status200OK)]
@@ -339,6 +338,23 @@ public class JobsController : ApiController
 
         return result.Match(
             reports => Ok(reports),
+            errors => Problem(errors)
+        );
+    }
+
+    [HttpPost("{slug}/review")]
+    [EndpointSummary("Creates a review for a job")]
+    [EndpointDescription("Creates a review for a job either client freelancer or freelancer client")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> ReviewJobBySlug([FromRoute]string slug, [FromBody]ReviewJobRequest request, CancellationToken ct)
+    {
+        var command = new CreateReviewCommand(slug, request.RevieweeUserName, request.rating, request.Comment);
+        var result = await _sender.Send(command, ct);
+
+        return result.Match(
+            _ => Created(),
             errors => Problem(errors)
         );
     }

@@ -14,7 +14,7 @@ namespace Kawadar.Application.Features.Admins.Queries.GetUsers
               .WithMessage("SortBy must be 'newest' or 'oldest'.");
 
             RuleFor(x => x.specilizationId).NotEqual(Guid.Empty).When(x => x.specilizationId is not null);
-            RuleFor(x => x.ExperienceYear).IsInEnum().When(x => x.ExperienceYear is not null)
+            RuleFor(x => x.ExperienceYear).IsInEnum().When(x => x.ExperienceYear is not null);
         }
     }
 }
