@@ -56,6 +56,10 @@ public class JobsController : ApiController
         .Select((q, i) => new CreateQuestionDto(q, request.QuestionsRequired?.ElementAtOrDefault(i) ?? false))
         .ToList() ?? [];
 
+    var attachmentLinks = request.AttachmentLinks?
+        .Where(link => !string.IsNullOrWhiteSpace(link))
+        .ToList();
+
     var command = new CreateJobCommand(
         request.Title,
         request.Description,
@@ -68,7 +72,7 @@ public class JobsController : ApiController
         questionDtos,
         skillIds,
         request.AttachmentFiles,
-        request.AttachmentLinks
+        attachmentLinks
     );
 
     var result = await _sender.Send(command, ct);

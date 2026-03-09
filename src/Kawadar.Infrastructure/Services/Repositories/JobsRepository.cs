@@ -22,6 +22,20 @@ public class JobsRepository : IJobsRepository
     await _context.Jobs.AddAsync(job, cancellationToken);
   }
 
+  public async Task<Result<Job>> GetJobsAsync(Guid jobId)
+  {
+    var job = await _context.Jobs.Include(j => j.Attachments).Include(j => j.Specilization)
+    .Include(J => J.Skills).Include(J => J.Questions.OrderBy(q => q.DisplayOrder))
+     .FirstOrDefaultAsync(j => j.Id == jobId);
+
+    if (job == null)
+    {
+      return Error.NotFound("Job not found.");
+    }
+
+    return job;
+  }
+
   public void Delete(Job job)
   {
     _context.Jobs.Remove(job);

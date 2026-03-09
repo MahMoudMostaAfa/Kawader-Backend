@@ -27,7 +27,7 @@ public class JobProposal : AuditableEntity
 
   // CASE OF HOURLY 
 
-  public decimal? HourlyRate
+  public int? HourlyRate
   { get; private set; }
   public int? EstimatedHours { get; private set; }
 
@@ -45,7 +45,7 @@ public class JobProposal : AuditableEntity
   private JobProposal() { }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
-  private JobProposal(Guid jobId, Guid freelancerId, string coverLetter, JobProposalType proposalType, decimal? amount, decimal? hourlyRate, int? estimatedHours, int? estimatedDays = null)
+  private JobProposal(Guid jobId, Guid freelancerId, string coverLetter, JobProposalType proposalType, decimal? amount, int? hourlyRate, int? estimatedHours, int? estimatedDays = null)
     : base(Guid.NewGuid())
   {
     JobId = jobId;
@@ -60,7 +60,7 @@ public class JobProposal : AuditableEntity
 
   }
 
-  public static Result<JobProposal> Create(Guid jobId, Guid freelancerId, string coverLetter, JobProposalType proposalType, decimal? amount, decimal? hourlyRate, int? estimatedHours, int? estimatedDays = null)
+  public static Result<JobProposal> Create(Guid jobId, Guid freelancerId, string coverLetter, JobProposalType proposalType, decimal? amount, int? hourlyRate, int? estimatedHours, int? estimatedDays = null)
   {
     if (string.IsNullOrWhiteSpace(coverLetter))
       return JobProposalErrors.CoverLetterRequired;
@@ -86,7 +86,7 @@ public class JobProposal : AuditableEntity
   }
 
 
-  public Result<Updated> Update(string? coverLetter, JobProposalType? proposalType, decimal? amount, decimal? hourlyRate, int? estimatedHours, int? estimatedDays = null)
+  public Result<Updated> Update(string? coverLetter, JobProposalType? proposalType, decimal? amount, int? hourlyRate, int? estimatedHours, int? estimatedDays = null)
   {
     if (!string.IsNullOrWhiteSpace(coverLetter))
       CoverLetter = coverLetter;
