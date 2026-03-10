@@ -10,9 +10,9 @@ namespace Kawadar.Domain.Portfolios.ProjectView
         public Guid PortfolioProjectId { get; private set; }
         public Guid UserProfileId { get; private set; }
 
-        public PortfolioProject PortfolioProject { get; private set; }
+        public PortfolioProject? PortfolioProject { get; private set; }
 
-        public UserProfile UserProfile { get; private set; }
+        public UserProfile? UserProfile { get; private set; }
 
         private PortfolioProjectView(Guid portfolioProjectId, Guid UserProfileId) : base(Guid.NewGuid())
         {

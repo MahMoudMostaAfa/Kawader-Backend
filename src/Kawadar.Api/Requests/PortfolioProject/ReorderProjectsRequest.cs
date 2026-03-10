@@ -4,6 +4,6 @@ namespace Kawadar.Api.Requests.PortfolioProject
 {
     public class ReorderProjectsRequest
     {
-        public List<ProjectOrderDTO> Order { get; set; }
+        public List<ProjectOrderDTO>? Order { get; set; }
     }
 }

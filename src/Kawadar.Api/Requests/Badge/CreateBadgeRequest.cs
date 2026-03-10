@@ -2,8 +2,8 @@
 {
     public class CreateBadgeRequest
     {
-        public string title { get; set; }
-        public string description { get; set; }
-        public IFormFile Icon { get; set; }
+        public string title { get; set; } = "";
+        public string description { get; set; } = "";
+        public IFormFile? Icon { get; set; }
     }
 }

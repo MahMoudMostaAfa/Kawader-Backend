@@ -26,7 +26,7 @@ namespace Kawadar.Application.Features.Skills.Commands.AddSkillsToFreelacner
             {
                 if(skill.SkillType == SkillType.Predefined)
                 {
-                    var exists = await skillRepository.getByIdAsync(skill.SkillId.Value);
+                    var exists = await skillRepository.getByIdAsync(skill.SkillId!.Value);
                     if (exists.IsError) return exists.Errors;
                 }
                 var freelancerSkillResult = FreelancerSkill.Create(userProfile.Id, skill.SkillId, skill.SkillType, skill.CustomSkillName);

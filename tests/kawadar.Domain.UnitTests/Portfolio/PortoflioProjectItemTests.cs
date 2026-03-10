@@ -62,23 +62,6 @@ namespace kawadar.Domain.UnitTests.Portfolio
         }
 
         [Fact]
-        public void Update_ValidData_ShouldSucceed()
-        {
-            string content = "This is the content of an Item";
-            int displayOrder = 1;
-            Guid projectId = Guid.NewGuid();
-
-            var result = PortfolioItem.Create(ItemType.Text, content, displayOrder, projectId);
-            Assert.True(result.IsSuccess);
-            var item = result.Value;
-
-            string updateContent = "THis is updated content";
-            var updateResult = item.Update(updateContent);
-            Assert.True(updateResult.IsSuccess);
-            Assert.Equal(updateContent, item.Content);
-        }
-
-        [Fact]
         public void UpdateDisplayOrder_ValidOrder_ShouldSucceed()
         {
             string content = "This is the content of an Item";

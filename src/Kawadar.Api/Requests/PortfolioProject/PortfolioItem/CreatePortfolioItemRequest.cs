@@ -4,7 +4,8 @@ namespace Kawadar.Api.Requests.PortfolioProject.PortfolioItem
 {
     public class CreatePortfolioItemRequest
     {
-        public ItemType ItemType { get; set; } 
-        public string Content { get; set; } 
+        public ItemType ItemType { get; set; }
+        public string? Content { get; set; } = "";
+        public IFormFile? Image { get; set; }
     }
 }
