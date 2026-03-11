@@ -260,7 +260,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.ToTable("JobReports");
                 });
-                
+
             modelBuilder.Entity("Kawadar.Domain.Jobs.JobViews.JobView", b =>
                 {
                     b.Property<Guid>("Id")
@@ -471,7 +471,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.ToTable("Reviews");
                 });
-                
+
             modelBuilder.Entity("Kawadar.Domain.Proposals.JobProposal", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1224,6 +1224,8 @@ namespace Kawadar.Infrastructure.Data.Migrations
                         .HasForeignKey("ReviewerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
             modelBuilder.Entity("Kawadar.Domain.Proposals.ProposalMilestones.ProposalMilestone", b =>
                 {
                     b.HasOne("Kawadar.Domain.Proposals.JobProposal", null)

@@ -118,14 +118,14 @@ public class ApplicationDbContextInitialiser(
 
         if (await _userManager.FindByEmailAsync("Omartamer2445@gmail.com") == null)
         {
-            var coAdmin = new AppUser
+            var coAdmin2 = new AppUser
             {
                 UserName = "Omar24455",
                 Email = "Omartamer2445@gmail.com",
                 EmailConfirmed = true,
             };
 
-            var result = await _userManager.CreateAsync(coAdmin, "Omar@123");
+            var result2 = await _userManager.CreateAsync(coAdmin2, "Omar@123");
             if (result.Succeeded)
             {
                 await _userManager.AddToRoleAsync(coAdmin, DefaultRoles.Admin);
