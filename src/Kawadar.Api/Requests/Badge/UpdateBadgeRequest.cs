@@ -2,6 +2,6 @@
 {
     public class UpdateBadgeRequest
     {
-        public IFormFile Icon { get; set; }
+        public IFormFile? Icon { get; set; }
     }
 }

@@ -41,7 +41,7 @@ namespace kawadar.Domain.UnitTests.Badges
             var iconUrl = "www.Icon.com";
             var description = "this is a badge";
 
-            var result = Badge.Create(title, iconUrl, description);
+            var result = Badge.Create(title!, iconUrl, description);
             Assert.True(result.IsError);
             Assert.Equal(BadgeErrors.TitleIsEmpty.Code, result.TopError.Code);
             Assert.Equal(BadgeErrors.TitleIsEmpty.Description, result.TopError.Description);

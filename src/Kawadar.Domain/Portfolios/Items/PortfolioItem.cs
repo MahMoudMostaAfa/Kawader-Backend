@@ -15,7 +15,7 @@ namespace Kawadar.Domain.Portfolios.Items
         //Foreign Key
         public Guid PortfolioProjectId { get; private set; }
 
-        public PortfolioProject PortfolioProject { get; private set; }
+        public PortfolioProject? PortfolioProject { get; private set; }
 
         private PortfolioItem(ItemType ItemType, string Content, int DisplayOrder, Guid PortfolioProjectId): base(Guid.NewGuid())
         {
@@ -41,8 +41,9 @@ namespace Kawadar.Domain.Portfolios.Items
             return portfolioItem;
         }
 
-        public Result<Updated> Update(string Content)
+        public Result<Updated> Update(ItemType itemType, string Content)
         {
+            this.ItemType = itemType;
             this.Content = Content;
 
             UpdatedAt = DateTime.UtcNow;

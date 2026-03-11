@@ -1,10 +1,14 @@
 
 using Kawadar.Application.Common.Interfaces;
+using Kawadar.Application.Common.Models;
 using Kawadar.Application.Features.ProfileManagment.Commands.UpdateProfile;
 using Kawadar.Application.Features.ProfileManagment.Commands.UpdateProfileImage;
 using Kawadar.Application.Features.ProfileManagment.Commands.UploadIdentity;
 using Kawadar.Application.Features.ProfileManagment.Queries.GetUserProfile;
 using Kawadar.Application.Features.ProfileManagment.Queries.GetUserProfileByUserName;
+using Kawadar.Application.Features.Reviews.Dtos;
+using Kawadar.Application.Features.Reviews.Queries.GetReviewsByUserProfileId;
+using Kawadar.Application.Features.Reviews.Queries.GetReviewStatistics;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -65,7 +69,48 @@ public class ProfileController : ApiController
 
   }
 
-  [HttpPut("me")]
+    [HttpGet("{username}/reviews")]
+    [EndpointName("UserReviews")]
+    [EndpointSummary("Gets the reviews of a user by username")]
+    [EndpointDescription("Gets the reviews of a user by their username.")]
+    [ProducesResponseType(typeof(PaginatedList<ReviewDto>), StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetUserReviews([FromRoute]string username,
+        [FromQuery] float? rating,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string sortBy = "highest")
+    {
+
+        var query = new GetReviewsByUserNameQuery(rating, page, pageSize, sortBy, username);
+        var result = await _sender.Send(query);
+
+        return result.Match(
+            reviews => Ok(reviews),
+            errors => Problem(errors));
+
+    }
+
+
+    [HttpGet("{username}/statistics")]
+    [EndpointName("UserStatistics")]
+    [EndpointSummary("Gets the review statistics of a user by username")]
+    [EndpointDescription("Gets the review statistics(The count and average rating) of a user by their username.")]
+    [ProducesResponseType(typeof(PaginatedList<ReviewDto>), StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetStatistics([FromRoute] string username)
+    {
+
+        var query = new GetReviewStatisticsQuery(username);
+        var result = await _sender.Send(query);
+
+        return result.Match(
+            statistics => Ok(statistics),
+            errors => Problem(errors));
+
+    }
+
+    [HttpPut("me")]
   [EndpointName("UpdateProfile")]
   [EndpointSummary("Updates the profile of the current user")]
   [EndpointDescription("Updates the profile of the current user with new information.")]

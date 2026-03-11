@@ -16,6 +16,14 @@ namespace Kawadar.Application.Features.Admins.Mapper
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.user.UserName))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.user.Email))
                 .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => src.userProfile.IsDeleted));
+
+            CreateMap<(UserProfile userProfile, UserDto user), BriefUserProfileDto>()
+                .ForMember(dest => dest.fullName, opt => opt.MapFrom(src => src.userProfile.FullName))
+                .ForMember(dest => dest.IsOnline, opt => opt.MapFrom(src => src.userProfile.IsOnline))
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.user.UserName))
+                .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => src.userProfile.IsDeleted))
+                .ForMember(dest => dest.profileType, opt => opt.MapFrom(src => src.userProfile.ProfileType))
+                .ForMember(dest => dest.IsBanned, opt => opt.MapFrom(src => src.userProfile.IsBanned));
         }
     }
 }

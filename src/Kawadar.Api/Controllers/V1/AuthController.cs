@@ -8,7 +8,7 @@ using Kawadar.Application.Features.Auth.Commands.Login;
 using Kawadar.Application.Features.Auth.Commands.Register;
 using Kawadar.Application.Features.Auth.Commands.ResendConfirmationEmail;
 using Kawadar.Application.Features.Auth.Commands.ResetPassword;
-
+using Kawadar.Application.Features.Auth.Dtos;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -51,12 +51,12 @@ public class AuthController : ApiController
 
   // login
   [HttpPost("Login")]
-  [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+  [ProducesResponseType(typeof(LoginDto), StatusCodes.Status200OK)]
   [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
   [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
   [EndpointName(nameof(Login))]
-  [EndpointSummary("Logs in a user and returns a JWT token.")]
-  [EndpointDescription("Authenticates a user with the provided credentials and returns a JWT token for authorized access to protected resources.")]
+  [EndpointSummary("Logs in a user and returns a JWT token, permissions and role.")]
+  [EndpointDescription("Authenticates a user with the provided credentials and returns a JWT token for authorized access to protected resources , a list of permissions and the role.")]
   public async Task<IActionResult> Login([FromBody] LoginCommand command, CancellationToken ct)
   {
     var result = await _sender.Send(command, ct);
