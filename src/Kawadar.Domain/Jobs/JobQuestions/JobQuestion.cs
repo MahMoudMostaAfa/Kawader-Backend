@@ -20,8 +20,8 @@ public class JobQuestion : AuditableEntity
     DisplayOrder = displayOrder;
   }
 
-  public static Result<JobQuestion> Create(string question, bool isRequired = false)
-      => new JobQuestion(question, isRequired, 1);
+  public static Result<JobQuestion> Create(string question, bool isRequired = false, int displayOrder = 1)
+      => new JobQuestion(question, isRequired, displayOrder);
 
   public static Result<List<JobQuestion>> CreateList(List<(string question, bool isRequired)> questions)
   {

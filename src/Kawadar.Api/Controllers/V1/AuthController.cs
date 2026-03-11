@@ -2,6 +2,7 @@
 
 using Kawadar.Application.Features.Auth.Commands.ChangePassword;
 using Kawadar.Application.Features.Auth.Commands.ConfirmEmail;
+using Kawadar.Application.Features.Auth.Commands.DeleteAccount;
 using Kawadar.Application.Features.Auth.Commands.ForgetPassword;
 using Kawadar.Application.Features.Auth.Commands.Login;
 using Kawadar.Application.Features.Auth.Commands.Register;
@@ -148,6 +149,24 @@ public class AuthController : ApiController
        _ => Ok(new { Message = "Password has been changed successfully." }),
        Problem
      );
+  }
+
+  [Authorize]
+  [HttpDelete("account")]
+  [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [EndpointName(nameof(DeleteAccount))]
+  [EndpointSummary("Soft-deletes the authenticated user's account.")]
+  [EndpointDescription("Marks the user's account for deletion and schedules permanent deletion after 30 days. Logging in within that period cancels the scheduled deletion.")]
+  public async Task<IActionResult> DeleteAccount(CancellationToken cancellationToken)
+  {
+    var result = await _sender.Send(new DeleteAccountCommand(), cancellationToken);
+    return result.Match(
+      _ => Ok(new { Message = "Your account has been marked for deletion. It will be permanently deleted after 30 days. Log in again to cancel." }),
+      Problem
+    );
   }
 
 

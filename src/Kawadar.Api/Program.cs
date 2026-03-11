@@ -1,3 +1,4 @@
+using Hangfire;
 using Kawadar.Api;
 using Kawadar.Api.Infrastructure;
 using Kawadar.Application;
@@ -70,6 +71,12 @@ try
 
   app.UseCoreMiddleware(builder.Configuration);
 
+  // Hangfire dashboard (development only for security)
+  app.UseHangfireDashboard("/hangfire", new DashboardOptions
+  {
+    Authorization = [new HangfireAuthorizationFilter()]
+  });
+
   app.MapControllers();
 
   // Prometheus metrics endpoint
@@ -77,7 +84,7 @@ try
 
   app.Run();
 }
-catch (Exception ex)
+catch (Exception ex) when (ex is not HostAbortedException)
 {
   Log.Fatal(ex, "Application terminated unexpectedly");
 }

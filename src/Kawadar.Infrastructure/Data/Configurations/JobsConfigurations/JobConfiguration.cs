@@ -28,6 +28,7 @@ public class JobConfiguration : IEntityTypeConfiguration<Job>
         // relationships
         builder.HasMany(j => j.Questions)
             .WithOne()
+            .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
         builder.Navigation(j => j.Questions)
             .HasField("_questions")
@@ -35,6 +36,7 @@ public class JobConfiguration : IEntityTypeConfiguration<Job>
 
         builder.HasMany(j => j.Attachments)
             .WithOne()
+            .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
         builder.Navigation(j => j.Attachments)
             .HasField("_attachments")

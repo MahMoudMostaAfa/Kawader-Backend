@@ -10,7 +10,10 @@ namespace Kawadar.Application.Common.Interfaces.Repositories;
 public interface IJobsRepository
 {
   public Task AddAsync(Job job, CancellationToken cancellationToken = default);
+  public void Delete(Job job);
   public Task<Result<Job>> GetJobBySlugAsync(string slug);
+
+  public Task<Result<Job>> GetJobsAsync(Guid jobId);
   public Task<PaginatedList<Job>> GetJobsAsync(
     string? search,
     Guid? specilizationId,

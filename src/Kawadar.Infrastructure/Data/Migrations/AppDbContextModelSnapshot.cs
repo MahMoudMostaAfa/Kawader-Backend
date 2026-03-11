@@ -167,13 +167,12 @@ namespace Kawadar.Infrastructure.Data.Migrations
             modelBuilder.Entity("Kawadar.Domain.Jobs.JobFiles.JobFile", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("JobId")
+                    b.Property<Guid>("JobId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -189,7 +188,6 @@ namespace Kawadar.Infrastructure.Data.Migrations
             modelBuilder.Entity("Kawadar.Domain.Jobs.JobQuestions.JobQuestion", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
@@ -201,7 +199,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.Property<bool>("IsRequired")
                         .HasColumnType("bit");
 
-                    b.Property<Guid?>("JobId")
+                    b.Property<Guid>("JobId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Question")
@@ -261,6 +259,33 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.HasIndex("ReportedBy");
 
                     b.ToTable("JobReports");
+                });
+                
+            modelBuilder.Entity("Kawadar.Domain.Jobs.JobViews.JobView", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("JobId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserProfileId");
+
+                    b.HasIndex("JobId", "UserProfileId");
+
+                    b.ToTable("JobViews");
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Portfolios.Items.PortfolioItem", b =>
@@ -446,6 +471,142 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.ToTable("Reviews");
                 });
+                
+            modelBuilder.Entity("Kawadar.Domain.Proposals.JobProposal", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("CoverLetter")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("EstimatedDays")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("EstimatedHours")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("FreelancerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("HourlyRate")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("JobId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ProposalType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobId", "FreelancerId")
+                        .IsUnique();
+
+                    b.ToTable("JobProposals");
+                });
+
+            modelBuilder.Entity("Kawadar.Domain.Proposals.ProposalMilestones.ProposalMilestone", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("JobProposalId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobProposalId");
+
+                    b.ToTable("ProposalMilestones");
+                });
+
+            modelBuilder.Entity("Kawadar.Domain.Proposals.QuestionAnswers.ProposalQuestionAnswer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Answer")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("JobProposalId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("JobProposalId1")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("QuestionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobProposalId1");
+
+                    b.HasIndex("QuestionId");
+
+                    b.HasIndex("JobProposalId", "QuestionId")
+                        .IsUnique();
+
+                    b.ToTable("ProposalQuestionAnswers");
+                });
 
             modelBuilder.Entity("Kawadar.Domain.Skills.FreelancerSkill.FreelancerSkill", b =>
                 {
@@ -627,6 +788,9 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.Property<string>("ProfileType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ScheduledDeletionAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid?>("SpecializationId")
                         .HasColumnType("uniqueidentifier");
@@ -906,7 +1070,8 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.HasOne("Kawadar.Domain.Jobs.Job", null)
                         .WithMany("Attachments")
                         .HasForeignKey("JobId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.OwnsOne("Kawadar.Domain.Common.ValueObjects.FileInfo", "File", b1 =>
                         {
@@ -948,7 +1113,27 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.HasOne("Kawadar.Domain.Jobs.Job", null)
                         .WithMany("Questions")
                         .HasForeignKey("JobId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Kawadar.Domain.Jobs.JobViews.JobView", b =>
+                {
+                    b.HasOne("Kawadar.Domain.Jobs.Job", "Job")
+                        .WithMany()
+                        .HasForeignKey("JobId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", "UserProfile")
+                        .WithMany()
+                        .HasForeignKey("UserProfileId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Job");
+
+                    b.Navigation("UserProfile");
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Jobs.JobReports.JobReport", b =>
@@ -1039,6 +1224,34 @@ namespace Kawadar.Infrastructure.Data.Migrations
                         .HasForeignKey("ReviewerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+            modelBuilder.Entity("Kawadar.Domain.Proposals.ProposalMilestones.ProposalMilestone", b =>
+                {
+                    b.HasOne("Kawadar.Domain.Proposals.JobProposal", null)
+                        .WithMany("Milestones")
+                        .HasForeignKey("JobProposalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Kawadar.Domain.Proposals.QuestionAnswers.ProposalQuestionAnswer", b =>
+                {
+                    b.HasOne("Kawadar.Domain.Proposals.JobProposal", null)
+                        .WithMany()
+                        .HasForeignKey("JobProposalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kawadar.Domain.Proposals.JobProposal", null)
+                        .WithMany("QuestionAnswers")
+                        .HasForeignKey("JobProposalId1");
+
+                    b.HasOne("Kawadar.Domain.Jobs.JobQuestions.JobQuestion", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Question");
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Skills.FreelancerSkill.FreelancerSkill", b =>
@@ -1141,6 +1354,13 @@ namespace Kawadar.Infrastructure.Data.Migrations
             modelBuilder.Entity("Kawadar.Domain.Portfolios.Project.PortfolioProject", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("Kawadar.Domain.Proposals.JobProposal", b =>
+                {
+                    b.Navigation("Milestones");
+
+                    b.Navigation("QuestionAnswers");
                 });
 #pragma warning restore 612, 618
         }

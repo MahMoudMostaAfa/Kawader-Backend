@@ -13,7 +13,9 @@ using Kawadar.Infrastructure.Data.Interceptors;
 using Kawadar.Domain.Common.Constants;
 using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Interfaces.Auth;
+using Kawadar.Application.Common.Interfaces.BackgroundJobs;
 using Kawadar.Infrastructure.Services;
+using Kawadar.Infrastructure.Services.BackgroundJobs;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Infrastructure.Services.Repositories;
 using Azure.Storage.Blobs;
@@ -24,6 +26,8 @@ using Kawadar.Application.Common.Messaging;
 using Kawadar.Infrastructure.Messaging;
 using MassTransit;
 using Kawadar.Infrastructure.Messaging.Consumers;
+using Hangfire;
+using Hangfire.SqlServer;
 
 public static class DependencyInjection
 {
@@ -31,8 +35,6 @@ public static class DependencyInjection
   public static IServiceCollection AddInfrastructure(this IServiceCollection service, IConfiguration configuration)
   {
     service.AddSingleton(TimeProvider.System);
-
-
 
     var connectionString = configuration.GetConnectionString("MonsterAsp");
 
@@ -84,13 +86,13 @@ public static class DependencyInjection
     .AddDefaultTokenProviders();
 
 
-
-
-
     var authBuilder = service.AddAuthorizationBuilder();
 
     // add MassTransit and rabbitMq services 
     service.AddMassTransitCfg(configuration);
+
+    // add Hangfire services
+    service.AddHangfireCfg(configuration);
 
     //Adding Azure Blob Storage
     service.AddSingleton(provider =>
@@ -138,11 +140,15 @@ public static class DependencyInjection
     service.AddScoped<IJobsRepository, JobsRepository>();
     service.AddScoped<IReviewRepository, ReviewRepository>();
 
+    service.AddScoped<IJobViewRepository, JobViewRepository>();
+    service.AddScoped<IProposalsRepository, ProposalsRepository>();
     service.AddScoped<IUnitOfWork, UnitOfWork>();
-
-
-
     service.AddTransient<IIdentityService, IdentityService>();
+
+
+    // Account deletion scheduler
+    service.AddScoped<IAccountDeletionScheduler, HangfireAccountDeletionScheduler>();
+
     return service;
   }
 
@@ -270,4 +276,29 @@ public static class DependencyInjection
     return services;
   }
 
+
+
+  public static IServiceCollection AddHangfireCfg(this IServiceCollection services, IConfiguration configuration)
+  {
+    var connectionString = configuration.GetConnectionString("MonsterAsp");
+    ArgumentException.ThrowIfNullOrEmpty(connectionString, "Connection string 'MonsterAsp' not found.");
+
+    // Hangfire configuration
+    services.AddHangfire(config => config
+      .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+      .UseSimpleAssemblyNameTypeSerializer()
+      .UseRecommendedSerializerSettings()
+      .UseSqlServerStorage(connectionString, new SqlServerStorageOptions
+      {
+        CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+        SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+        QueuePollInterval = TimeSpan.Zero,
+        UseRecommendedIsolationLevel = true,
+        DisableGlobalLocks = true
+      }));
+    services.AddHangfireServer();
+
+
+    return services;
+  }
 }

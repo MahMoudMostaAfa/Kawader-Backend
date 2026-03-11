@@ -56,6 +56,7 @@ public class CreateJobCommandHandler : IRequestHandler<CreateJobCommand, Result<
     if (skillsResult.IsError) return skillsResult.Errors;
     var skills = skillsResult.Value.ToList();
 
+
     var JobQuestionsResult = JobQuestion.CreateList(request.QuestionDtos.Select(q => (q.Question, q.IsRequired)).ToList());
     if (JobQuestionsResult.IsError) return JobQuestionsResult.Errors;
     var jobQuestions = JobQuestionsResult.Value;

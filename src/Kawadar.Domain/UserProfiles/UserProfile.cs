@@ -69,6 +69,7 @@ public class UserProfile : AuditableEntity
 
   public bool IsDeleted { get; private set; } = false;
   public DateTime? DeletedAt { get; private set; }
+  public DateTime? ScheduledDeletionAt { get; private set; }
 
   // Foreign Keys
   public string UserId { get; private set; } = "";
@@ -246,6 +247,27 @@ public class UserProfile : AuditableEntity
       IsActivated = false;
       ActivatedAt = null;
     }
+  }
+
+  public Result<Updated> MarkAsDeleted()
+  {
+    if (IsDeleted)
+      return UserProfileErrors.AccountAlreadyMarkedForDeletion;
+
+    IsDeleted = true;
+    DeletedAt = DateTime.UtcNow;
+    ScheduledDeletionAt = DateTime.UtcNow.AddMonths(1);
+    IsOnline = false;
+    IsAvailable = false;
+    return Result.Updated;
+  }
+
+  public Result<Updated> CancelDeletion()
+  {
+    IsDeleted = false;
+    DeletedAt = null;
+    ScheduledDeletionAt = null;
+    return Result.Updated;
   }
 
 }
