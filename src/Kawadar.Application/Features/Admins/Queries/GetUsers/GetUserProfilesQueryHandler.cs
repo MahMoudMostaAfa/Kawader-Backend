@@ -3,15 +3,16 @@ using Kawadar.Application.Common.Errors;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Application.Common.Models;
+using Kawadar.Application.Features.Admins.Dtos;
 using Kawadar.Domain.Common.Results;
 using MediatR;
 
 namespace Kawadar.Application.Features.Admins.Queries.GetUsers
 {
     public class GetUserProfilesQueryHandler(IUser user, IUsersRepository usersRepository
-        , IIdentityService identityService, IMapper mapper) : IRequestHandler<GetUserProfilesQuery, Result<PaginatedList<UserProfileDto>>>
+        , IIdentityService identityService, IMapper mapper) : IRequestHandler<GetUserProfilesQuery, Result<PaginatedList<BriefUserProfileDto>>>
     {
-        public async Task<Result<PaginatedList<UserProfileDto>>> Handle(GetUserProfilesQuery request, CancellationToken cancellationToken)
+        public async Task<Result<PaginatedList<BriefUserProfileDto>>> Handle(GetUserProfilesQuery request, CancellationToken cancellationToken)
         {
             var userId = user.Id;
             if (userId is null) return ApplicationErrors.UserIsNotAuthenticated;
@@ -30,10 +31,10 @@ namespace Kawadar.Application.Features.Admins.Queries.GetUsers
 
             var UserProfileDtos = userProfiles.Items
                 .Zip(UserDtosResult.Value, (profile, dto) => (profile, dto))
-                .Select(pair => mapper.Map<UserProfileDto>(pair))
+                .Select(pair => mapper.Map<BriefUserProfileDto>(pair))
                 .ToList();
 
-            return new PaginatedList<UserProfileDto>(UserProfileDtos, userProfiles.TotalCount, request.page, request.pageSize);
+            return new PaginatedList<BriefUserProfileDto>(UserProfileDtos, userProfiles.TotalCount, request.page, request.pageSize);
         }
     }
 }

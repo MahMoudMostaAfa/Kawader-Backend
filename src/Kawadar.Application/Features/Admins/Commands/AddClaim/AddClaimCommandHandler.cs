@@ -18,10 +18,7 @@ namespace Kawadar.Application.Features.Admins.Commands.AddClaim
             var userResult = await identityService.GetUserByUserNameAsync(request.userName);
             if (userResult.IsError) return userResult.Errors;
 
-            var userDtoResult = await identityService.GetUserByUserNameAsync(request.userName);
-            if (userDtoResult.IsError) return userDtoResult.Errors;
-
-            var hasAdminRoleResult = await identityService.IsInRoleAsync(userDtoResult.Value.Id, DefaultRoles.Admin);
+            var hasAdminRoleResult = await identityService.IsInRoleAsync(userResult.Value.Id, DefaultRoles.Admin);
             if (!hasAdminRoleResult.Value) return Error.Conflict("Conflict", "You can only add permissions to admins");
 
             var AddClaimResult = await identityService.AddClaimAsync(userResult.Value.Id, "Permission", request.permission);

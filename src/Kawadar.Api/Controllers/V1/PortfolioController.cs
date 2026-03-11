@@ -69,9 +69,9 @@ namespace Kawadar.Api.Controllers.V1
         [ProducesResponseType(typeof(List<ProjectDTO>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        [EndpointName("GetProjectsById")]
-        [EndpointSummary("Gets projects by freelancer Id")]
-        [EndpointDescription("Gets freelancer projects by his unique identifier.")]
+        [EndpointName("GetProjectsByUserName")]
+        [EndpointSummary("Gets projects by freelancer UserName")]
+        [EndpointDescription("Gets freelancer projects by his unique UserName.")]
         public async Task<IActionResult> GetAllPortfolioProjectsByUserName([FromRoute] string userName, CancellationToken cancellationToken = default)
         {
             var query = new GetAllProjectsByFreelancerUserNameQuery(userName);
