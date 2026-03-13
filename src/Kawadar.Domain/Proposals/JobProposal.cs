@@ -156,5 +156,12 @@ public class JobProposal : AuditableEntity
     return Result.Deleted;
   }
 
+  public Result<Updated> UpdateState(JobProposalStatus jobProposalStatus)
+  {
+    if (jobProposalStatus != Status) Status = jobProposalStatus;
+
+    return Result.Updated;
+  }
+
 
 }

@@ -12,3 +12,17 @@ public class MilestoneDto
   public DateTime DueDate { set; get; }
 
 }
+
+public class MilestoneUpdateDto
+{
+  public Guid MilestoneId { set; get; }
+
+  public string Title { set; get; } = String.Empty;
+
+  public string Description { set; get; } = string.Empty;
+
+  public decimal Amount { set; get; }
+
+  public DateTime DueDate { set; get; }
+
+}
