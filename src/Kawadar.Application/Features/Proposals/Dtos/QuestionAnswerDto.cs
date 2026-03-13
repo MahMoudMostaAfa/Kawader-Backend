@@ -7,3 +7,10 @@ public class QuestionAnswerDto
 
   public string QuestionAnswer { set; get; } = String.Empty;
 }
+
+public class QuestionAnswerUpdateDto
+{
+  public Guid QuestionAnswerId { set; get; }
+
+  public string QuestionAnswer { set; get; } = String.Empty;
+}
