@@ -18,7 +18,9 @@ namespace Kawadar.Infrastructure.Services.Repositories
         public async Task<Result<ReviewStatisticsDto>> GetReviewsStatistics(Guid UserProfileId)
         {
             var count = await appDbContext.Reviews.Where(x => x.RevieweeId == UserProfileId).CountAsync();
-            var average = await appDbContext.Reviews.Where(x => x.RevieweeId == UserProfileId).Select(x => x.Rating).AverageAsync();
+            float average = 0;
+            var ratings = appDbContext.Reviews.Where(x => x.RevieweeId == UserProfileId).Select(x => x.Rating);
+            if (ratings.Count() != 0) average = await ratings.AverageAsync();
             return new ReviewStatisticsDto
             {
                 AverageRating = average,
