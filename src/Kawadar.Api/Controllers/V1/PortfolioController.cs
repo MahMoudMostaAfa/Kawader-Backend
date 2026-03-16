@@ -47,7 +47,7 @@ namespace Kawadar.Api.Controllers.V1
         }
 
 
-        [HttpGet("{Id:guid}")]
+        [HttpGet("{Id:guid}/items")]
         [ProducesResponseType(typeof(List<ItemDTO>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
@@ -63,7 +63,6 @@ namespace Kawadar.Api.Controllers.V1
                 Items => Ok(Items),
                 errors => Problem(errors));
         }
-
 
         [HttpGet("{userName}")]
         [ProducesResponseType(typeof(List<ProjectDTO>), StatusCodes.Status200OK)]

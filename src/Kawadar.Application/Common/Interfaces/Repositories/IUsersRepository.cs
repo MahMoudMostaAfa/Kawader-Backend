@@ -29,4 +29,6 @@ public interface IUsersRepository
         int pageSize,
         string sortBy);
     Task<Result<IEnumerable<UserProfile>>> GetUsersbyIds(IEnumerable<Guid> Ids);
+    Task<Result<UsersRoleCount>> GetUsersRoleCount();
+    Task<Result<int>> GetNewUsersThisMonth();
 }

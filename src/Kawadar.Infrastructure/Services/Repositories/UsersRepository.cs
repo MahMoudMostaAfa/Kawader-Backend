@@ -126,4 +126,24 @@ public class UsersRepository(AppDbContext appDbContext) : IUsersRepository
         }
         return users;
     }
+
+    public async Task<Result<UsersRoleCount>> GetUsersRoleCount()
+    {
+        var TotalCount = await appDbContext.UserProfiles.Where(x => x.ProfileType != ProfileType.Admin).CountAsync();
+        var FreelancersCount = await appDbContext.UserProfiles.Where(x => x.ProfileType == ProfileType.Freelancer).CountAsync();
+
+        return new UsersRoleCount
+        {
+            TotalCount = TotalCount,
+            FreelancersCount = FreelancersCount,
+            ClientsCount = TotalCount - FreelancersCount
+        };
+    }
+
+    public async Task<Result<int>> GetNewUsersThisMonth()
+    {
+        var newUsersCount = await appDbContext.UserProfiles.Where(x => x.CreatedAt >= DateTime.UtcNow.AddMonths(-1)).CountAsync();
+        return newUsersCount;
+    }
+
 }
