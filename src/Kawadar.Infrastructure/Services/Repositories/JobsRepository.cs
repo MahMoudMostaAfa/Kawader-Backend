@@ -8,7 +8,6 @@ using Kawadar.Domain.Jobs.JobReports.Enums;
 using Kawadar.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace Kawadar.Infrastructure.Services.Repositories;
 
 public class JobsRepository : IJobsRepository
@@ -187,6 +186,27 @@ public class JobsRepository : IJobsRepository
     }
     return jobs;
   }
+  
+    //If there is no job with one of the status there won't be an entry for it in the dictionary
+    public async Task<Result<Dictionary<JobStatus, int>>> GetJobStatusDistribution()
+    {
+        var JobStatusDistribution = await _context.Jobs.GroupBy(x => x.JobStatus).ToDictionaryAsync(x => x.Key, x => x.Count());
+        return JobStatusDistribution;
+    }
+
+    public async Task<Result<Dictionary<string, int>>> GetJobSpecilizationDistribution()
+    {
+        var jobSpecilizationDistribution = await _context.Jobs.GroupBy(x => x.Specilization.Name).ToDictionaryAsync(x => x.Key, x => x.Count());
+        if (jobSpecilizationDistribution is null) return Error.Conflict("No Jobs Exist yet to carry out the Statistics");
+        return jobSpecilizationDistribution;
+    }
+
+    public async Task<Result<Dictionary<int, int>>> GetAverageJobPostingPerMonthDistribution()
+    {
+        var JobPostings = await _context.Jobs.GroupBy(x => x.CreatedAt.Month).ToDictionaryAsync(x => x.Key, x => x.Count());
+        return JobPostings;
+    }
+   
 
   public async Task<Result<List<JobReport>>> GetReportsByJobSlug(string slug)
   {

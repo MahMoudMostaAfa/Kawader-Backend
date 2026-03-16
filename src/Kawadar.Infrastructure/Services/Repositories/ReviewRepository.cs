@@ -68,5 +68,29 @@ namespace Kawadar.Infrastructure.Services.Repositories
 
             return new PaginatedList<Review>(items, totalCount, page, pageSize);
         }
+
+        public async Task<Result<Dictionary<float, int>>> GetReviewDistribution()
+        {
+            var distribution = await appDbContext.Reviews.GroupBy(x => x.Rating).ToDictionaryAsync(x => x.Key, x => x.Count());
+            if (distribution is null) return Error.Conflict("There are no reviews to get the distribution");
+            return distribution;
+        }
+
+        public async Task<Result<RatingStatisticsDto>> GetRatingStatistics()
+        {
+            var reviewsCount = await appDbContext.Reviews.CountAsync();
+            float averageRating = 0;
+            if(reviewsCount > 0) averageRating = await appDbContext.Reviews.Select(x => x.Rating).AverageAsync();
+            var UserReviews = appDbContext.Reviews.GroupBy(x => x.RevieweeId).Select(x => x.Average(x => x.Rating));
+            var highestRating = await UserReviews.MaxAsync();
+            var lowestRating = await UserReviews.MinAsync();
+            return new RatingStatisticsDto
+            {
+                averageRating = averageRating,
+                HighestRated = highestRating,
+                LowestRated = lowestRating
+            };
+            
+        }
     }
 }
