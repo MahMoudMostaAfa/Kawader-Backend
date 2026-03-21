@@ -41,7 +41,7 @@ public class UserProfileDto
 
 
   public ProfileType ProfileType { get; set; }
-
+    public List<string> skills { get; set; } = new List<string>();
 
 
 
