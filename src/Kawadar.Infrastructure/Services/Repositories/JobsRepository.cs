@@ -8,6 +8,7 @@ using Kawadar.Domain.Jobs.JobReports.Enums;
 using Kawadar.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace Kawadar.Infrastructure.Services.Repositories;
 
 public class JobsRepository : IJobsRepository
@@ -186,7 +187,16 @@ public class JobsRepository : IJobsRepository
     }
     return jobs;
   }
-  
+
+  public async Task<Result<List<JobReport>>> GetReportsByJobSlug(string slug)
+  {
+    var job = await _context.Jobs.FirstOrDefaultAsync(x => x.JobSlug == slug);
+    if (job is null) return Error.NotFound("Job not found.");
+    var jobReports = await _context.JobReports.Where(x => x.JobId == job.Id).ToListAsync();
+    return jobReports;
+  }
+=========
+
     //If there is no job with one of the status there won't be an entry for it in the dictionary
     public async Task<Result<Dictionary<JobStatus, int>>> GetJobStatusDistribution()
     {
@@ -206,13 +216,4 @@ public class JobsRepository : IJobsRepository
         var JobPostings = await _context.Jobs.GroupBy(x => x.CreatedAt.Month).ToDictionaryAsync(x => x.Key, x => x.Count());
         return JobPostings;
     }
-   
-
-  public async Task<Result<List<JobReport>>> GetReportsByJobSlug(string slug)
-  {
-    var job = await _context.Jobs.FirstOrDefaultAsync(x => x.JobSlug == slug);
-    if (job is null) return Error.NotFound("Job not found.");
-    var jobReports = await _context.JobReports.Where(x => x.JobId == job.Id).ToListAsync();
-    return jobReports;
-  }
 }

@@ -3,6 +3,7 @@ using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Portfolios.ProjectSkill;
 using Kawadar.Domain.Skills;
 using Kawadar.Domain.Skills.FreelancerSkill;
+using Kawadar.Domain.Skills.FreelancerSkill.Enum;
 using Kawadar.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -58,6 +59,19 @@ namespace Kawadar.Infrastructure.Services.Repositories
         {
             var skills = await appDbContext.Skills.Where(s => skillIds.Contains(s.Id)).ToListAsync();
             if (skills.Count != skillIds.Count) return Error.NotFound("Skill.NotFound", "One or more skills not found");
+            return skills;
+        }
+
+        public async Task<List<string>> GetFreelancerSkillsByUserProfileId(Guid UserProfileId)
+        {
+            var PredefinedSkills = from fs in appDbContext.FreelacnerSkills
+                                 join s in appDbContext.Skills on fs.SkillId equals s.Id
+                                 where fs.FreelancerId == UserProfileId
+                                 select s.Name;
+            var customSkills = await appDbContext.FreelacnerSkills.Where(x => x.FreelancerId == UserProfileId && x.SkillType == SkillType.Custom)
+                                                                  .Select(x => x.CustomSkillName).ToListAsync();
+            var skills = await PredefinedSkills.ToListAsync();
+            skills.AddRange(customSkills);
             return skills;
         }
     }
