@@ -188,13 +188,14 @@ public class JobsRepository : IJobsRepository
     return jobs;
   }
 
-    public async Task<Result<List<JobReport>>> GetReportsByJobSlug(string slug)
-    {
-        var job = await _context.Jobs.FirstOrDefaultAsync(x => x.JobSlug == slug);
-        if(job is null) return Error.NotFound("Job not found.");
-        var jobReports = await _context.JobReports.Where(x => x.JobId == job.Id).ToListAsync();
-        return jobReports;
-    }
+  public async Task<Result<List<JobReport>>> GetReportsByJobSlug(string slug)
+  {
+    var job = await _context.Jobs.FirstOrDefaultAsync(x => x.JobSlug == slug);
+    if (job is null) return Error.NotFound("Job not found.");
+    var jobReports = await _context.JobReports.Where(x => x.JobId == job.Id).ToListAsync();
+    return jobReports;
+  }
+=========
 
     //If there is no job with one of the status there won't be an entry for it in the dictionary
     public async Task<Result<Dictionary<JobStatus, int>>> GetJobStatusDistribution()
