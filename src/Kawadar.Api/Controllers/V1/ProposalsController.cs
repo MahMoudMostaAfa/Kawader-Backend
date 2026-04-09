@@ -2,6 +2,7 @@ using Kawadar.Api.Requests.Proposals;
 using Kawadar.Application.Features.Proposals.Commands.CreateProposal;
 using Kawadar.Application.Features.Proposals.Commands.DeleteProposal;
 using Kawadar.Application.Features.Proposals.Commands.UpdateProposal;
+using Kawadar.Application.Features.Proposals.Commands.UpdateProposalStatus;
 using Kawadar.Application.Features.Proposals.Queries.GetProposalById;
 using Kawadar.Application.Features.Proposals.Queries.GetProposals;
 using Kawadar.Application.Features.Proposals.Queries.GetUserProposals;
@@ -89,6 +90,18 @@ public class ProposalsController : ApiController
     var result = await _sender.Send(new GetProposalByIdQuery(proposalId));
 
     return result.Match(proposal => Ok(proposal), err => Problem(err));
+  }
+
+
+  [HttpPut("proposals/{proposalId:guid}/change-status")]
+  public async Task<IActionResult> ChangeProposalStatus([FromRoute] Guid proposalId, [FromBody]
+  UpdateProposalStatusRequest request)
+  {
+    var command = new UpdateProposalStatusCommand(proposalId, request.NewProposalStatus);
+
+    var result = await _sender.Send(command);
+
+    return result.Match(_ => NoContent(), err => Problem(err));
   }
 
 
