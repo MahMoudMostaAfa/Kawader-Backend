@@ -1,8 +1,6 @@
 ﻿using Kawadar.Domain.Common;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Portfolios.Items;
-using Kawadar.Domain.Portfolios.Project.Enum;
-using System.ComponentModel.DataAnnotations;
 
 namespace Kawadar.Domain.Portfolios.Project
 {
@@ -10,7 +8,7 @@ namespace Kawadar.Domain.Portfolios.Project
     {
         public string Title { get; private set; } = "";
         public string Description { get; private set; } = "";
-        public PortfolioProjectCategory Category { get; private set; } = PortfolioProjectCategory.GraphicDesign;
+        public Guid SpecilizationId { get; private set; }
         public DateTime? ProjectDate { get; private set; } = DateTime.UtcNow;
         public string? ProjectUrl { get; private set; } = "";
         public string ? ProjectImageUrl { get; private set; } = "";
@@ -22,16 +20,16 @@ namespace Kawadar.Domain.Portfolios.Project
         public Guid FreelancerId { get; private set; }
 
 
-        private PortfolioProject(string Title, string Description, PortfolioProjectCategory Category,
+        private PortfolioProject(string Title, string Description, Guid SpecilizationId,
              Guid FreelancerId): base(Guid.NewGuid())
         {
             this.Title = Title;
             this.Description = Description;
-            this.Category = Category;
+            this.SpecilizationId = SpecilizationId;
             this.FreelancerId = FreelancerId;
         }
 
-        public static Result<PortfolioProject> Create(string Title, string Description, PortfolioProjectCategory Category,
+        public static Result<PortfolioProject> Create(string Title, string Description, Guid specilization,
              Guid FreelancerId, string ProjectImageUrl, int displayOrder, string ProjectUrl = "")
         {
             if (string.IsNullOrWhiteSpace(Title))
@@ -49,10 +47,15 @@ namespace Kawadar.Domain.Portfolios.Project
                 return PortfolioProjectErrors.FreelancerIdIsRequired;
             }
 
+            if(specilization == Guid.Empty)
+            {
+                return PortfolioProjectErrors.SpecilizaitonIsRequired;
+            }
+
             var Project = new PortfolioProject(
                 Title,
                 Description,
-                Category,
+                specilization,
                 FreelancerId
                 );
 

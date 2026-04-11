@@ -38,7 +38,7 @@ namespace Kawadar.Api.Controllers.V1
         [EndpointDescription("Creates a new portfolio project with the freelancerId.")]
         public async Task<IActionResult> CreatePortfolioProject([FromForm] CreateProjectRequest request, CancellationToken ct = default)
         {
-            var command = new CreateProjectCommand(request.title, request.description, request.category, request.ProjectImage!, request.ProjectUrl!);
+            var command = new CreateProjectCommand(request.title, request.description, request.specilizationName, request.ProjectImage!, request.ProjectUrl!);
             var result = await _sender.Send(command, ct);
 
             return result.Match(

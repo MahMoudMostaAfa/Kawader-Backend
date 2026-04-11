@@ -8,11 +8,13 @@ using Kawadar.Application.Features.Portfolios.DTOs;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Portfolios.Project;
 using MediatR;
+using Kawadar.Domain.Specilizations;
 
 namespace Kawadar.Application.Features.Portfolios.Commands.CreateProject
 {
     public class CreateProjectCommandHandler(IUnitOfWork unitOfWork, IUser user, IPortfolioProjectRepository projectRepository
-        , IUsersRepository usersRepository, IStorageClient storageClient, IMapper mapper) : IRequestHandler<CreateProjectCommand, Result<ProjectDTO>>
+        , IUsersRepository usersRepository, ISpecilizationRepository specilizationRepository
+        , IStorageClient storageClient, IMapper mapper) : IRequestHandler<CreateProjectCommand, Result<ProjectDTO>>
     {
         public async Task<Result<ProjectDTO>> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
         {
@@ -34,7 +36,27 @@ namespace Kawadar.Application.Features.Portfolios.Commands.CreateProject
             if (uploadResult.IsError) return uploadResult.Errors;
 
             var projectImageUrl = uploadResult.Value;
-            var resultProject = PortfolioProject.Create(request.Title, request.Description, request.Category, freelancer.Id,
+            var specilizationId = Guid.Empty;
+            var SpecilizationResult = await specilizationRepository.GetByName(request.specilization);
+            if (SpecilizationResult.IsError && SpecilizationResult.TopError.Type == ErrorKind.NotFound)
+            {
+                var newSpecilization = Specilization.Create(request.specilization, true);
+                if (newSpecilization.IsError) return newSpecilization.Errors;
+                var addResult = await specilizationRepository.AddAsync(newSpecilization.Value);
+                if (addResult.IsError) return addResult.Errors;
+                specilizationId = newSpecilization.Value.Id;
+            }
+            else if (SpecilizationResult.IsSuccess)
+            { 
+                specilizationId = SpecilizationResult.Value.Id;
+            }
+
+            else
+            {
+                return SpecilizationResult.Errors;
+            }
+
+            var resultProject = PortfolioProject.Create(request.Title, request.Description, specilizationId, freelancer.Id,
                 projectImageUrl, displayOrder, request.ProjectUrl);
 
             if (resultProject.IsError) return resultProject.Errors;

@@ -15,6 +15,10 @@ namespace Kawadar.Application.Features.Portfolios.Commands.CreateProject
 
             RuleFor(x => x.ProjectImage).NotNull().WithMessage("The thumbnail image is required");
 
+            RuleFor(x => x.specilization).NotNull().WithMessage("The specilization can't be null")
+                .NotEmpty().WithMessage("The specilization can't be null")
+                .MaximumLength(50).WithMessage("Specilization name can't exceed 50 character");
+
             RuleFor(x => x.ProjectImage).Must(FileName => ExtensionValidator.ValidExtension(FileName.FileName, Extensions.AllowedImageExtensions))
                 .WithMessage("Alllowed file extensions are png, jpg and jpeg");
 
