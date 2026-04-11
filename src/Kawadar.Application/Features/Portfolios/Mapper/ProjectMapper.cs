@@ -18,8 +18,6 @@ namespace Kawadar.Application.Features.Portfolios.Mapper
 
                 .ForMember(dest => dest.title, op => op.MapFrom(src => src.Title))
 
-                .ForMember(dest => dest.category, op => op.MapFrom(src => src.Category))
-
                 .ForMember(dest => dest.description, op => op.MapFrom(src => src.Description))
                 
                 .ForMember(dest => dest.displayOrder, op => op.MapFrom(src => src.DisplayOrder));
