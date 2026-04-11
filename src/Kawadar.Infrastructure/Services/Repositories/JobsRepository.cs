@@ -195,7 +195,7 @@ public class JobsRepository : IJobsRepository
     var jobReports = await _context.JobReports.Where(x => x.JobId == job.Id).ToListAsync();
     return jobReports;
   }
-=========
+// =========
 
     //If there is no job with one of the status there won't be an entry for it in the dictionary
     public async Task<Result<Dictionary<JobStatus, int>>> GetJobStatusDistribution()
