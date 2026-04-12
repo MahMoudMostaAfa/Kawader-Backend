@@ -33,4 +33,7 @@ public interface IJobsRepository
   public Task<Result<JobReport>> GetJobReportById(Guid Id);
     public Task<Result<Job>> GetJobByIdAsync(Guid Id);
     public Task<Result<List<JobReport>>> GetReportsByJobSlug(string slug);
+    public Task<Result<Dictionary<JobStatus, int>>> GetJobStatusDistribution();
+    public Task<Result<Dictionary<string, int>>> GetJobSpecilizationDistribution();
+    public Task<Result<Dictionary<int, int>>> GetAverageJobPostingPerMonthDistribution();
 }

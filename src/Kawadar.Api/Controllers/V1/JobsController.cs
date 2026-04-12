@@ -18,12 +18,6 @@ using Kawadar.Domain.Jobs.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Kawadar.Application.Features.Jobs.Commands.ReportJob;
-using Kawadar.Domain.Jobs.JobReports.Enums;
-using Kawadar.Application.Features.Jobs.Queries.GetJobReports;
-using Kawadar.Application.Features.Jobs.Queries.GetJobReport;
-using Kawadar.Application.Features.Jobs.Commands.UpdateJobReport;
-using Kawadar.Application.Features.Jobs.Queries.GetReportsByJobSlug;
 using Kawadar.Application.Features.Reviews.Commands.CreateReview;
 
 namespace Kawadar.Api.Controllers.V1;
@@ -309,112 +303,23 @@ public class JobsController : ApiController
     );
   }
 
-    [HttpPost("{slug}/Report")]
-    [EndpointSummary("Reports a job")]
-    [EndpointDescription("Reports a job by identifiying the type of violation")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> ReportJob([FromRoute]string slug, [FromBody]ReportJobRequest request, CancellationToken ct)
-    {
-        var command = new ReportJobCommand(slug, request.reportType, request.content);
-        var result = await _sender.Send(command, ct);
+  [HttpPost("{slug}/review")]
+  [EndpointSummary("Creates a review for a job")]
+  [EndpointDescription("Creates a review for a job either client freelancer or freelancer client")]
+  [ProducesResponseType(StatusCodes.Status201Created)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  public async Task<IActionResult> ReviewJobBySlug([FromRoute]string slug, [FromBody]ReviewJobRequest request, CancellationToken ct)
+  {
+      var command = new CreateReviewCommand(slug, request.RevieweeUserName, request.rating, request.Comment);
+      var result = await _sender.Send(command, ct);
 
-        return result.Match(
-            _ => Created(),
-            errors => Problem(errors)
-        );
-    }
+      return result.Match(
+          _ => Created(),
+          errors => Problem(errors)
+      );
+  }
 
-    [HttpGet("Reports")]
-    [EndpointSummary("Gets Job Reports")]
-    [EndpointDescription("Gets Job Reports in pages with brief information")]
-    [ProducesResponseType(typeof(PaginatedList<BriefJobReportDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetJobReports(
-        [FromQuery] ReportType? reportType,
-        [FromQuery] ReportStatus? reportStatus,
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10,
-        [FromQuery] string sortBy = "newest", CancellationToken ct = default)
-    {
-        var query = new GetJobReportsQuery(reportType, reportStatus, page, pageSize, sortBy);
-        var result = await _sender.Send(query, ct);
-
-        return result.Match(
-            jobReports => Ok(jobReports),
-            errors => Problem(errors)
-        );
-    }
-
-    [HttpGet("Reports/{Id:guid}")]
-    [EndpointSummary("Gets a Job Report")]
-    [EndpointDescription("Gets a Job Report by its unique identifier with full details")]
-    [ProducesResponseType(typeof(FullJobReportDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetJobReport([FromRoute] Guid Id , CancellationToken ct = default)
-    {
-        var query = new GetJobReportQuery(Id);
-        var result = await _sender.Send(query, ct);
-
-        return result.Match(
-            jobReport => Ok(jobReport),
-            errors => Problem(errors)
-        );
-    }
-
-    [HttpPut("reports/{Id:guid}")]
-    [EndpointSummary("Updates a Job Report")]
-    [EndpointDescription("Updates Job Report Status and Action Taken")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> UpdateJobReport([FromRoute] Guid Id, UpdateJobReportRequest request, CancellationToken ct = default)
-    {
-        var command = new UpdateJobReportCommand(Id, request.ActionTaken, request.reportStatus);
-        var result = await _sender.Send(command, ct);
-
-        return result.Match(
-            _ => NoContent(),
-            errors => Problem(errors)
-        );
-    }
-
-    [HttpGet("{slug}/reports")]
-    [EndpointSummary("Gets job reports")]
-    [EndpointDescription("Gets job reports using the job slug")]
-    [ProducesResponseType(typeof(List<BriefJobReportDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetReportsByJobSlug([FromRoute] string slug, CancellationToken ct)
-    {
-        var query = new GetReportsByJobSlugQuery(slug);
-        var result = await _sender.Send(query, ct);
-
-        return result.Match(
-            reports => Ok(reports),
-            errors => Problem(errors)
-        );
-    }
-
-    [HttpPost("{slug}/review")]
-    [EndpointSummary("Creates a review for a job")]
-    [EndpointDescription("Creates a review for a job either client freelancer or freelancer client")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> ReviewJobBySlug([FromRoute]string slug, [FromBody]ReviewJobRequest request, CancellationToken ct)
-    {
-        var command = new CreateReviewCommand(slug, request.RevieweeUserName, request.rating, request.Comment);
-        var result = await _sender.Send(command, ct);
-
-        return result.Match(
-            _ => Created(),
-            errors => Problem(errors)
-        );
-    }
   [HttpPost("generate-description")]
   [EndpointSummary("Generates a job description using AI")]
   [EndpointDescription("Generates a clear and detailed job description based on the provided context. The description is generated in the same language as the context.")]

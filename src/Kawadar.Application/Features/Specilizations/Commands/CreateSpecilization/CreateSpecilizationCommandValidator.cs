@@ -6,7 +6,9 @@ namespace Kawadar.Application.Features.Specilizations.Commands.CreateSpecilizati
     {
         public CreateSpecilizationCommandValidator()
         {
-            RuleFor(x => x.name).NotEmpty().WithMessage("Specilization name can't be empty");
+            RuleFor(x => x.name).NotNull().WithMessage("the specilization name is required")
+                .NotEmpty().WithMessage("Specilization name can't be empty")
+                .MaximumLength(50).WithMessage("Specilization name can't exceed 50 character");
         }
     }
 }

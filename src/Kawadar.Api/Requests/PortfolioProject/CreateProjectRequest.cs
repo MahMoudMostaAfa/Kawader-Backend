@@ -8,6 +8,6 @@ namespace Kawadar.Api.Requests.PortfolioProject
         public string description { get; set; } = "";
         public IFormFile? ProjectImage { get; set; }
         public string? ProjectUrl { get; set; }
-        public PortfolioProjectCategory category { get; set; }
+        public string specilizationName { get; set; } = "";
     }
 }
