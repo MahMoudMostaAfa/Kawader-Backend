@@ -12,5 +12,8 @@ namespace Kawadar.Domain.Portfolios.Project
 
         public static Error DescriptionIsRequired => Error.Validation("PortfolioProject.DescriptionIsRequired",
             "Description is required to create a portfolio project");
+
+        public static Error SpecilizaitonIsRequired => Error.Validation("PortfolioProject.SpecilizationIsRequired",
+            "specilization is required to create a portfolio project");
     }
 }

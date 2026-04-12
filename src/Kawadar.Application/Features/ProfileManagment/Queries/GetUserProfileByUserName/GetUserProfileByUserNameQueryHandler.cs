@@ -15,13 +15,16 @@ public class GetUserProfileByUserNameQueryHandler : IRequestHandler<GetUserProfi
   private readonly IUser _user;
   private readonly IIdentityService _identityService;
   private readonly IUsersRepository _usersRepository;
+  private readonly ISkillRepository _skillRepository;
 
-  public GetUserProfileByUserNameQueryHandler(IMapper mapper, IUser user, IIdentityService identityService, IUsersRepository usersRepository)
+  public GetUserProfileByUserNameQueryHandler(IMapper mapper, IUser user, IIdentityService identityService,
+      IUsersRepository usersRepository, ISkillRepository skillRepository)
   {
     _mapper = mapper;
     _user = user;
     _identityService = identityService;
     _usersRepository = usersRepository;
+    _skillRepository = skillRepository;
   }
   public async Task<Result<UserProfileDto>> Handle(GetUserProfileByUserNameQuery request, CancellationToken cancellationToken)
   {
@@ -54,6 +57,8 @@ public class GetUserProfileByUserNameQueryHandler : IRequestHandler<GetUserProfi
 
 
     var userProfileDto = _mapper.Map<UserProfileDto>((userProfile, requestedUserResult.Value));
+    var skills = await _skillRepository.GetFreelancerSkillsByUserProfileId(userProfile.Id);
+    userProfileDto.skills = skills;
 
 
     if (userId != requestedUserResult.Value.Id) userProfileDto.LastName = userProfileDto.LastName.Substring(0, 1);

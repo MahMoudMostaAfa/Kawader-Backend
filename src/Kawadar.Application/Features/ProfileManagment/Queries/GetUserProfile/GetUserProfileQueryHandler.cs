@@ -3,6 +3,7 @@ using Kawadar.Application.Common.Errors;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Domain.Common.Results;
+using Kawadar.Domain.UserProfiles;
 using MediatR;
 
 namespace Kawadar.Application.Features.ProfileManagment.Queries.GetUserProfile;
@@ -12,13 +13,15 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, R
   private readonly IUser _currentUser;
   private readonly IUsersRepository _usersRepository;
   private readonly IIdentityService _identityService;
+  private readonly ISkillRepository _skillRepository;
 
   private readonly IMapper _mapper;
-  public GetUserProfileQueryHandler(IUser user, IUsersRepository usersRepository, IIdentityService identityService, IMapper mapper)
+  public GetUserProfileQueryHandler(IUser user, IUsersRepository usersRepository, IIdentityService identityService, IMapper mapper, ISkillRepository skillRepository)
   {
     _currentUser = user;
     _usersRepository = usersRepository;
     _identityService = identityService;
+    _skillRepository = skillRepository;
     _mapper = mapper;
 
   }
@@ -40,7 +43,11 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, R
 
     var UserProfile = UserProfileResult.Value;
 
-    return _mapper.Map<UserProfileDto>((UserProfile, identityUserResult.Value));
+    var userProfileDto = _mapper.Map<UserProfileDto>((UserProfile, identityUserResult.Value));
+    var skills = await _skillRepository.GetFreelancerSkillsByUserProfileId(UserProfile.Id);
+    userProfileDto.skills = skills;
 
-  }
+    return userProfileDto;
+
+    }
 }

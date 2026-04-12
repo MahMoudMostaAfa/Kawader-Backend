@@ -38,7 +38,7 @@ namespace Kawadar.Api.Controllers.V1
         [EndpointDescription("Creates a new portfolio project with the freelancerId.")]
         public async Task<IActionResult> CreatePortfolioProject([FromForm] CreateProjectRequest request, CancellationToken ct = default)
         {
-            var command = new CreateProjectCommand(request.title, request.description, request.category, request.ProjectImage!, request.ProjectUrl!);
+            var command = new CreateProjectCommand(request.title, request.description, request.specilizationName, request.ProjectImage!, request.ProjectUrl!);
             var result = await _sender.Send(command, ct);
 
             return result.Match(
@@ -47,7 +47,7 @@ namespace Kawadar.Api.Controllers.V1
         }
 
 
-        [HttpGet("{Id:guid}")]
+        [HttpGet("{Id:guid}/items")]
         [ProducesResponseType(typeof(List<ItemDTO>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
@@ -63,7 +63,6 @@ namespace Kawadar.Api.Controllers.V1
                 Items => Ok(Items),
                 errors => Problem(errors));
         }
-
 
         [HttpGet("{userName}")]
         [ProducesResponseType(typeof(List<ProjectDTO>), StatusCodes.Status200OK)]
