@@ -4,6 +4,7 @@ using Kawadar.Api.Infrastructure;
 using Kawadar.Api.OpenApi.Transformer;
 using Kawadar.Api.Services;
 using Kawadar.Application.Common.Interfaces.Auth;
+using Kawadar.Infrastructure.Hubs;
 using Kawadar.Infrastructure.Settings;
 
 namespace Kawadar.Api;
@@ -20,6 +21,7 @@ public static class DependencyInjection
     .AddApiVersioning()
     .AddConfiguredCors(configuration)
     .AddIdentityServices();
+
     return services;
   }
 
@@ -125,6 +127,8 @@ public static class DependencyInjection
     return services;
   }
 
+
+
   public static IApplicationBuilder UseCoreMiddleware(this IApplicationBuilder app, IConfiguration configuration)
   {
     // 1. Exception handling should be FIRST to catch all errors
@@ -152,5 +156,6 @@ public static class DependencyInjection
 
     return app;
   }
+
 
 }

@@ -203,17 +203,17 @@ public class UserProfile : AuditableEntity
   }
 
   public Result<Deleted> Delete()
-    {
-        IsDeleted = true;
-        return Result.Deleted;
-    }
+  {
+    IsDeleted = true;
+    return Result.Deleted;
+  }
 
   public Result<Success> Ban(DateTime bannedUntil)
-    {
-        IsBanned = true;
-        BannedUntil = bannedUntil;
-        return Result.Success;
-    }
+  {
+    IsBanned = true;
+    BannedUntil = bannedUntil;
+    return Result.Success;
+  }
 
   public Result<Updated> UpdateProfilePicture(string profilePictureUrl)
   {
@@ -270,4 +270,12 @@ public class UserProfile : AuditableEntity
     return Result.Updated;
   }
 
+
+  public Result<Updated> UpdateOnlineStatus(bool isOnline, DateTime? lastOnlineAt = null)
+  {
+
+    IsOnline = isOnline;
+    LastOnlineAt = lastOnlineAt ?? DateTime.UtcNow;
+    return Result.Updated;
+  }
 }
