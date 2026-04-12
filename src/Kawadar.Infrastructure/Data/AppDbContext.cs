@@ -22,6 +22,7 @@ using Kawadar.Infrastructure.Identity;
 using MediatR;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Kawadar.Domain.Jobs.SavedJobs;
 
 namespace Kawadar.Infrastructure.Data;
 
@@ -46,6 +47,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IMediator medi
   public DbSet<JobView> JobViews => Set<JobView>();
 
   public DbSet<JobProposal> JobProposals => Set<JobProposal>();
+
+  public DbSet<SavedJob> SavedJobs => Set<SavedJob>();
 
   public DbSet<ProposalMilestone> ProposalMilestones => Set<ProposalMilestone>();
 
