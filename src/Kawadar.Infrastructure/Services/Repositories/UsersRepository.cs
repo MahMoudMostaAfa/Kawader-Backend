@@ -142,8 +142,16 @@ public class UsersRepository(AppDbContext appDbContext) : IUsersRepository
 
     public async Task<Result<int>> GetNewUsersThisMonth()
     {
-        var newUsersCount = await appDbContext.UserProfiles.Where(x => x.CreatedAt >= DateTime.UtcNow.AddMonths(-1)).CountAsync();
+        var now = DateTime.UtcNow;
+        var monthStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+        var nextMonthStart = monthStart.AddMonths(1);
+        var newUsersCount = await appDbContext.UserProfiles.Where(x => x.CreatedAt >= monthStart && x.CreatedAt < nextMonthStart).CountAsync();
         return newUsersCount;
+    }
+
+    public async Task<int> GetVerifiedUserCount()
+    {
+        return await appDbContext.UserProfiles.Where(x => x.IsIdentityVerified == true).CountAsync();
     }
 
 }

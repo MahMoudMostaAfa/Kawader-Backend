@@ -103,4 +103,19 @@ public class ProposalsRepository : IProposalsRepository
 
     return new PaginatedList<JobProposal>(items, totalCount, Page, PageSize);
   }
+    
+    public async Task<int> GetProposalsCount()
+    {
+        return await _context.JobProposals.CountAsync();
+    }
+
+    public async Task<float> AverageProposalPerJob()
+    {
+        var proposalsCount = await _context.JobProposals.CountAsync();
+        var jobsCount = await _context.Jobs.CountAsync();
+        float average = proposalsCount / jobsCount;
+        return average;
+    }
+
+
 }

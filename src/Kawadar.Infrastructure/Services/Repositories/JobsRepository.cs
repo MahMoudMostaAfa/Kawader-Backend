@@ -206,13 +206,13 @@ public class JobsRepository : IJobsRepository
     public async Task<Result<Dictionary<string, int>>> GetJobSpecilizationDistribution()
     {
         var jobSpecilizationDistribution = await _context.Jobs.GroupBy(x => x.Specilization.Name).ToDictionaryAsync(x => x.Key, x => x.Count());
-        if (jobSpecilizationDistribution is null) return Error.Conflict("No Jobs Exist yet to carry out the Statistics");
         return jobSpecilizationDistribution;
     }
 
     public async Task<Result<Dictionary<int, int>>> GetAverageJobPostingPerMonthDistribution()
     {
-        var JobPostings = await _context.Jobs.GroupBy(x => x.CreatedAt.Month).ToDictionaryAsync(x => x.Key, x => x.Count());
+        var JobPostings = await _context.Jobs.Where(x => x.CreatedAt.Year == DateTime.UtcNow.Year)
+            .GroupBy(x => x.CreatedAt.Month).ToDictionaryAsync(x => x.Key, x => x.Count());
         return JobPostings;
     }
 }
