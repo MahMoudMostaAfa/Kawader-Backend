@@ -4,6 +4,7 @@ using Kawadar.Application.Features.Badges.Commands.CreateBadge;
 using Kawadar.Application.Features.Badges.Commands.DeleteBadge;
 using Kawadar.Application.Features.Badges.Commands.UpdateBadge;
 using Kawadar.Application.Features.Badges.DTOs;
+using Kawadar.Application.Features.Badges.Queries.GetAllBadges;
 using Kawadar.Application.Features.Badges.Queries.GetBadgeById;
 using Kawadar.Application.Features.Badges.Queries.GetFreelancerBadgesQuery;
 using Kawadar.Domain.Common.Constants;
@@ -39,6 +40,25 @@ namespace Kawadar.Api.Controllers.V1
 
             return result.Match(
                 badge => Ok(badge)
+                , errors => Problem(errors));
+
+        }
+
+        [HttpGet("Admin/Badge")]
+        [Authorize(Policy = Permissions.ViewBadges)]
+        [ProducesResponseType(typeof(List<BadgeDTO>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [EndpointName("GetAllBadges")]
+        [EndpointSummary("Gets all badges")]
+        [EndpointDescription("Gets all badges so the admin can delete or update them.")]
+        public async Task<IActionResult> GetAllBadges(CancellationToken ct)
+        {
+            var query = new GetAllBadgesQuery();
+            var result = await _sender.Send(query, ct);
+
+            return result.Match(
+                badges => Ok(badges)
                 , errors => Problem(errors));
 
         }

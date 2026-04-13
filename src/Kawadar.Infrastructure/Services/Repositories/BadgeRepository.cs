@@ -43,5 +43,11 @@ namespace Kawadar.Infrastructure.Services.Repositories
                                           select b).ToListAsync();
             return FreelancerBadges;
         }
+
+        public async Task<IEnumerable<Badge>> GetAllBadges()
+        {
+            var Badges = await appDbContext.Badges.ToListAsync();
+            return Badges;
+        }
     }
 }
