@@ -75,6 +75,14 @@ namespace Kawadar.Infrastructure.Services.Repositories
             return distribution;
         }
 
+        public async Task<float> GetAverageReviewScore()
+        {
+            var reviewsCount = await appDbContext.Reviews.CountAsync();
+            float averageRating = 0;
+            if (reviewsCount > 0) averageRating = await appDbContext.Reviews.Select(x => x.Rating).AverageAsync();
+            return averageRating;
+        }
+
         public async Task<Result<RatingStatisticsDto>> GetRatingStatistics()
         {
             var reviewsCount = await appDbContext.Reviews.CountAsync();

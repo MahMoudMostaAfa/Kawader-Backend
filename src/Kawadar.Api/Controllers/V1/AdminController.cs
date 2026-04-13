@@ -7,6 +7,8 @@ using Kawadar.Application.Features.Admins.Commands.DeleteUser;
 using Kawadar.Application.Features.Admins.Dtos;
 using Kawadar.Application.Features.Admins.Queries.GetAdmins;
 using Kawadar.Application.Features.Admins.Queries.GetJobsStatistics;
+using Kawadar.Application.Features.Admins.Queries.GetProposalsStatistics;
+using Kawadar.Application.Features.Admins.Queries.GetReviewsStatistics;
 using Kawadar.Application.Features.Admins.Queries.GetUsers;
 using Kawadar.Application.Features.Admins.Queries.GetUsersStatistics;
 using Kawadar.Domain.Common.Constants;
@@ -91,7 +93,7 @@ namespace Kawadar.Api.Controllers.V1
         }
 
         [HttpGet("Dashboard/Users")]
-        [Authorize]
+        [Authorize(Policy = Permissions.ViewStatistics)]
         [ProducesResponseType(typeof(UserStatisticsDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
@@ -109,9 +111,28 @@ namespace Kawadar.Api.Controllers.V1
 
         }
 
+        [HttpGet("Dashboard/Reviews")]
+        [Authorize(Policy = Permissions.ViewStatistics)]
+        [ProducesResponseType(typeof(ReviewStatisticsDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [EndpointName("GetReviewsStatistics")]
+        [EndpointSummary("Gets the reviews statistics")]
+        [EndpointDescription("Gets the reviews statistics so the admins can monitor the platform")]
+        public async Task<IActionResult> GetReviewsStatistics(CancellationToken ct = default)
+        {
+            var query = new GetReviewStatisticsQuery();
+            var result = await _sender.Send(query, ct);
+
+            return result.Match(
+                Statistics => Ok(Statistics)
+                , errors => Problem(errors));
+
+        }
+
         [HttpGet("Dashboard/Jobs")]
-        [Authorize]
-        [ProducesResponseType(typeof(UserStatisticsDto), StatusCodes.Status200OK)]
+        [Authorize(Policy = Permissions.ViewStatistics)]
+        [ProducesResponseType(typeof(JobsStatisticsDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [EndpointName("GetJobsStatistics")]
@@ -120,6 +141,25 @@ namespace Kawadar.Api.Controllers.V1
         public async Task<IActionResult> GetJobsStatistics(CancellationToken ct = default)
         {
             var query = new GetJobsStatisticsQuery();
+            var result = await _sender.Send(query, ct);
+
+            return result.Match(
+                Statistics => Ok(Statistics)
+                , errors => Problem(errors));
+
+        }
+
+        [HttpGet("Dashboard/Proposals")]
+        [Authorize(Policy = Permissions.ViewStatistics)]
+        [ProducesResponseType(typeof(ProposalStatisticsDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [EndpointName("GetProposalStatistics")]
+        [EndpointSummary("Gets the Proposals statistics")]
+        [EndpointDescription("Gets the Proposals statistics so the admins can monitor the platform")]
+        public async Task<IActionResult> GetProposalsStatistics(CancellationToken ct = default)
+        {
+            var query = new GetProposalStatisticsQuery();
             var result = await _sender.Send(query, ct);
 
             return result.Match(

@@ -93,7 +93,7 @@ namespace Kawadar.Api.Controllers.V1
         [EndpointDescription("Creates a badge with data from the request.")]
         public async Task<IActionResult> CreateBadge(CreateBadgeRequest request, CancellationToken ct)
         {
-            var command = new CreateBadgeCommand(request.title, request.Icon, request.description);
+            var command = new CreateBadgeCommand(request.title, request.Icon!, request.description);
             var result = await _sender.Send(command, ct);
 
             return result.Match(
@@ -150,7 +150,7 @@ namespace Kawadar.Api.Controllers.V1
         [EndpointDescription("Updates a badge by its unique identifier.")]
         public async Task<IActionResult> UpdateBadge(Guid Id, [FromForm]UpdateBadgeRequest request, CancellationToken ct)
         {
-            var command = new UpdateBadgeCommand(Id, request.Icon);
+            var command = new UpdateBadgeCommand(Id, request.Icon!);
             var result = await _sender.Send(command, ct);
 
             return result.Match(

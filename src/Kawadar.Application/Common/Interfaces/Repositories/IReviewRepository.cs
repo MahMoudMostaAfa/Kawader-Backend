@@ -13,6 +13,7 @@ namespace Kawadar.Application.Common.Interfaces.Repositories
         public Task<Result<Review>> GetReviewById(Guid Id);
         public Task<Result<Dictionary<float, int>>> GetReviewDistribution();
         public Task<Result<RatingStatisticsDto>> GetRatingStatistics();
+        public Task<float> GetAverageReviewScore();
 
     }
 }

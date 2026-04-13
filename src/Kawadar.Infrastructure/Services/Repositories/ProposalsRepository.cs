@@ -109,13 +109,20 @@ public class ProposalsRepository : IProposalsRepository
         return await _context.JobProposals.CountAsync();
     }
 
-    public async Task<float> AverageProposalPerJob()
+    public async Task<int> GetNumberOfProposalsThisMonth()
     {
-        var proposalsCount = await _context.JobProposals.CountAsync();
-        var jobsCount = await _context.Jobs.CountAsync();
-        float average = proposalsCount / jobsCount;
-        return average;
+        var now = DateTime.UtcNow;
+        var currentMonthStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+        var NextMonthStart = currentMonthStart.AddMonths(1);
+
+        var proposals = await _context.JobProposals.Where(x => x.CreatedAt >= currentMonthStart && x.CreatedAt < NextMonthStart).CountAsync();
+        return proposals;
     }
 
+    public async Task<Dictionary<JobProposalStatus, int>> GetDistributionBasedOnStatus()
+    {
+        var distribution = await _context.JobProposals.GroupBy(x => x.Status).ToDictionaryAsync(x => x.Key, x => x.Count());
+        return distribution;
+    }
 
 }

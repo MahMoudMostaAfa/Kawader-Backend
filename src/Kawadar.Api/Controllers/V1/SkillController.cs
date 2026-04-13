@@ -107,7 +107,7 @@ namespace Kawadar.Api.Controllers.V1
         [EndpointDescription("Adds Skills for project using skills ids")]
         public async Task<IActionResult> AddSkillsToProject([FromBody] AddSkillsToProjectRequest request, CancellationToken ct)
         {
-            var command = new AddSkillsToProjectCommand(request.projectId, request.skills);
+            var command = new AddSkillsToProjectCommand(request.projectId, request.skills!);
             var result = await _sender.Send(command, ct);
 
             return result.Match(

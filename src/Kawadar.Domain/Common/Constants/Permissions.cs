@@ -32,6 +32,8 @@ public static class Permissions
   public const string CreateBadges = "Permissions.Badges.Create";
   public const string EditBadges = "Permissions.Badges.Edit";
 
+  public const string ViewStatistics = "Permissions.Statistics.View";
+
 
 
   public static List<string> GetAllPermissions()
