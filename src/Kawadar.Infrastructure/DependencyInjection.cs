@@ -32,6 +32,7 @@ using Kawadar.Application.Common.Hubs;
 using Kawadar.Infrastructure.Services.HubServices;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using Kawadar.Application.Features.ConversastionsAndMessages.EventHandlers;
 
 public static class DependencyInjection
 {
@@ -169,7 +170,8 @@ public static class DependencyInjection
     service.AddScoped<IJobsRepository, JobsRepository>();
     service.AddScoped<IReviewRepository, ReviewRepository>();
     service.AddScoped<ISavedJobsRepository, SavedJobsRepository>();
-
+    service.AddScoped<IConversationsRepository, ConversationsRepository>();
+    service.AddScoped<INotificationsRepository, NotificationsRepository>();
     service.AddScoped<IJobViewRepository, JobViewRepository>();
     service.AddScoped<IProposalsRepository, ProposalsRepository>();
     service.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -345,8 +347,10 @@ public static class DependencyInjection
        }
    );
 
-
+    // online status tracking service
     services.AddSingleton<IPersistanceService, PersistanceService>();
+
+    services.AddScoped<INotificationsHubService, NotificationsHubServices>();
 
     return services;
 
