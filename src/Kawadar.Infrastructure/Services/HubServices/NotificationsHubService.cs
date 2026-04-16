@@ -7,11 +7,11 @@ using Microsoft.AspNetCore.SignalR;
 namespace Kawadar.Infrastructure.Services.HubServices;
 
 
-public class NotificationsHubServices : INotificationsHubService
+public class NotificationsHubService : INotificationsHubService
 {
   private readonly IHubContext<NotificationHub> _hubContext;
 
-  public NotificationsHubServices(IHubContext<NotificationHub> hubContext)
+  public NotificationsHubService(IHubContext<NotificationHub> hubContext)
   {
     _hubContext = hubContext;
   }

@@ -7,6 +7,10 @@ namespace Kawadar.Application.Common.Interfaces.Repositories;
 
 public interface IConversationsRepository
 {
-  Task<Result<Created>> AddConversationAsync(Conversation conversation, CancellationToken cancellationToken);
-  Task<Result<Created>> AddMessageAsync(Message message, CancellationToken cancellationToken);
+  Task<Result<Created>> AddConversationAsync(Conversation conversation, CancellationToken cancellationToken = default);
+  Task<Result<Created>> AddMessageAsync(Message message, CancellationToken cancellationToken = default);
+
+  Task<Result<Conversation>> GetConversationByIdAsync(Guid conversationId, CancellationToken cancellationToken = default);
+
+  Task<Result<Message>> GetMessageByIdAsync(Guid messageId, CancellationToken cancellationToken = default);
 }

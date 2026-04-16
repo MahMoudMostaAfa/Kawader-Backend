@@ -350,7 +350,8 @@ public static class DependencyInjection
     // online status tracking service
     services.AddSingleton<IPersistanceService, PersistanceService>();
 
-    services.AddScoped<INotificationsHubService, NotificationsHubServices>();
+    services.AddScoped<INotificationsHubService, NotificationsHubService>();
+    services.AddScoped<IConversationsHubService, ConversationsHubService>();
 
     return services;
 

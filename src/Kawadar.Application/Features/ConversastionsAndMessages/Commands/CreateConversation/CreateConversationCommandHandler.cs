@@ -39,14 +39,6 @@ public class CreateConversationCommandHandler : IRequestHandler<CreateConversati
     var userId = _user.Id;
 
     if (userId is null) return ApplicationErrors.UserIsNotAuthenticated;
-
-    if (request.JobId is not null)
-    {
-
-      var jobResult = await _jobsRepository.GetJobByIdAsync(request.JobId.Value);
-      if (jobResult.IsError) return jobResult.Errors;
-
-    }
     // get sender and receiver user profiles to ensure they exist and to use their data in the conversation creation if needed
     var senderUserResult = await _usersRepository.GetUserProfileByUserIdAsync(userId);
     if (senderUserResult.IsError) return senderUserResult.Errors;
@@ -57,6 +49,15 @@ public class CreateConversationCommandHandler : IRequestHandler<CreateConversati
     if (receiverUserProfileResult.IsError) return receiverUserProfileResult.Errors;
     var receiverUserProfile = receiverUserProfileResult.Value;
 
+
+    if (request.JobId is not null)
+    {
+
+      var jobResult = await _jobsRepository.GetJobByIdAsync(request.JobId.Value);
+      if (jobResult.IsError) return jobResult.Errors;
+      if (jobResult.Value.PostedById != senderUserResult.Value.Id) return ApplicationErrors.UnauthorizedAccess;
+
+    }
 
     // create the conversation
 

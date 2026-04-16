@@ -3,6 +3,7 @@ using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Conversations;
 using Kawadar.Domain.Conversations.Messages;
 using Kawadar.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Kawadar.Infrastructure.Services.Repositories;
 
@@ -24,5 +25,20 @@ public class ConversationsRepository : IConversationsRepository
   {
     await _context.Messages.AddAsync(message, cancellationToken);
     return Result.Created;
+  }
+
+  public async Task<Result<Conversation>> GetConversationByIdAsync(Guid conversationId, CancellationToken cancellationToken)
+  {
+    var conversation = await _context.Conversations.FirstOrDefaultAsync(c => c.Id == conversationId);
+
+    if (conversation == null) return Error.NotFound("Conversations.NotFound", "Conversation not found");
+    return conversation;
+  }
+
+  public async Task<Result<Message>> GetMessageByIdAsync(Guid messageId, CancellationToken cancellationToken = default)
+  {
+    var message = await _context.Messages.FirstOrDefaultAsync(m => m.Id == messageId);
+    if (message == null) return Error.NotFound("Messages.NotFound", "Message not found");
+    return message;
   }
 }
