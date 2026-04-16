@@ -37,7 +37,7 @@ public class ConversationsRepository : IConversationsRepository
 
   public async Task<Result<Message>> GetMessageByIdAsync(Guid messageId, CancellationToken cancellationToken = default)
   {
-    var message = await _context.Messages.FirstOrDefaultAsync(m => m.Id == messageId);
+    var message = await _context.Messages.Include(m => m.Files).FirstOrDefaultAsync(m => m.Id == messageId);
     if (message == null) return Error.NotFound("Messages.NotFound", "Message not found");
     return message;
   }

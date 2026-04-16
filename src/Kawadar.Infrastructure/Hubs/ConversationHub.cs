@@ -1,4 +1,6 @@
 using Kawadar.Application.Common.Hubs;
+using Kawadar.Application.Features.ConversastionsAndMessages.Commands.DeleteMessage;
+using Kawadar.Application.Features.ConversastionsAndMessages.Commands.EditMessage;
 using Kawadar.Application.Features.ConversastionsAndMessages.Commands.SendMessage;
 using Kawadar.Application.Features.ConversastionsAndMessages.DTOs;
 using Kawadar.Infrastructure.Services.HubServices.SignalRDTOs;
@@ -80,7 +82,62 @@ public class ConversationHub : Hub
 
   }
 
+  public async Task<MessageDto> EditMessage(EditSignalRMessageRequest editMessageRequest)
+  {
+    var userId = Context.UserIdentifier;
+    if (userId == null)
+    {
+      throw new HubException("User is not authenticated.");
+    }
+    var isExistResult = await _conversationsHubService.IsUserInConversationAsync(editMessageRequest.ConversationId, userId);
+    if (isExistResult.IsError) throw new HubException(isExistResult.Errors[0].Description);
 
+    if (!isExistResult.Value) throw new HubException("User is not a participant of the conversation.");
+
+
+    var editMessageResult = await _sender.Send(
+      new EditMessageCommand(userId, Context.ConnectionId, editMessageRequest.MessageId, editMessageRequest.NewContent)
+    );
+    if (editMessageResult.IsError)
+    {
+      var error = editMessageResult.Errors[0];
+      _logger.LogError("Error editing message: {ErrorDescription}", error.Description);
+      throw new HubException(error.Description);
+    }
+
+    var message = editMessageResult.Value;
+    _logger.LogInformation("User {UserId} edited a message. MessageId: {MessageId}", userId, message.Id);
+    return message;
+  }
+
+
+  public async Task<MessageDto> DeleteMessage(Guid messageId, Guid conversationId)
+  {
+    var userId = Context.UserIdentifier;
+    if (userId == null)
+    {
+      throw new HubException("User is not authenticated.");
+    }
+    var isExistResult = await _conversationsHubService.IsUserInConversationAsync(conversationId, userId);
+    if (isExistResult.IsError) throw new HubException(isExistResult.Errors[0].Description);
+
+    if (!isExistResult.Value) throw new HubException("User is not a participant of the conversation.");
+
+
+    var deleteMessageResult = await _sender.Send(
+      new DeleteMessageCommand(userId, Context.ConnectionId, messageId)
+    );
+    if (deleteMessageResult.IsError)
+    {
+      var error = deleteMessageResult.Errors[0];
+      _logger.LogError("Error deleting message: {ErrorDescription}", error.Description);
+      throw new HubException(error.Description);
+    }
+
+    var message = deleteMessageResult.Value;
+    _logger.LogInformation("User {UserId} deleted a message. MessageId: {MessageId}", userId, message.Id);
+    return message;
+  }
   //<summary>
   // this method to send text messages only throw the hub, for messages with attachments use the SendMessage method which will handle both text and attachments
   //</summary>

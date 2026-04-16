@@ -40,6 +40,16 @@ public class ConversationsHubService : IConversationsHubService
     return true;
   }
 
+  public Task SendDeletedMessageToConversationAsync(Guid conversationId, string? connectionId, string recipientId, MessageDto message)
+  {
+    return _hubContext.Clients.GroupExcept(ConversationHub.ConversationGroup(conversationId), connectionId!).SendAsync("ReceiveDeletedMessage", message);
+  }
+
+  public Task SendEditedMessageToConversationAsync(Guid conversationId, string? connectionId, string recipientId, MessageDto message)
+  {
+    return _hubContext.Clients.GroupExcept(ConversationHub.ConversationGroup(conversationId), connectionId!).SendAsync("ReceiveEditedMessage", message);
+  }
+
   public Task SendMessageToConversationAsync(Guid conversationId, string? connectionId, string recipientId, MessageDto message)
   {
 
@@ -48,6 +58,7 @@ public class ConversationsHubService : IConversationsHubService
 
     else return _hubContext.Clients.Group(ConversationHub.ConversationGroup(conversationId)).SendAsync("ReceiveMessage", message);
   }
+
 
 
 }

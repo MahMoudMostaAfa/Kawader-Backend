@@ -8,4 +8,6 @@ public interface IConversationsHubService
 {
   Task<Result<bool>> IsUserInConversationAsync(Guid conversationId, string userId);
   Task SendMessageToConversationAsync(Guid conversationId, string? connectionId, string recipientId, MessageDto message);
+  Task SendEditedMessageToConversationAsync(Guid conversationId, string? connectionId, string recipientId, MessageDto message);
+  Task SendDeletedMessageToConversationAsync(Guid conversationId, string? connectionId, string recipientId, MessageDto message);
 }
