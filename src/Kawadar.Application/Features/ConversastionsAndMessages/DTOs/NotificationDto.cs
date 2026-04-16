@@ -8,7 +8,7 @@ public class NotificationDto
   public string Title { get; set; } = default!;
   public string Category { get; set; } = default!;
   public string Type { get; set; } = default!;
-  public string RedirectUrl { get; set; } = default!;
+  public string? RedirectUrl { get; set; } = default!;
   public string Body { get; set; } = default!;
   public bool IsRead { get; set; }
   public DateTime ReceivedAt { get; set; }

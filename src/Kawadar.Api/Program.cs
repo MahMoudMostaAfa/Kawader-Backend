@@ -89,6 +89,7 @@ try
   // signalR hubs
   app.MapHub<PersistanceHub>("/hubs/persistance");
   app.MapHub<NotificationHub>("/hubs/notifications");
+  app.MapHub<ConversationHub>("/hubs/conversations");
 
   app.Run();
 }
