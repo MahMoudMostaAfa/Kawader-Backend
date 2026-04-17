@@ -1,4 +1,5 @@
 using Kawadar.Application.Common.Interfaces.Repositories;
+using Kawadar.Application.Common.Models;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Conversations;
 using Kawadar.Domain.Conversations.Messages;
@@ -27,12 +28,38 @@ public class ConversationsRepository : IConversationsRepository
     return Result.Created;
   }
 
+  public Result<Deleted> DeleteConversationAsync(Conversation conversation, CancellationToken cancellationToken = default)
+  {
+    _context.Conversations.Remove(conversation);
+
+    return Result.Deleted;
+  }
+
   public async Task<Result<Conversation>> GetConversationByIdAsync(Guid conversationId, CancellationToken cancellationToken)
   {
-    var conversation = await _context.Conversations.FirstOrDefaultAsync(c => c.Id == conversationId);
+    var conversation = await _context.Conversations.Include(c => c.LastMessage).FirstOrDefaultAsync(c => c.Id == conversationId);
 
     if (conversation == null) return Error.NotFound("Conversations.NotFound", "Conversation not found");
     return conversation;
+  }
+
+  public async Task<Result<PaginatedList<Conversation>>> GetConversationsForUserAsync(Guid userId, int pageNumber, int pageSize, CancellationToken cancellationToken = default)
+  {
+    var conversationsQuery = _context.Conversations
+        .Where(c => c.SenderUserId == userId || c.ReceiverUserId == userId)
+        .Include(c => c.LastMessage)
+        .OrderByDescending(c => c.LastMessage != null ? c.LastMessage.CreatedAt : c.CreatedAt).AsQueryable();
+
+    var totalCount = await conversationsQuery.CountAsync();
+    var conversations = await conversationsQuery
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .ToListAsync();
+
+    var paginatedList = new PaginatedList<Conversation>(conversations, totalCount, pageNumber, pageSize);
+
+    return paginatedList;
+
   }
 
   public async Task<Result<Message>> GetMessageByIdAsync(Guid messageId, CancellationToken cancellationToken = default)
@@ -40,5 +67,12 @@ public class ConversationsRepository : IConversationsRepository
     var message = await _context.Messages.Include(m => m.Files).FirstOrDefaultAsync(m => m.Id == messageId);
     if (message == null) return Error.NotFound("Messages.NotFound", "Message not found");
     return message;
+  }
+
+  public async Task<Result<bool>> IsOhterUserJoinedConversationAsync(Guid conversationId, Guid currentUserId, CancellationToken cancellationToken = default)
+  {
+    var isOtherUserJoined = await _context.Conversations.Where(c => c.Id == conversationId).AnyAsync(c => c.Messages.Any(m => m.SenderUserId != currentUserId), cancellationToken);
+
+    return isOtherUserJoined;
   }
 }

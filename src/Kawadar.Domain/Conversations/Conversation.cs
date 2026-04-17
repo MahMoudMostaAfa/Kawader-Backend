@@ -60,6 +60,13 @@ public class Conversation : AuditableEntity
     return Result.Updated;
   }
 
+  public Result<Updated> ClearLastMessageReference()
+  {
+    LastMessageId = null;
+    LastMessage = null;
+    return Result.Updated;
+  }
+
 
   public Result<Updated> UpdateConversationStatus(ConversationStatus newStatus)
   {
