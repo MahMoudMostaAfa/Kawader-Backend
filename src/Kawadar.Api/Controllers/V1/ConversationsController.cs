@@ -1,7 +1,9 @@
 
 using Kawadar.Api.Requests.Conversation;
 using Kawadar.Application.Features.ConversastionsAndMessages.Commands.CreateConversation;
+using Kawadar.Application.Features.ConversastionsAndMessages.Commands.DeleteConversation;
 using Kawadar.Application.Features.ConversastionsAndMessages.Commands.SendMessage;
+using Kawadar.Application.Features.ConversastionsAndMessages.Queries.GetMyConversations;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -34,6 +36,33 @@ public class ConversationsController : ApiController
      );
   }
 
+
+  // Implement the logic to retrieve all conversations for the authenticated user
+  [HttpGet]
+  public async Task<IActionResult> GetConversations([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+  {
+    var query = new GetMyConversationsQuery(pageNumber, pageSize);
+
+    var result = await _sender.Send(query);
+    return result.Match(
+      paginatedConversations => Ok(paginatedConversations),
+      errors => Problem(errors)
+     );
+
+  }
+
+
+  [HttpDelete("{conversationId:guid}")]
+  public async Task<IActionResult> DeleteConversation(Guid conversationId)
+  {
+    var command = new DeleteConversationCommand(conversationId);
+
+    var result = await _sender.Send(command);
+    return result.Match(
+      deleted => NoContent(),
+      errors => Problem(errors)
+     );
+  }
 
   [HttpGet("{conversationId:guid}")]
   public IActionResult GetConversationById(Guid conversationId)

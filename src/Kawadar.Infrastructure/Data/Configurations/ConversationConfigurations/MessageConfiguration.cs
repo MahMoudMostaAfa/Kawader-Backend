@@ -20,8 +20,8 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
         .OnDelete(DeleteBehavior.Cascade);
 
 
-    builder.HasOne<Conversation>().WithMany().HasForeignKey(m => m.ConversationId).OnDelete(DeleteBehavior.Cascade)
-    ;
+    // builder.HasOne<Conversation>().WithMany().HasForeignKey(m => m.ConversationId).OnDelete(DeleteBehavior.Cascade)
+    // ;
     builder.HasOne<UserProfile>().WithMany().HasForeignKey(m => m.SenderUserId).OnDelete(DeleteBehavior.Cascade);
 
     builder.Property(m => m.IsDeleted).HasDefaultValue(false);
