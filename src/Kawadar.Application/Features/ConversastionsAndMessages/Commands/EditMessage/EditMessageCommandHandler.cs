@@ -16,13 +16,15 @@ Result<MessageDto>>
   private readonly IUnitOfWork _unitOfWork;
   private readonly IUser _user;
   private readonly IUsersRepository _usersRepository;
-
-  public EditMessageCommandHandler(IConversationsRepository conversationsRepository, IUnitOfWork unitOfWork, IUser user, IUsersRepository usersRepository)
+  private readonly IIdentityService _identityService;
+  public EditMessageCommandHandler(IConversationsRepository conversationsRepository, IUnitOfWork unitOfWork, IUser user, IUsersRepository usersRepository, IIdentityService identityService)
   {
     _coversationsRepository = conversationsRepository;
     _unitOfWork = unitOfWork;
     _user = user;
     _usersRepository = usersRepository;
+    _identityService = identityService;
+
   }
 
 
@@ -43,11 +45,14 @@ Result<MessageDto>>
     var editResult = message.UpdateContent(request.newContent);
     if (editResult.IsError) return editResult.Errors;
 
+    var identityResult = await _identityService.GetUserByIdAsync(userProfile.UserId);
+    if (identityResult.IsError) return identityResult.Errors;
+    var identityUser = identityResult.Value;
     var messageDto = new MessageDto
     {
       Id = message.Id,
       Content = message.Content,
-      SenderId = message.SenderUserId,
+      SenderUserName = identityUser.UserName,
       SentAt = message.CreatedAt,
       ConversationId = message.ConversationId,
 

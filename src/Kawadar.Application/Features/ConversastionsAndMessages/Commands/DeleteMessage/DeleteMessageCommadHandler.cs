@@ -15,14 +15,16 @@ public class DeleteMessageCommadHandler : IRequestHandler<DeleteMessageCommand, 
   private readonly IUser _user;
 
   private readonly IUsersRepository _usersRepository;
+  private readonly IIdentityService _identityService;
 
 
-  public DeleteMessageCommadHandler(IUnitOfWork unitOfWork, IConversationsRepository conversationsRepository, IUser user, IUsersRepository usersRepository)
+  public DeleteMessageCommadHandler(IUnitOfWork unitOfWork, IConversationsRepository conversationsRepository, IUser user, IUsersRepository usersRepository, IIdentityService identityService)
   {
     _unitOfWork = unitOfWork;
     _conversationsRepository = conversationsRepository;
     _user = user;
     _usersRepository = usersRepository;
+    _identityService = identityService;
   }
 
   public async Task<Result<MessageDto>> Handle(DeleteMessageCommand request, CancellationToken cancellationToken)
@@ -46,14 +48,16 @@ public class DeleteMessageCommadHandler : IRequestHandler<DeleteMessageCommand, 
     var deleteResult = message.Delete();
     if (deleteResult.IsError) return deleteResult.Errors;
 
-
+    var identityResult = await _identityService.GetUserByIdAsync(userProfile.UserId);
+    if (identityResult.IsError) return identityResult.Errors;
+    var identityUser = identityResult.Value;
     var messageDto = new MessageDto
     {
       Id = message.Id,
       ConversationId = message.ConversationId,
       Content = message.Content,
       SentAt = message.CreatedAt,
-      SenderId = message.SenderUserId
+      SenderUserName = identityUser.UserName,
     };
 
     message.AddDomainEvent(new DeletedMessageEvent(message.Id, message.ConversationId, userId, request.connectionId!, message.CreatedAt, userProfile.Id, message.Content));

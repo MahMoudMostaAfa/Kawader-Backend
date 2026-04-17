@@ -5,6 +5,7 @@ using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Application.Features.ConversastionsAndMessages.DTOs;
 using Kawadar.Domain.Common.Results;
+using Kawadar.Domain.Conversations.Enums;
 using Kawadar.Domain.Conversations.Events;
 using Kawadar.Domain.Conversations.Messages;
 using MediatR;
@@ -23,11 +24,13 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Res
 
   private readonly IStorageClient _storageClient;
   private readonly ILogger<SendMessageCommandHandler> _logger;
-  public SendMessageCommandHandler(IConversationsRepository conversationsRepository, IUnitOfWork unitOfWork, IUsersRepository usersRepository, IUser user, IStorageClient storageClient, ILogger<SendMessageCommandHandler> logger)
+  private readonly IIdentityService _identityService;
+  public SendMessageCommandHandler(IConversationsRepository conversationsRepository, IUnitOfWork unitOfWork, IUsersRepository usersRepository, IUser user, IStorageClient storageClient, IIdentityService identityService, ILogger<SendMessageCommandHandler> logger)
   {
     _unitOfWork = unitOfWork;
     _conversationsRepository = conversationsRepository;
     _usersRepository = usersRepository;
+    _identityService = identityService;
     _user = user;
     _storageClient = storageClient;
     _logger = logger;
@@ -53,6 +56,11 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Res
     if (conversation.ReceiverUserId != userProfile.Id && conversation.SenderUserId != userProfile.Id)
     {
       return ApplicationErrors.UnauthorizedAccess;
+    }
+    // check that the conversation is not archived by the sender
+    if (conversation.ConversationStatus != ConversationStatus.Open)
+    {
+      return Error.Validation("ConversationClosed", "You cannot send messages in a closed conversation.");
     }
 
     // upload attachments to storage and get their URLs
@@ -128,11 +136,18 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Res
 
     _logger.LogInformation("User {userID} created a message successfully.", userId);
 
+    var identityResult = await _identityService.GetUserByIdAsync(userProfile.UserId);
+    if (identityResult.IsError) return identityResult.Errors;
     return new MessageDto
     {
       Id = message.Id,
       Content = message.Content,
-      SenderId = message.SenderUserId,
+      SenderUserName = identityResult.Value.UserName,
+      messageReplyDto = message.ReplayToMessageId != null ? new MessageReplyDto
+      {
+        Id = message.ReplayToMessageId ?? Guid.Empty,
+        Content = message.ReplayToMessage != null ? message.ReplayToMessage.Content : string.Empty
+      } : null,
       SentAt = message.CreatedAt,
       ConversationId = message.ConversationId,
       Attachments = message.Files?.Select(a => new MessageAttachmentDto

@@ -1,4 +1,5 @@
 using Kawadar.Application.Common.Hubs;
+using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Application.Features.ConversastionsAndMessages.DTOs;
 using Kawadar.Domain.Common.Results;
@@ -21,7 +22,9 @@ public class CreatedMessageEventHandler : INotificationHandler<CreatedMessageEve
   private readonly IConversationsRepository _conversationsRepository;
   private readonly IUnitOfWork _unitOfWork;
   private readonly IPersistanceService _persistanceService;
-  public CreatedMessageEventHandler(ILogger<CreatedMessageEventHandler> logger, IConversationsHubService conversationsHubService, INotificationsHubService notificationsHubService, IPersistanceService persistanceService, INotificationsRepository notificationsRepository, IUnitOfWork unitOfWork, IConversationsRepository conversationsRepository)
+  private readonly IIdentityService _identityService;
+  private readonly IUsersRepository _usersRepository;
+  public CreatedMessageEventHandler(ILogger<CreatedMessageEventHandler> logger, IConversationsHubService conversationsHubService, INotificationsHubService notificationsHubService, IPersistanceService persistanceService, INotificationsRepository notificationsRepository, IUnitOfWork unitOfWork, IConversationsRepository conversationsRepository, IIdentityService identityService, IUsersRepository usersRepository)
   {
     _logger = logger;
     _conversationsHubService = conversationsHubService;
@@ -30,6 +33,9 @@ public class CreatedMessageEventHandler : INotificationHandler<CreatedMessageEve
     _notificationsRepository = notificationsRepository;
     _unitOfWork = unitOfWork;
     _conversationsRepository = conversationsRepository;
+    _identityService = identityService;
+    _usersRepository = usersRepository;
+
   }
   public async Task Handle(CreatedMessageEvent notification, CancellationToken cancellationToken)
   {
@@ -55,10 +61,27 @@ public class CreatedMessageEventHandler : INotificationHandler<CreatedMessageEve
       }
     }
 
+    var senderUserResult = await _usersRepository.GetUserProfileByIdAsync(notification.Message.SenderUserId);
+    if (senderUserResult.IsError)
+    {
+      _logger.LogError("Failed to retrieve sender user profile with ID {senderUserId}: {errors}", notification.Message.SenderUserId, senderUserResult.Errors);
+    }
+    var senderUser = senderUserResult.Value;
+    var identityResult = await _identityService.GetUserByIdAsync(senderUser.UserId);
+    if (identityResult.IsError)
+    {
+      _logger.LogError("Failed to retrieve sender user identity with ID {senderUserId}: {errors}", senderUser.UserId, identityResult.Errors);
+    }
+    var senderIdentity = identityResult.Value;
 
     MessageDto message = new MessageDto
     {
-
+      Id = notification.Message.Id,
+      Content = notification.Message.Content,
+      SenderUserName = senderIdentity.UserName,
+      SentAt = notification.Message.CreatedAt,
+      ConversationId = notification.Message.ConversationId,
+      messageReplyDto = replayMessageDto,
       Attachments = notification.Message.Files.Select(a => new MessageAttachmentDto
       {
         Id = a.Id,
@@ -66,16 +89,9 @@ public class CreatedMessageEventHandler : INotificationHandler<CreatedMessageEve
         FileName = a.File.FileName,
         FileSizeInBytes = a.File.FileSizeInBytes,
         FileUrl = a.File.FileUrl,
-      }).ToList(),
-      Id = notification.Message.Id,
-      Content = notification.Message.Content,
-      ConversationId = notification.Message.ConversationId,
-      SenderId = notification.Message.SenderUserId,
-      SentAt = notification.Message.CreatedAt,
-      messageReplyDto = replayMessageDto
-
-
+      }).ToList()
     };
+
 
     // Send real-time message to conversation participants via SignalR
     await _conversationsHubService.SendMessageToConversationAsync(notification.ConversationId, notification.ConnectionId, notification.RecipientUserId, message);

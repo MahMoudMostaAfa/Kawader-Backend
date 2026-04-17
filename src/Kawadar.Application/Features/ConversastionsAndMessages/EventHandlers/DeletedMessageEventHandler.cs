@@ -1,4 +1,6 @@
 using Kawadar.Application.Common.Hubs;
+using Kawadar.Application.Common.Interfaces.Auth;
+using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Application.Features.ConversastionsAndMessages.DTOs;
 using Kawadar.Domain.Conversations.Events;
 using MediatR;
@@ -10,19 +12,39 @@ public class DeletedMessageEventHandler : INotificationHandler<DeletedMessageEve
 {
   private readonly IConversationsHubService _conversationsHubService;
   private readonly ILogger<DeletedMessageEventHandler> _logger;
-  public DeletedMessageEventHandler(IConversationsHubService conversationsHubService, ILogger<DeletedMessageEventHandler> logger)
+  private readonly IIdentityService _identityService;
+  private readonly IUsersRepository _usersRepository;
+  public DeletedMessageEventHandler(IConversationsHubService conversationsHubService, ILogger<DeletedMessageEventHandler> logger, IIdentityService identityService, IUsersRepository usersRepository)
   {
     _conversationsHubService = conversationsHubService;
     _logger = logger;
+    _identityService = identityService;
+    _usersRepository = usersRepository;
 
   }
   public async Task Handle(DeletedMessageEvent notification, CancellationToken cancellationToken)
   {
+
+    var userResult = await _usersRepository.GetUserProfileByIdAsync(notification.UserProfileId);
+    if (userResult.IsError)
+    {
+      _logger.LogError("Failed to retrieve user profile with ID {UserProfileId}: {errors}", notification.UserProfileId, userResult.Errors);
+      return;
+    }
+    var userProfile = userResult.Value;
+
+    var identityResult = await _identityService.GetUserByIdAsync(userProfile.UserId);
+    if (identityResult.IsError)
+    {
+      _logger.LogError("Failed to retrieve identity for user with ID {UserId}: {errors}", userProfile.UserId, identityResult.Errors);
+      return;
+    }
+    var identityUser = identityResult.Value;
     var messageDto = new MessageDto
     {
       Id = notification.MessageId,
       Content = notification.NewContent,
-      SenderId = notification.UserProfileId,
+      SenderUserName = identityUser.UserName,
       SentAt = notification.SentAt,
       ConversationId = notification.ConversationId,
     };

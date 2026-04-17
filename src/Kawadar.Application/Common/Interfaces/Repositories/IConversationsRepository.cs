@@ -18,4 +18,5 @@ public interface IConversationsRepository
 
   Result<Deleted> DeleteConversationAsync(Conversation conversation, CancellationToken cancellationToken = default);
   Task<Result<bool>> IsOhterUserJoinedConversationAsync(Guid conversationId, Guid currentUserId, CancellationToken cancellationToken = default);
+  Task<Result<PaginatedList<Message>>> GetMessagesForConversationAsync(Guid conversationId, int pageNumber, int pageSize, CancellationToken cancellationToken = default);
 }

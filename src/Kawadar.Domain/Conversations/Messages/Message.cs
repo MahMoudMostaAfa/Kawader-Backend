@@ -9,6 +9,7 @@ public class Message : AuditableEntity
   public Guid ConversationId { get; private set; }
   public Guid SenderUserId { get; private set; }
   public Guid? ReplayToMessageId { get; private set; }
+  public Message? ReplayToMessage { get; private set; }
   public string Content { get; private set; } = default!;
 
   public bool IsDeleted { get; private set; } = false;

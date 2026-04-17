@@ -64,9 +64,21 @@ public class ConversationsRepository : IConversationsRepository
 
   public async Task<Result<Message>> GetMessageByIdAsync(Guid messageId, CancellationToken cancellationToken = default)
   {
-    var message = await _context.Messages.Include(m => m.Files).FirstOrDefaultAsync(m => m.Id == messageId);
+    var message = await _context.Messages.Include(m => m.Files).Include(m => m.ReplayToMessage).FirstOrDefaultAsync(m => m.Id == messageId);
     if (message == null) return Error.NotFound("Messages.NotFound", "Message not found");
     return message;
+  }
+
+  public async Task<Result<PaginatedList<Message>>> GetMessagesForConversationAsync(Guid conversationId, int pageNumber, int pageSize, CancellationToken cancellationToken = default)
+  {
+    var query = _context.Messages.Where(m => m.ConversationId == conversationId).Include(m => m.ReplayToMessage).Include(m => m.Files).OrderByDescending(m => m.CreatedAt);
+    var totalCount = await query.CountAsync();
+
+    var messages = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+
+    var paginatedList = new PaginatedList<Message>(messages, totalCount, pageNumber, pageSize);
+
+    return paginatedList;
   }
 
   public async Task<Result<bool>> IsOhterUserJoinedConversationAsync(Guid conversationId, Guid currentUserId, CancellationToken cancellationToken = default)
@@ -75,4 +87,6 @@ public class ConversationsRepository : IConversationsRepository
 
     return isOtherUserJoined;
   }
+
+
 }
