@@ -17,6 +17,7 @@ namespace Kawadar.Application.Common.Interfaces.Repositories
         public Task<List<string>> GetFreelancerSkillsByUserProfileId(Guid UserProfileId);
         public Task<Result<IEnumerable<Skill>>> GetBySkillIds(List<Guid> skillIds);
         public Task<Result<Deleted>> RemoveSkillFromFreelancer(string skillName, Guid freelancerId);
+        public Task<List<string>> GetProjectSkillsByProjectId(Guid ProjectId);
 
     }
 }

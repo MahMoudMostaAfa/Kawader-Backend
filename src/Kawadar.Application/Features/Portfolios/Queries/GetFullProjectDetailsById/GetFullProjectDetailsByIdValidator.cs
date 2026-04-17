@@ -2,9 +2,9 @@
 
 namespace Kawadar.Application.Features.Portfolios.Queries.GetProjectItemsById
 {
-    public class GetProjectItemsByIdValidator : AbstractValidator<GetProjectWithItemsByIdQuery>
+    public class GetFullProjectDetailsByIdValidator : AbstractValidator<GetFullProjectDetailsByIdQuery>
     {
-        public GetProjectItemsByIdValidator()
+        public GetFullProjectDetailsByIdValidator()
         {
             RuleFor(x => x.Id).NotEmpty().WithMessage("Project Id is Required")
                 .NotEqual(Guid.Empty).WithMessage("Project Id can't be Empty");

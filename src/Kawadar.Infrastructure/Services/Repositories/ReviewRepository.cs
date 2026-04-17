@@ -72,8 +72,15 @@ namespace Kawadar.Infrastructure.Services.Repositories
         public async Task<Result<Dictionary<float, int>>> GetReviewDistribution()
         {
             var distribution = await appDbContext.Reviews.GroupBy(x => x.Rating).ToDictionaryAsync(x => x.Key, x => x.Count());
-            if (distribution is null) return Error.Conflict("There are no reviews to get the distribution");
             return distribution;
+        }
+
+        public async Task<float> GetAverageReviewScore()
+        {
+            var reviewsCount = await appDbContext.Reviews.CountAsync();
+            float averageRating = 0;
+            if (reviewsCount > 0) averageRating = await appDbContext.Reviews.Select(x => x.Rating).AverageAsync();
+            return averageRating;
         }
 
         public async Task<Result<RatingStatisticsDto>> GetRatingStatistics()
@@ -82,8 +89,13 @@ namespace Kawadar.Infrastructure.Services.Repositories
             float averageRating = 0;
             if(reviewsCount > 0) averageRating = await appDbContext.Reviews.Select(x => x.Rating).AverageAsync();
             var UserReviews = appDbContext.Reviews.GroupBy(x => x.RevieweeId).Select(x => x.Average(x => x.Rating));
-            var highestRating = await UserReviews.MaxAsync();
-            var lowestRating = await UserReviews.MinAsync();
+            float highestRating = 0;
+            float lowestRating = 0;
+            if(UserReviews.Count() > 0)
+            {
+                highestRating = await UserReviews.MaxAsync();
+                lowestRating = await UserReviews.MinAsync();
+            }
             return new RatingStatisticsDto
             {
                 averageRating = averageRating,

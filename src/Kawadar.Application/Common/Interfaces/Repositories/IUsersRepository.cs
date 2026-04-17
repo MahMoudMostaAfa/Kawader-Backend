@@ -31,4 +31,5 @@ public interface IUsersRepository
     Task<Result<IEnumerable<UserProfile>>> GetUsersbyIds(IEnumerable<Guid> Ids);
     Task<Result<UsersRoleCount>> GetUsersRoleCount();
     Task<Result<int>> GetNewUsersThisMonth();
+    Task<int> GetVerifiedUserCount();
 }

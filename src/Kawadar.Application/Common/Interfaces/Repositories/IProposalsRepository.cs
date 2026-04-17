@@ -32,5 +32,9 @@ public interface IProposalsRepository
 
   );
 
+    public Task<Dictionary<JobProposalStatus, int>> GetDistributionBasedOnStatus();
+    public Task<int> GetNumberOfProposalsThisMonth();
+    public Task<int> GetProposalsCount();
+
 
 }

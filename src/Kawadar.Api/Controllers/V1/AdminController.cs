@@ -6,7 +6,11 @@ using Kawadar.Application.Features.Admins.Commands.CreateAdmin;
 using Kawadar.Application.Features.Admins.Commands.DeleteUser;
 using Kawadar.Application.Features.Admins.Dtos;
 using Kawadar.Application.Features.Admins.Queries.GetAdmins;
+using Kawadar.Application.Features.Admins.Queries.GetJobsStatistics;
+using Kawadar.Application.Features.Admins.Queries.GetProposalsStatistics;
+using Kawadar.Application.Features.Admins.Queries.GetReviewsStatistics;
 using Kawadar.Application.Features.Admins.Queries.GetUsers;
+using Kawadar.Application.Features.Admins.Queries.GetUsersStatistics;
 using Kawadar.Domain.Common.Constants;
 using Kawadar.Domain.UserProfiles.Enums;
 using MediatR;
@@ -84,6 +88,82 @@ namespace Kawadar.Api.Controllers.V1
 
             return result.Match(
                 Admins => Ok(Admins)
+                , errors => Problem(errors));
+
+        }
+
+        [HttpGet("Dashboard/Users")]
+        [Authorize(Policy = Permissions.ViewStatistics)]
+        [ProducesResponseType(typeof(UserStatisticsDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [EndpointName("GetUsersStatistics")]
+        [EndpointSummary("Gets the users statistics")]
+        [EndpointDescription("Gets the users statistics so the admins can monitor the platform")]
+        public async Task<IActionResult> GetUsersStatistics(CancellationToken ct = default)
+        {
+            var query = new GetUserStatisticsQuery();
+            var result = await _sender.Send(query, ct);
+
+            return result.Match(
+                Statistics => Ok(Statistics)
+                , errors => Problem(errors));
+
+        }
+
+        [HttpGet("Dashboard/Reviews")]
+        [Authorize(Policy = Permissions.ViewStatistics)]
+        [ProducesResponseType(typeof(ReviewStatisticsDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [EndpointName("GetReviewsStatistics")]
+        [EndpointSummary("Gets the reviews statistics")]
+        [EndpointDescription("Gets the reviews statistics so the admins can monitor the platform")]
+        public async Task<IActionResult> GetReviewsStatistics(CancellationToken ct = default)
+        {
+            var query = new GetReviewStatisticsQuery();
+            var result = await _sender.Send(query, ct);
+
+            return result.Match(
+                Statistics => Ok(Statistics)
+                , errors => Problem(errors));
+
+        }
+
+        [HttpGet("Dashboard/Jobs")]
+        [Authorize(Policy = Permissions.ViewStatistics)]
+        [ProducesResponseType(typeof(JobsStatisticsDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [EndpointName("GetJobsStatistics")]
+        [EndpointSummary("Gets the jobs statistics")]
+        [EndpointDescription("Gets the jobs statistics so the admins can monitor the platform")]
+        public async Task<IActionResult> GetJobsStatistics(CancellationToken ct = default)
+        {
+            var query = new GetJobsStatisticsQuery();
+            var result = await _sender.Send(query, ct);
+
+            return result.Match(
+                Statistics => Ok(Statistics)
+                , errors => Problem(errors));
+
+        }
+
+        [HttpGet("Dashboard/Proposals")]
+        [Authorize(Policy = Permissions.ViewStatistics)]
+        [ProducesResponseType(typeof(ProposalStatisticsDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [EndpointName("GetProposalStatistics")]
+        [EndpointSummary("Gets the Proposals statistics")]
+        [EndpointDescription("Gets the Proposals statistics so the admins can monitor the platform")]
+        public async Task<IActionResult> GetProposalsStatistics(CancellationToken ct = default)
+        {
+            var query = new GetProposalStatisticsQuery();
+            var result = await _sender.Send(query, ct);
+
+            return result.Match(
+                Statistics => Ok(Statistics)
                 , errors => Problem(errors));
 
         }
