@@ -48,19 +48,19 @@ namespace Kawadar.Api.Controllers.V1
 
 
         [HttpGet("{Id:guid}/items")]
-        [ProducesResponseType(typeof(List<ItemDTO>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(FullProjectDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        [EndpointName("GetItemsById")]
-        [EndpointSummary("Gets Project items by Project Id")]
-        [EndpointDescription("Gets project items by its unique identifier.")]
+        [EndpointName("GetFullProjectDetailsById")]
+        [EndpointSummary("Gets full Project Details by Project Id")]
+        [EndpointDescription("Gets full project details like skills and items by its unique identifier.")]
         public async Task<IActionResult> GetProjectItemsById([FromRoute] Guid Id, CancellationToken ct = default)
         {
-            var query = new GetProjectWithItemsByIdQuery(Id);
+            var query = new GetFullProjectDetailsByIdQuery(Id);
             var result = await _sender.Send(query, ct);
 
             return result.Match(
-                Items => Ok(Items),
+                project => Ok(project),
                 errors => Problem(errors));
         }
 

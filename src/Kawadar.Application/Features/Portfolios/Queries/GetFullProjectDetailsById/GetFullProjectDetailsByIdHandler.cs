@@ -8,10 +8,10 @@ using MediatR;
 
 namespace Kawadar.Application.Features.Portfolios.Queries.GetProjectItemsById
 {
-    public class GetProjectItemsByIdHandler(IUser user, IPortfolioProjectRepository projectRepository,
-        IMapper mapper) : IRequestHandler<GetProjectWithItemsByIdQuery, Result<List<ItemDTO>>>
+    public class GetFullProjectDetailsByIdHandler(IUser user, IPortfolioProjectRepository projectRepository,
+        ISkillRepository skillRepository, IMapper mapper) : IRequestHandler<GetFullProjectDetailsByIdQuery, Result<FullProjectDto>>
     {
-        public async Task<Result<List<ItemDTO>>> Handle(GetProjectWithItemsByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Result<FullProjectDto>> Handle(GetFullProjectDetailsByIdQuery request, CancellationToken cancellationToken)
         {
             var userId = user.Id;
             if (userId is null) return ApplicationErrors.UserIsNotAuthenticated;
@@ -20,10 +20,12 @@ namespace Kawadar.Application.Features.Portfolios.Queries.GetProjectItemsById
             if (result.IsError) return result.Errors;
 
             var Items = result.Value.Items;
-
             var itemDTOs = mapper.Map<List<ItemDTO>>(Items);
 
-            return itemDTOs;
+            var skills = await skillRepository.GetProjectSkillsByProjectId(request.Id);
+
+            var project = mapper.Map<FullProjectDto>((result.Value, skills, itemDTOs));
+            return project;
 
         }
     }

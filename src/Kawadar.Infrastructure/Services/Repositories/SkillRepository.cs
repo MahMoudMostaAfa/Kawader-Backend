@@ -92,5 +92,17 @@ namespace Kawadar.Infrastructure.Services.Repositories
             skills.AddRange(customSkills);
             return skills;
         }
+
+        public async Task<List<string>> GetProjectSkillsByProjectId(Guid ProjectId)
+        {
+            var PredefinedSkills = from ps in appDbContext.ProjectSkills
+                                   join s in appDbContext.Skills on ps.SkillId equals s.Id
+                                   where ps.PortfolioProjectId == ProjectId
+                                   select s.Name;
+            
+            var skills = await PredefinedSkills.ToListAsync();
+            
+            return skills;
+        }
     }
 }
