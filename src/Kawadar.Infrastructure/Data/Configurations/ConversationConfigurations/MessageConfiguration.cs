@@ -26,7 +26,10 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
 
     builder.Property(m => m.IsDeleted).HasDefaultValue(false);
 
-    builder.HasOne<Message>().WithMany().HasForeignKey(m => m.ReplayToMessageId).OnDelete(DeleteBehavior.NoAction);
+    builder.HasOne(m => m.ReplayToMessage)
+        .WithMany()
+        .HasForeignKey(m => m.ReplayToMessageId)
+        .OnDelete(DeleteBehavior.NoAction);
 
 
     builder.Navigation(m => m.Files)

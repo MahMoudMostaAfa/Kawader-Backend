@@ -3,6 +3,7 @@ using Kawadar.Api.Requests.Conversation;
 using Kawadar.Application.Features.ConversastionsAndMessages.Commands.CreateConversation;
 using Kawadar.Application.Features.ConversastionsAndMessages.Commands.DeleteConversation;
 using Kawadar.Application.Features.ConversastionsAndMessages.Commands.SendMessage;
+using Kawadar.Application.Features.ConversastionsAndMessages.Queries.GetConversationMessages;
 using Kawadar.Application.Features.ConversastionsAndMessages.Queries.GetMyConversations;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -31,7 +32,7 @@ public class ConversationsController : ApiController
     var result = await _sender.Send(command);
 
     return result.Match(
-       conversationId => CreatedAtAction(nameof(GetConversationById), new { conversationId }, conversationId),
+       _ => Created(),
        errors => Problem(errors)
      );
   }
@@ -64,12 +65,6 @@ public class ConversationsController : ApiController
      );
   }
 
-  [HttpGet("{conversationId:guid}")]
-  public IActionResult GetConversationById(Guid conversationId)
-  {
-    // Implement the logic to retrieve a conversation by its ID
-    return Ok();
-  }
 
   [HttpPost("{conversationId:guid}/messages")]
   public async Task<IActionResult> SendMessage(Guid conversationId, [FromForm] SendMessageRequest request)
@@ -85,5 +80,14 @@ public class ConversationsController : ApiController
 
   }
 
-
+  [HttpGet("{conversationId:guid}/messages")]
+  public async Task<IActionResult> GetConversationMessages(Guid conversationId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+  {
+    var query = new GetConversationMessagesQuery(conversationId, pageNumber, pageSize);
+    var result = await _sender.Send(query);
+    return result.Match(
+      paginatedMessages => Ok(paginatedMessages),
+      errors => Problem(errors)
+    );
+  }
 }
