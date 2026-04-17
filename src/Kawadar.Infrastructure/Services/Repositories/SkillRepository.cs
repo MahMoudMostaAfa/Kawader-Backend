@@ -29,6 +29,24 @@ namespace Kawadar.Infrastructure.Services.Repositories
             return Result.Success;
         }
 
+        public async Task<Result<Deleted>> RemoveSkillFromFreelancer(string skillName, Guid freelancerId)
+        {
+            var customSkill = await appDbContext.FreelacnerSkills.Where(x => x.FreelancerId == freelancerId && x.SkillType == SkillType.Custom && x.CustomSkillName == skillName).FirstOrDefaultAsync();
+            if(customSkill is not null)
+            {
+                appDbContext.Remove(customSkill);
+                return Result.Deleted;
+            }
+            var skill = await appDbContext.Skills.Where(x => x.Name == skillName).FirstOrDefaultAsync();
+            if (skill is null) return Error.NotFound("The given skill doesn't exist");
+
+            var freelancerSkill = await appDbContext.FreelacnerSkills.Where(x => x.FreelancerId == freelancerId && x.SkillId == skill.Id).FirstOrDefaultAsync();
+            if (freelancerSkill is null) return Error.NotFound("The freelancer doesn't have the given skill");
+
+            appDbContext.Remove(freelancerSkill);
+            return Result.Deleted;
+        }
+
         public Result<Deleted> delete(Skill skill)
         {
             appDbContext.Remove(skill);
@@ -72,6 +90,18 @@ namespace Kawadar.Infrastructure.Services.Repositories
                                                                   .Select(x => x.CustomSkillName).ToListAsync();
             var skills = await PredefinedSkills.ToListAsync();
             skills.AddRange(customSkills);
+            return skills;
+        }
+
+        public async Task<List<string>> GetProjectSkillsByProjectId(Guid ProjectId)
+        {
+            var PredefinedSkills = from ps in appDbContext.ProjectSkills
+                                   join s in appDbContext.Skills on ps.SkillId equals s.Id
+                                   where ps.PortfolioProjectId == ProjectId
+                                   select s.Name;
+            
+            var skills = await PredefinedSkills.ToListAsync();
+            
             return skills;
         }
     }

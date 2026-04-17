@@ -22,6 +22,10 @@ using Kawadar.Infrastructure.Identity;
 using MediatR;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Kawadar.Domain.Jobs.SavedJobs;
+using Kawadar.Domain.Conversations.Messages;
+using Kawadar.Domain.Notifications;
+using Kawadar.Domain.Conversations;
 
 namespace Kawadar.Infrastructure.Data;
 
@@ -47,9 +51,19 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IMediator medi
 
   public DbSet<JobProposal> JobProposals => Set<JobProposal>();
 
+  public DbSet<SavedJob> SavedJobs => Set<SavedJob>();
+
   public DbSet<ProposalMilestone> ProposalMilestones => Set<ProposalMilestone>();
 
   public DbSet<ProposalQuestionAnswer> ProposalQuestionAnswers => Set<ProposalQuestionAnswer>();
+
+
+  public DbSet<Message> Messages => Set<Message>();
+  public DbSet<MessageFile> MessageFiles => Set<MessageFile>();
+
+  public DbSet<Notification> Notifications => Set<Notification>();
+
+  public DbSet<Conversation> Conversations => Set<Conversation>();
 
 
 
@@ -57,7 +71,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IMediator medi
   public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
   {
     await DispatchDomainEventsAsync(cancellationToken);
+
     return await base.SaveChangesAsync(cancellationToken);
+
   }
   protected override void OnModelCreating(ModelBuilder builder)
   {
@@ -77,15 +93,20 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IMediator medi
         .SelectMany(e => e.DomainEvents)
         .ToList();
 
+
+    // Fix: Clear the events FIRST before publishing them.
+    // This prevents the infinite loop if a handler calls SaveChangesAsync().
+    foreach (var entity in domainEntities)
+    {
+      entity.ClearDomainEvents();
+    }
+
     foreach (var domainEvent in domainEvents)
     {
       await mediator.Publish(domainEvent, cancellationToken);
     }
 
-    foreach (var entity in domainEntities)
-    {
-      entity.ClearDomainEvents();
-    }
+
   }
 
 }

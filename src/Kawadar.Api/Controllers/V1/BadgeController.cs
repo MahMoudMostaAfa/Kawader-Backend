@@ -4,6 +4,7 @@ using Kawadar.Application.Features.Badges.Commands.CreateBadge;
 using Kawadar.Application.Features.Badges.Commands.DeleteBadge;
 using Kawadar.Application.Features.Badges.Commands.UpdateBadge;
 using Kawadar.Application.Features.Badges.DTOs;
+using Kawadar.Application.Features.Badges.Queries.GetAllBadges;
 using Kawadar.Application.Features.Badges.Queries.GetBadgeById;
 using Kawadar.Application.Features.Badges.Queries.GetFreelancerBadgesQuery;
 using Kawadar.Domain.Common.Constants;
@@ -43,6 +44,25 @@ namespace Kawadar.Api.Controllers.V1
 
         }
 
+        [HttpGet("Admin/Badge")]
+        [Authorize(Policy = Permissions.ViewBadges)]
+        [ProducesResponseType(typeof(List<BadgeDTO>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [EndpointName("GetAllBadges")]
+        [EndpointSummary("Gets all badges")]
+        [EndpointDescription("Gets all badges so the admin can delete or update them.")]
+        public async Task<IActionResult> GetAllBadges(CancellationToken ct)
+        {
+            var query = new GetAllBadgesQuery();
+            var result = await _sender.Send(query, ct);
+
+            return result.Match(
+                badges => Ok(badges)
+                , errors => Problem(errors));
+
+        }
+
         [HttpGet("User/Badges")]
         [Authorize]
         [ProducesResponseType(typeof(BadgeDTO), StatusCodes.Status200OK)]
@@ -73,7 +93,7 @@ namespace Kawadar.Api.Controllers.V1
         [EndpointDescription("Creates a badge with data from the request.")]
         public async Task<IActionResult> CreateBadge(CreateBadgeRequest request, CancellationToken ct)
         {
-            var command = new CreateBadgeCommand(request.title, request.Icon, request.description);
+            var command = new CreateBadgeCommand(request.title, request.Icon!, request.description);
             var result = await _sender.Send(command, ct);
 
             return result.Match(
@@ -130,7 +150,7 @@ namespace Kawadar.Api.Controllers.V1
         [EndpointDescription("Updates a badge by its unique identifier.")]
         public async Task<IActionResult> UpdateBadge(Guid Id, [FromForm]UpdateBadgeRequest request, CancellationToken ct)
         {
-            var command = new UpdateBadgeCommand(Id, request.Icon);
+            var command = new UpdateBadgeCommand(Id, request.Icon!);
             var result = await _sender.Send(command, ct);
 
             return result.Match(

@@ -96,7 +96,7 @@ public class ProfileController : ApiController
     [EndpointName("UserStatistics")]
     [EndpointSummary("Gets the review statistics of a user by username")]
     [EndpointDescription("Gets the review statistics(The count and average rating) of a user by their username.")]
-    [ProducesResponseType(typeof(PaginatedList<ReviewDto>), StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ReviewStatisticsDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetStatistics([FromRoute] string username)
     {

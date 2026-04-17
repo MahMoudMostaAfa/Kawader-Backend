@@ -11,5 +11,6 @@ namespace Kawadar.Application.Common.Interfaces
         public Result<Deleted> Delete(Badge badge);
         public Task<IEnumerable<Badge>> GetAllFreelancerBadges(Guid FreelancerId);
         public Task<Result<Success>> AddBadgeToFreelancer(FreelancerBadge freelancerBadge);
+        public Task<IEnumerable<Badge>> GetAllBadges();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Kawadar.Domain.Portfolios.Items;
 using Kawadar.Domain.Portfolios.Project;
+using Kawadar.Domain.Specilizations;
 using Kawadar.Domain.UserProfiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -14,8 +15,6 @@ namespace Kawadar.Infrastructure.Data.Configurations
 
             builder.Property(p => p.Title).IsRequired().HasMaxLength(50);
 
-            builder.Property(p => p.Category).HasConversion<string>().IsRequired();
-
             builder.Property(p => p.Description).IsRequired().HasMaxLength(300);
 
             builder.Property(p => p.CreatedAt).IsRequired();
@@ -29,6 +28,12 @@ namespace Kawadar.Infrastructure.Data.Configurations
             builder.HasOne<UserProfile>()
                 .WithMany()
                 .HasForeignKey(p => p.FreelancerId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne<Specilization>()
+                .WithMany()
+                .HasForeignKey(p => p.SpecilizationId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
 

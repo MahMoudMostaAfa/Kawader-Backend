@@ -18,11 +18,27 @@ namespace Kawadar.Application.Features.Portfolios.Mapper
 
                 .ForMember(dest => dest.title, op => op.MapFrom(src => src.Title))
 
-                .ForMember(dest => dest.category, op => op.MapFrom(src => src.Category))
-
                 .ForMember(dest => dest.description, op => op.MapFrom(src => src.Description))
                 
                 .ForMember(dest => dest.displayOrder, op => op.MapFrom(src => src.DisplayOrder));
+
+            CreateMap<(PortfolioProject project, List<string> skills, List<ItemDTO> Items), FullProjectDto>()
+
+                .ForMember(dest => dest.Id, op => op.MapFrom(src => src.project.Id))
+
+                .ForMember(dest => dest.ProjectImageUrl, op => op.MapFrom(src => src.project.ProjectImageUrl))
+
+                .ForMember(dest => dest.ProjectUrl, op => op.MapFrom(src => src.project.ProjectUrl))
+
+                .ForMember(dest => dest.title, op => op.MapFrom(src => src.project.Title))
+
+                .ForMember(dest => dest.description, op => op.MapFrom(src => src.project.Description))
+
+                .ForMember(dest => dest.displayOrder, op => op.MapFrom(src => src.project.DisplayOrder))
+                
+                .ForMember(dest => dest.Items, op => op.MapFrom(src => src.Items))
+                
+                .ForMember(dest => dest.Skills, op => op.MapFrom(src => src.skills));
         }
     }
 }

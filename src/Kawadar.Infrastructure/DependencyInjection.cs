@@ -28,6 +28,11 @@ using MassTransit;
 using Kawadar.Infrastructure.Messaging.Consumers;
 using Hangfire;
 using Hangfire.SqlServer;
+using Kawadar.Application.Common.Hubs;
+using Kawadar.Infrastructure.Services.HubServices;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+using Kawadar.Application.Features.ConversastionsAndMessages.EventHandlers;
 
 public static class DependencyInjection
 {
@@ -49,6 +54,8 @@ public static class DependencyInjection
       options.UseSqlServer(connectionString).AddInterceptors(auditInterceptor);
 
     });
+
+
     service.AddAuthentication(options =>
     {
       options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -67,6 +74,26 @@ public static class DependencyInjection
         ValidIssuer = jwtSettings["Issuer"],
         ValidAudience = jwtSettings["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Secret"]!))
+      };
+
+      // ✅ Critical: SignalR sends the token in the query string
+      options.Events = new JwtBearerEvents
+      {
+        OnMessageReceived = context =>
+        {
+          var accessToken = context.Request.Query["access_token"];
+          var path = context.HttpContext.Request.Path;
+
+          if (!string.IsNullOrEmpty(accessToken) &&
+                  (path.StartsWithSegments("/hubs/messaging") ||
+                   path.StartsWithSegments("/hubs/notifications") ||
+                   path.StartsWithSegments("/hubs/persistance")))
+          {
+            context.Token = accessToken;
+          }
+
+          return Task.CompletedTask;
+        }
       };
 
     });
@@ -93,6 +120,9 @@ public static class DependencyInjection
 
     // add Hangfire services
     service.AddHangfireCfg(configuration);
+
+    // add signalR services
+    service.AddSignalRConfig();
 
     //Adding Azure Blob Storage
     service.AddSingleton(provider =>
@@ -139,7 +169,9 @@ public static class DependencyInjection
     service.AddScoped<ISkillRepository, SkillRepository>();
     service.AddScoped<IJobsRepository, JobsRepository>();
     service.AddScoped<IReviewRepository, ReviewRepository>();
-
+    service.AddScoped<ISavedJobsRepository, SavedJobsRepository>();
+    service.AddScoped<IConversationsRepository, ConversationsRepository>();
+    service.AddScoped<INotificationsRepository, NotificationsRepository>();
     service.AddScoped<IJobViewRepository, JobViewRepository>();
     service.AddScoped<IProposalsRepository, ProposalsRepository>();
     service.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -300,5 +332,29 @@ public static class DependencyInjection
 
 
     return services;
+  }
+
+
+  public static IServiceCollection AddSignalRConfig(this IServiceCollection services)
+  {
+
+    services.AddSignalR(
+       opt =>
+       {
+         opt.EnableDetailedErrors = services.BuildServiceProvider().GetRequiredService<IWebHostEnvironment>().IsDevelopment();
+         opt.KeepAliveInterval = TimeSpan.FromSeconds(15);
+         opt.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+       }
+   );
+
+    // online status tracking service
+    services.AddSingleton<IPersistanceService, PersistanceService>();
+
+    services.AddScoped<INotificationsHubService, NotificationsHubService>();
+    services.AddScoped<IConversationsHubService, ConversationsHubService>();
+
+    return services;
+
+
   }
 }

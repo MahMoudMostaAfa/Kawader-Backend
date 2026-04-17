@@ -4,6 +4,7 @@ using Kawadar.Api.Infrastructure;
 using Kawadar.Application;
 using Kawadar.Infrastructure;
 using Kawadar.Infrastructure.Data;
+using Kawadar.Infrastructure.Hubs;
 using Prometheus;
 using Scalar.AspNetCore;
 using Serilog;
@@ -36,6 +37,9 @@ try
       .AddPresentation(builder.Configuration)
       .AddInfrastructure(builder.Configuration)
       .AddApplication();
+
+
+
 
   var app = builder.Build();
 
@@ -81,6 +85,11 @@ try
 
   // Prometheus metrics endpoint
   app.MapMetrics();
+
+  // signalR hubs
+  app.MapHub<PersistanceHub>("/hubs/persistance");
+  app.MapHub<NotificationHub>("/hubs/notifications");
+  app.MapHub<ConversationHub>("/hubs/conversations");
 
   app.Run();
 }
