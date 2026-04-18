@@ -6,8 +6,10 @@ using Kawadar.Application.Features.Jobs.DTOs;
 using Kawadar.Application.Features.Jobs.Queries.GetJobReport;
 using Kawadar.Application.Features.Jobs.Queries.GetJobReports;
 using Kawadar.Application.Features.Jobs.Queries.GetReportsByJobSlug;
+using Kawadar.Domain.Common.Constants;
 using Kawadar.Domain.Jobs.JobReports.Enums;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kawadar.Api.Controllers.V1
@@ -25,6 +27,7 @@ namespace Kawadar.Api.Controllers.V1
         }
 
         [HttpPost("{slug}")]
+        [Authorize]
         [EndpointSummary("Reports a job")]
         [EndpointDescription("Reports a job by identifiying the type of violation")]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -42,8 +45,9 @@ namespace Kawadar.Api.Controllers.V1
         }
 
         [HttpGet]
-        [EndpointSummary("Gets Job Reports")]
-        [EndpointDescription("Gets Job Reports in pages with brief information")]
+        [Authorize(Policy = Permissions.ViewJobReports)]
+        [EndpointSummary("Gets Jobs Reports")]
+        [EndpointDescription("Gets Jobs Reports in pages with brief information")]
         [ProducesResponseType(typeof(PaginatedList<BriefJobReportDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
@@ -64,6 +68,7 @@ namespace Kawadar.Api.Controllers.V1
         }
 
         [HttpGet("{Id:guid}")]
+        [Authorize(Policy = Permissions.ViewJobReports)]
         [EndpointSummary("Gets a Job Report")]
         [EndpointDescription("Gets a Job Report by its unique identifier with full details")]
         [ProducesResponseType(typeof(FullJobReportDto), StatusCodes.Status200OK)]
@@ -81,6 +86,7 @@ namespace Kawadar.Api.Controllers.V1
         }
 
         [HttpPut("{Id:guid}")]
+        [Authorize(Policy = Permissions.UpdateJobReports)]
         [EndpointSummary("Updates a Job Report")]
         [EndpointDescription("Updates Job Report Status and Action Taken")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -98,6 +104,7 @@ namespace Kawadar.Api.Controllers.V1
         }
 
         [HttpGet("{slug}")]
+        [Authorize(Policy = Permissions.ViewJobReports)]
         [EndpointSummary("Gets job reports")]
         [EndpointDescription("Gets job reports using the job slug")]
         [ProducesResponseType(typeof(List<BriefJobReportDto>), StatusCodes.Status200OK)]
