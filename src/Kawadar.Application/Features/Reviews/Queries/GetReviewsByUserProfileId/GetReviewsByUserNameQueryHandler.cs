@@ -28,7 +28,7 @@ namespace Kawadar.Application.Features.Reviews.Queries.GetReviewsByUserProfileId
 
             var reviews = await reviewRepository.GetReviewsByUserProfileId(request.rating, request.page, request.pageSize, request.sortBy, RevieweeProfileReuslt.Value.Id);
 
-            var UserProfileIds = reviews.Items.Select(x => x.RevieweeId);
+            var UserProfileIds = reviews.Items.Select(x => x.ReviewerId);
 
             var UserProfiles = await usersRepository.GetUsersbyIds(UserProfileIds);
             if (UserProfiles.IsError) return UserProfiles.Errors;
