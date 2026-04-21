@@ -33,7 +33,7 @@ public static class Permissions
   public const string EditBadges = "Permissions.Badges.Edit";
 
   public const string ViewStatistics = "Permissions.Statistics.View";
-    public const string ViewJobReports = "Permisssions.JobReports.View";
+    public const string ViewJobReports = "Permissions.JobReports.View";
     public const string UpdateJobReports = "Permissions.JobReports.Update";
 
 

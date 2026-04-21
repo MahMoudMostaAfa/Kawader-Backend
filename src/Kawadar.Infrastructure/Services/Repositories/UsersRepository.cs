@@ -1,9 +1,10 @@
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Application.Common.Models;
 using Kawadar.Domain.Common.Results;
-using Kawadar.Domain.Jobs;
+using Kawadar.Domain.Jobs.JobReports.Enums;
 using Kawadar.Domain.UserProfiles;
 using Kawadar.Domain.UserProfiles.Enums;
+using Kawadar.Domain.UserProfiles.UserReports;
 using Kawadar.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -154,4 +155,69 @@ public class UsersRepository(AppDbContext appDbContext) : IUsersRepository
         return await appDbContext.UserProfiles.Where(x => x.IsIdentityVerified == true).CountAsync();
     }
 
+    public async Task<Success> AddUserReport(UserReport report)
+    {
+        await appDbContext.UserReports.AddAsync(report);
+        return Result.Success;
+    }
+
+    public async Task<Result<UserReport>> GetUserReportById(Guid Id)
+    {
+        var report = await appDbContext.UserReports.Where(x => x.Id == Id).FirstOrDefaultAsync();
+        if (report is null) return Error.NotFound("User Report not found");
+        return report;
+    }
+    public async Task<PaginatedList<UserReport>> GetUserReports(ReportType? reportType, ReportStatus? reportStatus, int page, int pageSize, string sortBy)
+    {
+        var query = appDbContext.UserReports.AsQueryable();
+        if (reportType.HasValue)
+        {
+            query = query.Where(x => x.ReportType == reportType);
+        }
+
+        if (reportStatus.HasValue)
+        {
+            query = query.Where(x => x.ReportStatus == reportStatus);
+        }
+        query = sortBy == "oldest"
+            ? query.OrderBy(x => x.CreatedAt)
+            : query.OrderByDescending(x => x.CreatedAt);
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+          .Skip((page - 1) * pageSize)
+          .Take(pageSize)
+          .ToListAsync();
+
+        return new PaginatedList<UserReport>(items, totalCount, page, pageSize);
+    }
+
+    public async Task<PaginatedList<UserReport>> GetUserReportsByUserId(Guid Id, ReportStatus? reportstatus, ReportType? reportType, int page, int pageSize, string sortBy)
+    {
+        var query = appDbContext.UserReports.AsQueryable();
+        query = query.Where(x => x.ReportedUser == Id);
+
+        if (reportType.HasValue)
+        {
+            query = query.Where(x => x.ReportType == reportType);
+        }
+
+        if (reportstatus.HasValue)
+        {
+            query = query.Where(x => x.ReportStatus == reportstatus);
+        }
+        query = sortBy == "oldest"
+            ? query.OrderBy(x => x.CreatedAt)
+            : query.OrderByDescending(x => x.CreatedAt);
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+          .Skip((page - 1) * pageSize)
+          .Take(pageSize)
+          .ToListAsync();
+
+        return new PaginatedList<UserReport>(items, totalCount, page, pageSize);
+    }
 }
