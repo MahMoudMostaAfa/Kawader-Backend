@@ -26,6 +26,7 @@ using Kawadar.Domain.Jobs.SavedJobs;
 using Kawadar.Domain.Conversations.Messages;
 using Kawadar.Domain.Notifications;
 using Kawadar.Domain.Conversations;
+using Kawadar.Domain.UserProfiles.UserReports;
 
 namespace Kawadar.Infrastructure.Data;
 
@@ -46,6 +47,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IMediator medi
   public DbSet<JobQuestion> JobQuestions => Set<JobQuestion>();
   public DbSet<JobFile> JobFiles => Set<JobFile>();
   public DbSet<JobReport> JobReports => Set<JobReport>();
+  public DbSet<UserReport> UserReports => Set<UserReport>();
   public DbSet<Review> Reviews => Set<Review>();
   public DbSet<JobView> JobViews => Set<JobView>();
 

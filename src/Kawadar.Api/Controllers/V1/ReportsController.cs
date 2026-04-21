@@ -6,6 +6,12 @@ using Kawadar.Application.Features.Jobs.DTOs;
 using Kawadar.Application.Features.Jobs.Queries.GetJobReport;
 using Kawadar.Application.Features.Jobs.Queries.GetJobReports;
 using Kawadar.Application.Features.Jobs.Queries.GetReportsByJobSlug;
+using Kawadar.Application.Features.ProfileManagment.Commands.ReportUser;
+using Kawadar.Application.Features.ProfileManagment.Commands.UpdateUserReport;
+using Kawadar.Application.Features.ProfileManagment.DTOs;
+using Kawadar.Application.Features.ProfileManagment.Queries.GetUserReport;
+using Kawadar.Application.Features.ProfileManagment.Queries.GetUserReportByUserName;
+using Kawadar.Application.Features.ProfileManagment.Queries.GetUserReports;
 using Kawadar.Domain.Common.Constants;
 using Kawadar.Domain.Jobs.JobReports.Enums;
 using MediatR;
@@ -33,13 +39,114 @@ namespace Kawadar.Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> ReportJob([FromRoute] string slug, [FromBody] ReportJobRequest request, CancellationToken ct)
+        public async Task<IActionResult> ReportJob([FromRoute] string slug, [FromBody] ReportRequest request, CancellationToken ct)
         {
             var command = new ReportJobCommand(slug, request.reportType, request.content);
             var result = await _sender.Send(command, ct);
 
             return result.Match(
                 _ => Created(),
+                errors => Problem(errors)
+            );
+        }
+
+        [HttpPost("User/{userName}")]
+        [Authorize]
+        [EndpointSummary("Reports a User")]
+        [EndpointDescription("Reports a User by identifiying the type of violation")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> ReportUser([FromRoute] string userName, [FromBody] ReportRequest request, CancellationToken ct)
+        {
+            var command = new ReportUserCommand(userName, request.content, request.reportType);
+            var result = await _sender.Send(command, ct);
+
+            return result.Match(
+                _ => Created(),
+                errors => Problem(errors)
+            );
+        }
+
+        [HttpGet("User")]
+        [Authorize]
+        [EndpointSummary("Gets Users Reports")]
+        [EndpointDescription("Gets Users Reports in pages with brief information")]
+        [ProducesResponseType(typeof(PaginatedList<BriefUserReportDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetUserReports(
+        [FromQuery] ReportType? reportType,
+        [FromQuery] ReportStatus? reportStatus,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string sortBy = "newest", CancellationToken ct = default)
+        {
+            var query = new GetUserReportsQuery(reportType, reportStatus, page, pageSize, sortBy);
+            var result = await _sender.Send(query, ct);
+
+            return result.Match(
+                userReports => Ok(userReports),
+                errors => Problem(errors)
+            );
+        }
+
+        [HttpGet("User/{userName}")]
+        [Authorize]
+        [EndpointSummary("Gets Users Reports By userName")]
+        [EndpointDescription("Gets a certain Users Reports by userName in pages with brief information")]
+        [ProducesResponseType(typeof(PaginatedList<BriefUserReportDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetUserReportsByUserName(
+        [FromRoute] string userName,
+        [FromQuery] ReportType? reportType,
+        [FromQuery] ReportStatus? reportStatus,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string sortBy = "newest", CancellationToken ct = default)
+        {
+            var query = new GetUserReportByUserNameQuery(reportType, reportStatus, userName, page, pageSize, sortBy);
+            var result = await _sender.Send(query, ct);
+
+            return result.Match(
+                userReports => Ok(userReports),
+                errors => Problem(errors)
+            );
+        }
+
+        [HttpGet("User/{Id:guid}")]
+        [Authorize]
+        [EndpointSummary("Gets a User Report")]
+        [EndpointDescription("Get a User Report in full detail")]
+        [ProducesResponseType(typeof(FullJobReportDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetUserReport([FromRoute]Guid Id, CancellationToken ct = default)
+        {
+            var query = new GetUserReportQuery(Id);
+            var result = await _sender.Send(query, ct);
+
+            return result.Match(
+                userReport => Ok(userReport),
+                errors => Problem(errors)
+            );
+        }
+
+        [HttpPut("User/{Id:guid}")]
+        [Authorize]
+        [EndpointSummary("Updates a User Report")]
+        [EndpointDescription("Updates a User Report Status and Action Taken")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateUserReport([FromRoute] Guid Id, UpdateReportRequest request, CancellationToken ct = default)
+        {
+            var command = new UpdateUserReportCommand(Id, request.reportStatus, request.ActionTaken);
+            var result = await _sender.Send(command, ct);
+
+            return result.Match(
+                _ => NoContent(),
                 errors => Problem(errors)
             );
         }
@@ -92,7 +199,7 @@ namespace Kawadar.Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> UpdateJobReport([FromRoute] Guid Id, UpdateJobReportRequest request, CancellationToken ct = default)
+        public async Task<IActionResult> UpdateJobReport([FromRoute] Guid Id, UpdateReportRequest request, CancellationToken ct = default)
         {
             var command = new UpdateJobReportCommand(Id, request.ActionTaken, request.reportStatus);
             var result = await _sender.Send(command, ct);

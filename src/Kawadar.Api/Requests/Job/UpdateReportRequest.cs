@@ -2,7 +2,7 @@
 
 namespace Kawadar.Api.Requests.Job
 {
-    public class UpdateJobReportRequest
+    public class UpdateReportRequest
     {
         public ReportStatus reportStatus { get; set; }
         public string ActionTaken { get; set; } = "";
