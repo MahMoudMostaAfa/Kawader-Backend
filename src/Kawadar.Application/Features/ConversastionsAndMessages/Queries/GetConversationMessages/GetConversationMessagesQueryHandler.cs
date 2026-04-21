@@ -3,6 +3,7 @@ using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Application.Common.Models;
 using Kawadar.Application.Features.ConversastionsAndMessages.DTOs;
+using Kawadar.Domain.Common.Constants;
 using Kawadar.Domain.Common.Results;
 using MediatR;
 
@@ -41,6 +42,8 @@ public class GetConversationMessagesQueryHandler : IRequestHandler<GetConversati
     var conversationResult = await _conversationsRepository.GetConversationByIdAsync(request.conversationId);
     if (conversationResult.IsError) return conversationResult.Errors;
     var conversation = conversationResult.Value;
+
+
     // CHECK THAT USER IS A PARTICIPANT IN THE CONVERSATION
     if (conversation.ReceiverUserId != userProfile.Id && conversation.SenderUserId != userProfile.Id)
     {
