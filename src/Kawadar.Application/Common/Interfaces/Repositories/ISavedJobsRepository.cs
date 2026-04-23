@@ -9,7 +9,7 @@ namespace Kawadar.Application.Common.Interfaces.Repositories;
 public interface ISavedJobsRepository
 {
   Task<Result<Created>> AddSavedJobAsync(SavedJob savedJob, CancellationToken cancellationToken = default);
-  Task<Result<Deleted>> RemoveSavedJobAsync(SavedJob savedJob, CancellationToken cancellationToken = default);
+  Result<Deleted> RemoveSavedJobAsync(SavedJob savedJob);
   Task<Result<PaginatedList<SavedJob>>> GetSavedJobsbyUserIdAsync(Guid userId, int pageNumber = 1, int pageSize = 10, CancellationToken cancellationToken = default);
 
   Task<Result<bool>> IsJobSavedByUserAsync(Guid jobId, Guid userId, CancellationToken cancellationToken = default);
