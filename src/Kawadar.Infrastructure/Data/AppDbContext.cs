@@ -27,6 +27,8 @@ using Kawadar.Domain.Conversations.Messages;
 using Kawadar.Domain.Notifications;
 using Kawadar.Domain.Conversations;
 using Kawadar.Domain.UserProfiles.UserReports;
+using Kawadar.Domain.Contracts;
+using Kawadar.Domain.Subscriptions;
 
 namespace Kawadar.Infrastructure.Data;
 
@@ -66,6 +68,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IMediator medi
   public DbSet<Notification> Notifications => Set<Notification>();
 
   public DbSet<Conversation> Conversations => Set<Conversation>();
+  public DbSet<Contract> Contracts => Set<Contract>();
+  public DbSet<ContractMilestone> ContractMilestones => Set<ContractMilestone>();
+
+  public DbSet<UserSubscription> UserSubscriptions => Set<UserSubscription>();
+  public DbSet<SubscriptionPlan> SubscriptionPlans => Set<SubscriptionPlan>();
 
 
 
