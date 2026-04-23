@@ -4,6 +4,7 @@ using Kawadar.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kawadar.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260423131514_addedContractTables")]
+    partial class addedContractTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -152,7 +155,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.HasIndex("ProposalId")
                         .IsUnique();
 
-                    b.ToTable("Contracts");
+                    b.ToTable("Contract");
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Contracts.ContractMilestone", b =>
@@ -208,7 +211,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.HasIndex("ProposalMilestoneId")
                         .IsUnique();
 
-                    b.ToTable("ContractMilestones");
+                    b.ToTable("ContractMilestone");
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Conversations.Conversation", b =>
@@ -1011,85 +1014,6 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.ToTable("Specilizations");
                 });
 
-            modelBuilder.Entity("Kawadar.Domain.Subscriptions.SubscriptionPlan", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("BillingCycleType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Price")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("SubscriptionPlans");
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.Subscriptions.UserSubscription", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("AutoRenew")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("CancalledAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("StartedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("SubscriptionPlanId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("TotalPrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SubscriptionPlanId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserSubscriptions");
-                });
-
             modelBuilder.Entity("Kawadar.Domain.UserProfiles.UserProfile", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1878,45 +1802,6 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", null)
                         .WithMany()
                         .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.Subscriptions.SubscriptionPlan", b =>
-                {
-                    b.OwnsOne("Kawadar.Domain.Subscriptions.PlanFeatures", "Features", b1 =>
-                        {
-                            b1.Property<Guid>("SubscriptionPlanId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<int>("ProposalsPerMonth")
-                                .HasColumnType("int");
-
-                            b1.HasKey("SubscriptionPlanId");
-
-                            b1.ToTable("SubscriptionPlans");
-
-                            b1.ToJson("Features");
-
-                            b1.WithOwner()
-                                .HasForeignKey("SubscriptionPlanId");
-                        });
-
-                    b.Navigation("Features")
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.Subscriptions.UserSubscription", b =>
-                {
-                    b.HasOne("Kawadar.Domain.Subscriptions.SubscriptionPlan", null)
-                        .WithMany()
-                        .HasForeignKey("SubscriptionPlanId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

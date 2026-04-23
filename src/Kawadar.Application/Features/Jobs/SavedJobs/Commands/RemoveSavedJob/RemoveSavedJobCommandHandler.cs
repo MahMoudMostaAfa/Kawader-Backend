@@ -47,7 +47,7 @@ public class RemoveSavedJobCommandHandler : IRequestHandler<RemoveSavedJobComman
     if (savedJobResult.IsError) return savedJobResult.Errors;
     var savedJob = savedJobResult.Value;
 
-    await _savedJobsRepository.RemoveSavedJobAsync(savedJob);
+     _savedJobsRepository.RemoveSavedJobAsync(savedJob);
     await _unitOfWork.SaveChangesAsync(cancellationToken);
     _logger.LogInformation("User {userId} removed saved job {jobId} successfully.", userId, request.JobId);
 

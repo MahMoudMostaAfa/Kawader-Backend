@@ -56,7 +56,7 @@ public class SavedJobsRepository : ISavedJobsRepository
 
   }
 
-  public async Task<Result<Deleted>> RemoveSavedJobAsync(SavedJob savedJob, CancellationToken cancellationToken = default)
+  public  Result<Deleted> RemoveSavedJobAsync(SavedJob savedJob)
   {
     _context.SavedJobs.Remove(savedJob);
     return Result.Deleted;
