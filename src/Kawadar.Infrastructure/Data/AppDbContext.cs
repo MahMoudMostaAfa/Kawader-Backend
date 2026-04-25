@@ -29,6 +29,7 @@ using Kawadar.Domain.Conversations;
 using Kawadar.Domain.UserProfiles.UserReports;
 using Kawadar.Domain.Contracts;
 using Kawadar.Domain.Subscriptions;
+using Kawadar.Domain.WalletAndPayments;
 
 namespace Kawadar.Infrastructure.Data;
 
@@ -74,6 +75,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IMediator medi
   public DbSet<UserSubscription> UserSubscriptions => Set<UserSubscription>();
   public DbSet<SubscriptionPlan> SubscriptionPlans => Set<SubscriptionPlan>();
 
+  public DbSet<Wallet> Wallets => Set<Wallet>();
+  public DbSet<WalletTransaction> WalletTransactions => Set<WalletTransaction>();
+
+  public DbSet<EscrowTransaction> EscrowTransactions => Set<EscrowTransaction>();
 
 
 

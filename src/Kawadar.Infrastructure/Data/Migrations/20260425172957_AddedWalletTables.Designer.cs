@@ -4,6 +4,7 @@ using Kawadar.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kawadar.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260425172957_AddedWalletTables")]
+    partial class AddedWalletTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1304,124 +1307,6 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.ToTable("EscrowTransactions");
                 });
 
-            modelBuilder.Entity("Kawadar.Domain.WalletAndPayments.Payments.PaymentEventHook", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("EventType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("GatewayEventId")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("HMACSignature")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsProcessed")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsValidSignature")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("PaymentTransactionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("ProcessedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ProcessingError")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RawPayload")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PaymentTransactionId");
-
-                    b.ToTable("PaymentEventHook");
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.WalletAndPayments.Payments.PaymentTransaction", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasMaxLength(3)
-                        .HasColumnType("nvarchar(3)");
-
-                    b.Property<string>("FailureReason")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Gateway")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("GatewayOrderId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("GatewayTransactionId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Method")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("PaidAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("WalletId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("WalletTransactionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("WalletId");
-
-                    b.HasIndex("WalletTransactionId")
-                        .IsUnique()
-                        .HasFilter("[WalletTransactionId] IS NOT NULL");
-
-                    b.ToTable("PaymentTransaction");
-                });
-
             modelBuilder.Entity("Kawadar.Domain.WalletAndPayments.Wallet", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2242,35 +2127,6 @@ namespace Kawadar.Infrastructure.Data.Migrations
                         .HasForeignKey("SenderUserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.WalletAndPayments.Payments.PaymentEventHook", b =>
-                {
-                    b.HasOne("Kawadar.Domain.WalletAndPayments.Payments.PaymentTransaction", null)
-                        .WithMany()
-                        .HasForeignKey("PaymentTransactionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.WalletAndPayments.Payments.PaymentTransaction", b =>
-                {
-                    b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Kawadar.Domain.WalletAndPayments.Wallet", null)
-                        .WithMany()
-                        .HasForeignKey("WalletId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Kawadar.Domain.WalletAndPayments.WalletTransaction", null)
-                        .WithOne()
-                        .HasForeignKey("Kawadar.Domain.WalletAndPayments.Payments.PaymentTransaction", "WalletTransactionId")
-                        .OnDelete(DeleteBehavior.SetNull);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.WalletAndPayments.Wallet", b =>
