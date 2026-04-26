@@ -30,6 +30,7 @@ using Kawadar.Domain.UserProfiles.UserReports;
 using Kawadar.Domain.Contracts;
 using Kawadar.Domain.Subscriptions;
 using Kawadar.Domain.WalletAndPayments;
+using Kawadar.Domain.WalletAndPayments.Payouts;
 
 namespace Kawadar.Infrastructure.Data;
 
@@ -79,6 +80,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IMediator medi
   public DbSet<WalletTransaction> WalletTransactions => Set<WalletTransaction>();
 
   public DbSet<EscrowTransaction> EscrowTransactions => Set<EscrowTransaction>();
+
+  public DbSet<WithdrawalRequest> WithdrawalRequests => Set<WithdrawalRequest>();
+
+  public DbSet<UserPayoutAccount> UserPayoutAccounts => Set<UserPayoutAccount>();
 
 
 
