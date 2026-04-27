@@ -75,6 +75,7 @@ public class JobDetailsProfile : Profile
 
         CreateMap<(JobReport jobReport, Kawadar.Domain.Jobs.Job job, UserDto userDto), BriefJobReportDto>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.jobReport.Id))
+            .ForMember(dest => dest.JobSlug, opt => opt.MapFrom(src => src.job.JobSlug))
             .ForMember(dest => dest.JobTitle, opt => opt.MapFrom(src => src.job.Title))
             .ForMember(dest => dest.ReporterUserName, opt => opt.MapFrom(src => src.userDto.UserName))
             .ForMember(dest => dest.ReportStatus, opt => opt.MapFrom(src => src.jobReport.ReportStatus))

@@ -1,7 +1,6 @@
 ﻿using Kawadar.Domain.Common;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Contracts.Disbutes.Enum;
-using System.Runtime.InteropServices;
 
 namespace Kawadar.Domain.Contracts.Disbutes
 {
@@ -36,6 +35,7 @@ namespace Kawadar.Domain.Contracts.Disbutes
             Status = status;
             this.Resolution = Resolution;
             this.ResolvedAt = ResolvedAt;
+            UpdatedAt = DateTime.UtcNow;
             return Result.Updated;
         }
     }

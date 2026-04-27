@@ -170,6 +170,8 @@ public static class DependencyInjection
     service.AddScoped<IJobsRepository, JobsRepository>();
     service.AddScoped<IReviewRepository, ReviewRepository>();
     service.AddScoped<ISavedJobsRepository, SavedJobsRepository>();
+    service.AddScoped<IViolationRepository, ViolationRepository>();
+    service.AddScoped<IDisbuteRepository, DisbuteRepository>();
     service.AddScoped<IConversationsRepository, ConversationsRepository>();
     service.AddScoped<INotificationsRepository, NotificationsRepository>();
     service.AddScoped<IJobViewRepository, JobViewRepository>();
