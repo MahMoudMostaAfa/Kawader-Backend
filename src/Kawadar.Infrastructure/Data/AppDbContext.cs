@@ -31,10 +31,13 @@ using Kawadar.Domain.Contracts;
 using Kawadar.Domain.Subscriptions;
 using Kawadar.Domain.WalletAndPayments;
 using Kawadar.Domain.WalletAndPayments.Payouts;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.Logging;
 
 namespace Kawadar.Infrastructure.Data;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options, IMediator mediator) : IdentityDbContext<AppUser>(options)
+public class AppDbContext(DbContextOptions<AppDbContext> options,
+ILogger<AppDbContext> logger, IMediator mediator) : IdentityDbContext<AppUser>(options)
 {
 
   public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
@@ -90,6 +93,22 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IMediator medi
   public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
   {
     await DispatchDomainEventsAsync(cancellationToken);
+
+    // TEMPORARY: Log all tracked entity states before saving
+
+    // foreach (var entry in ChangeTracker.Entries())
+    // {
+    //   if (entry.State == EntityState.Modified || entry.State == EntityState.Added)
+    //   {
+    //     var concurrencyProps = entry.Properties
+    //       .Where(p => p.Metadata.IsConcurrencyToken)
+    //       .Select(p => $"{p.Metadata.Name}={p.CurrentValue ?? "null"}(orig={p.OriginalValue ?? "null"})")
+    //       .ToList();
+
+    //     logger.LogWarning("[EF SAVE] {Entity} | State={State} | ConcurrencyTokens=[{Tokens}]",
+    //       entry.Entity.GetType().Name, entry.State, string.Join(", ", concurrencyProps));
+    //   }
+    // }
 
     return await base.SaveChangesAsync(cancellationToken);
 

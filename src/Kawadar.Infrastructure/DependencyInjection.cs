@@ -51,8 +51,10 @@ public static class DependencyInjection
     service.AddDbContext<AppDbContext>((sp, options) =>
     {
       var auditInterceptor = sp.GetRequiredService<AuditInterceptor>();
-      options.UseSqlServer(connectionString).AddInterceptors(auditInterceptor);
-
+      options.UseSqlServer(connectionString)
+        .AddInterceptors(auditInterceptor)
+        .EnableSensitiveDataLogging()
+        .EnableDetailedErrors();
     });
 
 
@@ -76,7 +78,7 @@ public static class DependencyInjection
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Secret"]!))
       };
 
-      // ✅ Critical: SignalR sends the token in the query string
+      //!  SignalR sends the token in the query string <IMPORTANT>
       options.Events = new JwtBearerEvents
       {
         OnMessageReceived = context =>
@@ -174,6 +176,8 @@ public static class DependencyInjection
     service.AddScoped<INotificationsRepository, NotificationsRepository>();
     service.AddScoped<IJobViewRepository, JobViewRepository>();
     service.AddScoped<IProposalsRepository, ProposalsRepository>();
+    service.AddScoped<IWalletRepository, WalletRepository>();
+    service.AddScoped<IContractsRepository, ContractsRepository>();
     service.AddScoped<IUnitOfWork, UnitOfWork>();
     service.AddTransient<IIdentityService, IdentityService>();
 

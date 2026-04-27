@@ -21,6 +21,8 @@ public class ContractConfigurations : IEntityTypeConfiguration<Contract>
     builder.HasOne<JobProposal>().WithOne().HasForeignKey<Contract>(c => c.ProposalId)
     .OnDelete(DeleteBehavior.Restrict);
 
+    builder.Property(c => c.OneTimeFixedPrice).HasColumnType("decimal(18,2)").IsRequired(false);
+
     builder.HasOne<UserProfile>().WithMany().HasForeignKey(c => c.ClientId)
     .OnDelete(DeleteBehavior.Restrict);
     builder.HasOne<UserProfile>().WithMany().HasForeignKey(c => c.FreelancerId)

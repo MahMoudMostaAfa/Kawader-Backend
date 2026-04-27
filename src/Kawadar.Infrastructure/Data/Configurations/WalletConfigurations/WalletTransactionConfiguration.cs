@@ -11,10 +11,8 @@ public class WalletTransactionConfiguration : IEntityTypeConfiguration<WalletTra
   {
     builder.HasKey(wt => wt.Id);
 
-    builder.HasOne(wt => wt.Wallet)
-    .WithMany()
-    .HasForeignKey(wt => wt.WalletId)
-    .OnDelete(DeleteBehavior.Cascade);
+    builder.Property(wt => wt.Id).ValueGeneratedNever();
+
 
 
     builder.Property(wt => wt.Type).HasConversion<string>();

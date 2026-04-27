@@ -21,5 +21,13 @@ public class WalletConfiguration : IEntityTypeConfiguration<Wallet>
     builder.Property(w => w.EscrowBalance).HasPrecision(18, 2);
 
     builder.Ignore(w => w.TotalBalance);
+
+    builder.HasMany(w => w.Transactions)
+           .WithOne(t => t.Wallet)
+           .HasForeignKey(t => t.WalletId)
+           .OnDelete(DeleteBehavior.Cascade);
+
+    builder.Navigation(w => w.Transactions).HasField("_transactions")
+    .UsePropertyAccessMode(PropertyAccessMode.Field);
   }
 }
