@@ -77,7 +77,7 @@ public class CreateContractCommandHandler : IRequestHandler<CreateContractComman
 
 
     // create contract 
-    var contract = Contract.Create(request.JobId, request.ProposaslId, userProfile.Id, freelancerProfile.Id, request.ContractType, request.StartDate, request.ContractType == ContractType.OneTime ? DateTime.UtcNow.AddDays(Convert.ToDouble(proposal.EstimatedDays)) : null, request.ContractType == ContractType.OneTime ? proposal.Amount : null);
+    var contract = Contract.Create(request.JobId, request.ProposaslId, userProfile.Id, freelancerProfile.Id, request.ContractType, request.StartDate, request.ContractType == ContractType.OneTime ? DateTime.UtcNow.AddDays(Convert.ToDouble(proposal.EstimatedDays)) : null, request.ContractType == ContractType.OneTime ? proposal.Amount : null, job.Title, job.Description);
 
     if (contract.IsError) return contract.Errors;
 
@@ -93,21 +93,9 @@ public class CreateContractCommandHandler : IRequestHandler<CreateContractComman
       if (clientWalletResult.IsError) return clientWalletResult.Errors;
       var clientWallet = clientWalletResult.Value;
       // reserve the amount in client's wallet
-      var balanceBefore = clientWallet.Balance;
-      var holdResult = clientWallet.Hold(proposal.Amount!.Value);
-      if (holdResult.IsError) return holdResult.Errors;
-      var balanceAfter = clientWallet.Balance;
-
-      // make wallet transaction 
       var transactionResult = clientWallet.AddTransaction(proposal.Amount!.Value
-      , balanceBefore, balanceAfter, TransactionType.EscrowHold, WalletTransactionReferenceType.Contract, createdContract.Id, null);
+      , TransactionType.EscrowHold, WalletTransactionReferenceType.Contract, createdContract.Id, null);
       if (transactionResult.IsError) return transactionResult.Errors;
-      var transaction = transactionResult.Value;
-      // mark transaction as completed
-      transaction.MarkCompleted();
-
-      // // explicitly add to DbContext so EF tracks it as Added (not Modified)
-      // _walletRepository.AddWalletTransaction(transaction);
 
       // make escrow hold transaction 
       var escrowTansactionResult = EscrowTransaction.Create(createdContract.Id, null, EcrowTransactionType.Hold, proposal.Amount!.Value, userProfile.Id, freelancerProfile.Id, null);
@@ -152,3 +140,10 @@ public class CreateContractCommandHandler : IRequestHandler<CreateContractComman
 
 
 }
+
+
+/// E499A449-FB5B-4051-AEEA-C890B2FC47A3
+/// 
+/// 7F91E5DC-BDBF-4E1E-8F03-34204EA17781
+/// 
+/// OneTime

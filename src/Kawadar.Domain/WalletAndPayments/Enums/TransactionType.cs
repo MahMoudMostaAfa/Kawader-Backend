@@ -7,5 +7,6 @@ public enum TransactionType
   EscrowHold,
   EscrowRelease,
   EscrowRefund,
+  EscrowDeduction,
   SubscriptionCharge
 }

@@ -28,7 +28,7 @@ public class WalletTransaction : AuditableEntity
 
   private WalletTransaction() { }
 
-  private WalletTransaction(Guid walletId, TransactionType type, decimal amount, decimal balanceBefore, decimal balanceAfter, WalletTransactionReferenceType referenceType, Guid referenceId, string? note = null) : base(Guid.NewGuid())
+  private WalletTransaction(Guid walletId, TransactionType type, decimal amount, decimal balanceBefore, decimal balanceAfter, WalletTransactionReferenceType referenceType, Guid referenceId, string? note = null, WalletTransactionStatus status = WalletTransactionStatus.Pending) : base(Guid.NewGuid())
   {
     WalletId = walletId;
     Type = type;
@@ -38,15 +38,16 @@ public class WalletTransaction : AuditableEntity
     ReferenceType = referenceType;
     ReferenceId = referenceId;
     Note = note;
+    Status = status;
   }
 
 
-  public static Result<WalletTransaction> Create(Guid walletId, TransactionType type, decimal amount, decimal balanceBefore, decimal balanceAfter, WalletTransactionReferenceType referenceType, Guid referenceId, string? note = null)
+  public static Result<WalletTransaction> Create(Guid walletId, TransactionType type, decimal amount, decimal balanceBefore, decimal balanceAfter, WalletTransactionReferenceType referenceType, Guid referenceId, string? note = null, WalletTransactionStatus status = WalletTransactionStatus.Pending)
   {
     if (amount <= 0)
       return WalletErrors.InvalidAmount;
 
-    return new WalletTransaction(walletId, type, amount, balanceBefore, balanceAfter, referenceType, referenceId, note);
+    return new WalletTransaction(walletId, type, amount, balanceBefore, balanceAfter, referenceType, referenceId, note, status);
 
 
   }
@@ -56,4 +57,12 @@ public class WalletTransaction : AuditableEntity
     Status = WalletTransactionStatus.Completed;
   }
 
+  public Result<Updated> ChangeStatus(WalletTransactionStatus newStatus)
+  {
+    if (Status == newStatus)
+      return Result.Updated;
+
+    Status = newStatus;
+    return Result.Updated;
+  }
 }
