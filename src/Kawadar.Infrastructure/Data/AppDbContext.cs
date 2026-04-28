@@ -36,8 +36,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Kawadar.Infrastructure.Data;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options,
-ILogger<AppDbContext> logger, IMediator mediator) : IdentityDbContext<AppUser>(options)
+public class AppDbContext(DbContextOptions<AppDbContext> options, IMediator mediator) : IdentityDbContext<AppUser>(options)
 {
 
   public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
@@ -93,6 +92,8 @@ ILogger<AppDbContext> logger, IMediator mediator) : IdentityDbContext<AppUser>(o
   public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
   {
     await DispatchDomainEventsAsync(cancellationToken);
+
+    // for testing purpose
 
     // TEMPORARY: Log all tracked entity states before saving
 

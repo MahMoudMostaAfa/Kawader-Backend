@@ -26,6 +26,9 @@ public class Contract : AuditableEntity
   public DateTime? CompletionRequestedAt { get; private set; }
   public DateTime? CompletionApprovedAt { get; private set; }
 
+  public string Title { get; private set; } = string.Empty;
+  public string Description { get; private set; } = string.Empty;
+
 
 
 
@@ -41,7 +44,7 @@ public class Contract : AuditableEntity
 
   }
 
-  private Contract(Guid jobId, Guid proposalId, Guid clientId, Guid freelancerId, ContractType type, DateTime startAt, DateTime? endAt, decimal? oneTimeFixedPrice = null)
+  private Contract(Guid jobId, Guid proposalId, Guid clientId, Guid freelancerId, ContractType type, DateTime startAt, DateTime? endAt, decimal? oneTimeFixedPrice = null, string title = "", string description = "")
   {
     JobId = jobId;
     ProposalId = proposalId;
@@ -51,12 +54,14 @@ public class Contract : AuditableEntity
     StartAt = startAt;
     EndAt = endAt;
     OneTimeFixedPrice = oneTimeFixedPrice;
+    Title = title;
+    Description = description;
 
   }
 
-  public static Result<Contract> Create(Guid jobId, Guid proposalId, Guid clientId, Guid freelancerId, ContractType type, DateTime startAt, DateTime? endAt, decimal? oneTimeFixedPrice = null)
+  public static Result<Contract> Create(Guid jobId, Guid proposalId, Guid clientId, Guid freelancerId, ContractType type, DateTime startAt, DateTime? endAt, decimal? oneTimeFixedPrice = null, string title = "", string description = "")
   {
-    return new Contract(jobId, proposalId, clientId, freelancerId, type, startAt, endAt, oneTimeFixedPrice);
+    return new Contract(jobId, proposalId, clientId, freelancerId, type, startAt, endAt, oneTimeFixedPrice, title, description);
   }
 
   public void AddContractMilestone(Guid ProposalMilestoneId, string title, string description, decimal amount, DateTime dueDate)
@@ -69,6 +74,36 @@ public class Contract : AuditableEntity
     _contractMilestones.Add(contractMilestone);
 
 
+  }
+
+  public Result<Updated> ChangeStatus(ContractStatus newStatus)
+  {
+    if (Status == ContractStatus.Canceled)
+      return Error.Failure("Contracts.Status", "Cannot change status of a cancelled contract.");
+
+    if (Status == ContractStatus.Completed && newStatus != ContractStatus.Active)
+      return Error.Failure("Contracts.Status", "Can only change status of a completed contract back to active.");
+
+    Status = newStatus;
+    return Result.Updated;
+  }
+
+  public Result<Updated> ChangeDeadline(DateTime newDeadline)
+  {
+    if (Type != ContractType.OneTime)
+      return Error.Failure("Only one-time contracts can have their deadlines edited.");
+
+    if (Status != ContractStatus.Active)
+      return Error.Failure("Only active contracts can have their deadlines edited.");
+
+    if (EndAt is null)
+      return Error.Failure("Current deadline is not set. Cannot change deadline.");
+
+    if (newDeadline <= EndAt)
+      return Error.Validation("New deadline must be later than the current deadline.");
+
+    EndAt = newDeadline;
+    return Result.Updated;
   }
 
 }

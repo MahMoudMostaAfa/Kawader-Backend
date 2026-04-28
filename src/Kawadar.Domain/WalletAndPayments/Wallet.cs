@@ -42,7 +42,7 @@ public class Wallet : AuditableEntity
     return new Wallet(userId);
   }
 
-  public Result<Updated> Deposit(decimal amount)
+  private Result<Updated> Deposit(decimal amount)
   {
     if (amount <= 0)
       return WalletErrors.InvalidAmount;
@@ -53,7 +53,7 @@ public class Wallet : AuditableEntity
     return Result.Updated;
   }
 
-  public Result<Updated> Withdraw(decimal amount)
+  private Result<Updated> Withdraw(decimal amount)
   {
     if (amount <= 0)
       return WalletErrors.InvalidAmount;
@@ -66,7 +66,7 @@ public class Wallet : AuditableEntity
     return Result.Updated;
   }
 
-  public Result<Updated> Hold(decimal amount)
+  private Result<Updated> Hold(decimal amount)
   {
     if (amount <= 0)
       return WalletErrors.InvalidAmount;
@@ -80,7 +80,7 @@ public class Wallet : AuditableEntity
     return Result.Updated;
   }
 
-  public Result<Updated> Release(decimal amount)
+  private Result<Updated> Release(decimal amount)
   {
     if (amount <= 0)
       return WalletErrors.InvalidAmount;
@@ -94,7 +94,7 @@ public class Wallet : AuditableEntity
     return Result.Updated;
   }
 
-  public Result<Updated> Deduct(decimal amount)
+  private Result<Updated> Deduct(decimal amount)
   {
     if (amount <= 0)
       return WalletErrors.InvalidAmount;
@@ -116,21 +116,66 @@ public class Wallet : AuditableEntity
 
   public Result<WalletTransaction> AddTransaction(
     decimal amount,
-    decimal balanceBefore,
-    decimal balanceAfter,
     TransactionType transactionType,
     WalletTransactionReferenceType referenceType,
     Guid referenceId,
-    string? note = null
+    string? note = null,
+    WalletTransactionStatus status = WalletTransactionStatus.Pending
     )
   {
-    var transactionResult = WalletTransaction.Create(Id, transactionType, amount, balanceBefore, balanceAfter, referenceType, referenceId, note);
+
+    if (amount > Balance && (transactionType == TransactionType.Withdrawal || transactionType == TransactionType.EscrowHold))
+      return WalletErrors.InsufficientBalance;
+
+    var transactionResult = WalletTransaction.Create(Id, transactionType, amount, Balance, Balance + amount, referenceType, referenceId, note, status);
     if (transactionResult.IsError)
       return transactionResult.Errors;
 
     var transaction = transactionResult.Value;
     _transactions.Add(transaction);
+
+    if (transaction.Type == TransactionType.Withdrawal || transaction.Type == TransactionType.EscrowHold) transaction.MarkCompleted();
+
+    if (transaction.Status == WalletTransactionStatus.Completed)
+    {
+
+      if (transaction.Type == TransactionType.Deposit) Deposit(amount);
+      else if (transaction.Type == TransactionType.Withdrawal) Withdraw(amount);
+      else if (transaction.Type == TransactionType.EscrowHold) Hold(amount);
+      else if (transaction.Type == TransactionType.EscrowRelease) Release(amount);
+      else if (transaction.Type == TransactionType.SubscriptionCharge) Withdraw(amount);
+      else if (transaction.Type == TransactionType.EscrowRefund) Release(amount);
+      else if (transaction.Type == TransactionType.EscrowDeduction) Deduct(amount);
+
+    }
+
     return transaction;
 
+  }
+
+  public Result<Updated> ChangeTransactionStatus(Guid transactionId, WalletTransactionStatus newStatus)
+  {
+    var transaction = _transactions.FirstOrDefault(t => t.Id == transactionId);
+    if (transaction == null)
+      return Error.NotFound("Wallet.TransactionNotFound", "The specified transaction was not found in the wallet.");
+
+    if (transaction.Status == newStatus)
+      return Result.Updated;
+
+    // Handle status change logic
+    if (transaction.Status == WalletTransactionStatus.Pending && newStatus == WalletTransactionStatus.Completed)
+    {
+      if (transaction.Type == TransactionType.Deposit) Deposit(transaction.Amount);
+      else if (transaction.Type == TransactionType.Withdrawal) Withdraw(transaction.Amount);
+      else if (transaction.Type == TransactionType.EscrowHold) Hold(transaction.Amount);
+      else if (transaction.Type == TransactionType.EscrowRelease) Release(transaction.Amount);
+      else if (transaction.Type == TransactionType.SubscriptionCharge) Withdraw(transaction.Amount);
+      else if (transaction.Type == TransactionType.EscrowRefund) Release(transaction.Amount);
+      else if (transaction.Type == TransactionType.EscrowDeduction) Deduct(transaction.Amount);
+
+    }
+
+    transaction.ChangeStatus(newStatus);
+    return Result.Updated;
   }
 }
