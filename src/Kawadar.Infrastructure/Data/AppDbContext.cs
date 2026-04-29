@@ -29,6 +29,8 @@ using Kawadar.Domain.Conversations;
 using Kawadar.Domain.UserProfiles.UserReports;
 using Kawadar.Domain.Contracts;
 using Kawadar.Domain.Subscriptions;
+using Kawadar.Domain.Contracts.Disbutes;
+using Kawadar.Domain.Violations;
 using Kawadar.Domain.WalletAndPayments;
 using Kawadar.Domain.WalletAndPayments.Payouts;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -73,6 +75,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IMediator medi
 
   public DbSet<Conversation> Conversations => Set<Conversation>();
   public DbSet<Contract> Contracts => Set<Contract>();
+  public DbSet<Disbute> Disbutes => Set<Disbute>();
+  public DbSet<Violation> Violations => Set<Violation>();
   public DbSet<ContractMilestone> ContractMilestones => Set<ContractMilestone>();
 
   public DbSet<UserSubscription> UserSubscriptions => Set<UserSubscription>();
