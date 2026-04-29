@@ -1,9 +1,6 @@
-using System.Runtime.CompilerServices;
-using AutoMapper;
-using AutoMapper.Configuration.Annotations;
+
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
-using Kawadar.Application.Features.Auth.Dtos;
 using Kawadar.Domain.Common.Constants;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.UserProfiles;
