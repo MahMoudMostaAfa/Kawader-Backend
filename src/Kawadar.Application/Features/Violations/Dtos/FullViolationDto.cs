@@ -4,6 +4,7 @@ namespace Kawadar.Application.Features.Violations.Dtos
 {
     public class FullViolationDto
     {
+        public Guid Id { get; set; }
         public string UserName { get; set; } = "";
         public string ViolationEvidence { get; set; } = "";
         public ViolationType ViolationType { get; set; }

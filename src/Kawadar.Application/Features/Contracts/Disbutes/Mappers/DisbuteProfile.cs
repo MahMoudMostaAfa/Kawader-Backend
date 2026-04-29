@@ -11,6 +11,7 @@ namespace Kawadar.Application.Features.Contracts.Disbutes.Mappers
         {
             CreateMap<(Disbute disbute, UserDto userDto), fullDisbuteDto>()
                 .ForMember(dest => dest.contractId, opt => opt.MapFrom(src => src.disbute.ContractId))
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.disbute.Id))
                 .ForMember(dest => dest.reason, opt => opt.MapFrom(src => src.disbute.Reason))
                 .ForMember(dest => dest.resolution, opt => opt.MapFrom(src => src.disbute.Resolution))
                 .ForMember(dest => dest.status, opt => opt.MapFrom(src => src.disbute.Status))
@@ -20,6 +21,7 @@ namespace Kawadar.Application.Features.Contracts.Disbutes.Mappers
             CreateMap<(Disbute disbute, UserDto userDto), BriefDisbuteDto>()
                 .ForMember(dest => dest.reason, opt => opt.MapFrom(src => src.disbute.Reason))
                 .ForMember(dest => dest.status, opt => opt.MapFrom(src => src.disbute.Status))
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.disbute.Id))
                 .ForMember(dest => dest.RaisedByUserName, opt => opt.MapFrom(src => src.userDto.UserName));
         }
     }

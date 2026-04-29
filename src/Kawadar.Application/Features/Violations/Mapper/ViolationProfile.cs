@@ -11,6 +11,7 @@ namespace Kawadar.Application.Features.Violations.Mapper
         {
             CreateMap<(Violation violation, UserDto userDto), BriefViolationDto>()
                 .ForMember(dest => dest.userName, opt => opt.MapFrom(src => src.userDto.UserName))
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.violation.Id))
                 .ForMember(dest => dest.violationStatus, opt => opt.MapFrom(src => src.violation.ViolationStatus))
                 .ForMember(dest => dest.violationType, opt => opt.MapFrom(src => src.violation.ViolationType))
                 .ForMember(dest => dest.severityScore, opt => opt.MapFrom(src => src.violation.severityScore))
@@ -22,6 +23,7 @@ namespace Kawadar.Application.Features.Violations.Mapper
                 .ForMember(dest => dest.ViolationType, opt => opt.MapFrom(src => src.violation.ViolationType))
                 .ForMember(dest => dest.severityScore, opt => opt.MapFrom(src => src.violation.severityScore))
                 .ForMember(dest => dest.ReferenceType, opt => opt.MapFrom(src => src.violation.ReferenceType))
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.violation.Id))
                 .ForMember(dest => dest.ViolationEvidence, opt => opt.MapFrom(src => src.violation.ViolationEvidence))
                 .ForMember(dest => dest.ResolvedAt, opt => opt.MapFrom(src => src.violation.ResolvedAt))
                 .ForMember(dest => dest.RedirectUrl, opt => opt.MapFrom(src => src.violation.RedirectUrl))

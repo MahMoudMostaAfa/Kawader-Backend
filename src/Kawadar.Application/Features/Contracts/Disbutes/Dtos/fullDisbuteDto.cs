@@ -6,6 +6,7 @@ namespace Kawadar.Application.Features.Contracts.Disbutes.Dtos
 {
     public class fullDisbuteDto
     {
+        public Guid Id { get; set; }
         public Guid contractId { get; set; }
         public string RaisedByUserName { get; set; } = "";
         public DisbuteStatus status { get; set; }

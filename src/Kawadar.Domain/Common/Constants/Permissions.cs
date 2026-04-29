@@ -36,6 +36,12 @@ public static class Permissions
     public const string ViewJobReports = "Permissions.JobReports.View";
     public const string UpdateJobReports = "Permissions.JobReports.Update";
 
+    public const string ViewViolations = "Permissions.Violations.View";
+    public const string SolveViolations = "Permissions.Violations.Solve";
+
+    public const string ViewDisbutes = "Permissions.Disbutes.View";
+    public const string SolveDisbutes = "Permissions.Disbuted.Solve";
+
 
 
   public static List<string> GetAllPermissions()
