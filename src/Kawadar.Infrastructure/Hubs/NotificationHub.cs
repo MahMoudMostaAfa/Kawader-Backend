@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Kawadar.Infrastructure.Hubs;
 
+
 [Authorize]
 public class NotificationHub : Hub
 {

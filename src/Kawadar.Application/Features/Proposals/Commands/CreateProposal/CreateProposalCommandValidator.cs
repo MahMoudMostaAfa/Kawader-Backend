@@ -12,7 +12,8 @@ public class CreateProposalCommandValidator : AbstractValidator<CreateProposalCo
   public CreateProposalCommandValidator()
   {
     RuleFor(x => x.CoverLetter).NotEmpty().WithMessage("Cover letter is required")
-      .MinimumLength(50).WithMessage("Cover letter must be at least 50 characters long");
+      .MinimumLength(50).WithMessage("Cover letter must be at least 50 characters long")
+      .MaximumLength(200).WithMessage("Cover letter must be less than 200 characters long");
 
     RuleFor(x => x.JobProposalType).IsInEnum().WithMessage("Invalid Proposal Type");
 

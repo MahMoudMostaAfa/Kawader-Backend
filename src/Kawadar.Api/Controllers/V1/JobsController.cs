@@ -19,6 +19,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Kawadar.Application.Features.Reviews.Commands.CreateReview;
+using Kawadar.Application.Features.Jobs.Queries.GetJobById;
 
 namespace Kawadar.Api.Controllers.V1;
 
@@ -309,15 +310,15 @@ public class JobsController : ApiController
   [ProducesResponseType(StatusCodes.Status201Created)]
   [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
   [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-  public async Task<IActionResult> ReviewJobBySlug([FromRoute]string slug, [FromBody]ReviewJobRequest request, CancellationToken ct)
+  public async Task<IActionResult> ReviewJobBySlug([FromRoute] string slug, [FromBody] ReviewJobRequest request, CancellationToken ct)
   {
-      var command = new CreateReviewCommand(slug, request.RevieweeUserName, request.rating, request.Comment);
-      var result = await _sender.Send(command, ct);
+    var command = new CreateReviewCommand(slug, request.RevieweeUserName, request.rating, request.Comment);
+    var result = await _sender.Send(command, ct);
 
-      return result.Match(
-          _ => Created(),
-          errors => Problem(errors)
-      );
+    return result.Match(
+        _ => Created(),
+        errors => Problem(errors)
+    );
   }
 
   [HttpPost("generate-description")]
@@ -336,4 +337,27 @@ public class JobsController : ApiController
         errors => Problem(errors)
     );
   }
+
+
+
+  [HttpGet("{id:guid}")]
+  [EndpointSummary("Gets a job by its ID")]
+  [EndpointDescription("Gets full job details including skills, questions, and attachments by its unique ID.")]
+  [ProducesResponseType(typeof(JobDetailsDto), StatusCodes.Status200OK)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+
+  public async Task<IActionResult> GetJobById([FromRoute] Guid id, CancellationToken ct)
+  {
+    var query = new GetJobByIdQuery(id);
+
+    var result = await _sender.Send(query, ct);
+
+    return result.Match(
+          job => Ok(job),
+          errors => Problem(errors)
+      );
+  }
+
 }

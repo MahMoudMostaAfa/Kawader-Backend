@@ -98,7 +98,7 @@ public class CreatedMessageEventHandler : INotificationHandler<CreatedMessageEve
 
     // check if recipient is online and send notification via SignalR
     var isRecipientOnline = await _persistanceService.IsUserOnlineAsync(notification.RecipientUserId);
-    if (!isRecipientOnline)
+    if (isRecipientOnline)
     {
       // create and send real-time notification via SignalR
       var notificationResult = Notification.Create(notification.RecipientUserProfileId, "New message received", "you have received a new message in one of your conversations ", NotificationCategory.Message, NotificationType.Info, notification.ConversationId, "conversations", $"conversations/{notification.ConversationId}");

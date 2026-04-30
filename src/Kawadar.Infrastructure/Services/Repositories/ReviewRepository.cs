@@ -38,6 +38,8 @@ namespace Kawadar.Infrastructure.Services.Repositories
         public async Task<PaginatedList<Review>> GetReviewsByUserProfileId(float? Rating, int page, int pageSize, string sortBy, Guid Id)
         {
             var query = appDbContext.Reviews.AsQueryable();
+            query = query.Where(x => x.RevieweeId == Id);
+
             if (Rating.HasValue)
             {
                 query = query.Where(x => x.Rating == Rating);
