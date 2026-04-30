@@ -8,7 +8,7 @@ public interface IContractsRepository
 {
 
   void Add(Contract contract);
-  Task<Result<PaginatedList<Contract>>> GetContractsByUserIdAsync(Guid userId, int pageNumber, int pageSize, CancellationToken cancellationToken);
+  Task<Result<PaginatedList<Contract>>> GetContractsByUserIdAsync(Guid userId, int pageNumber, int pageSize, CancellationToken cancellationToken = default);
 
-  Task<Result<Contract>> GetContractByIdAsync(Guid contractId, CancellationToken cancellationToken);
+  Task<Result<Contract>> GetContractByIdAsync(Guid contractId, CancellationToken cancellationToken = default);
 }
