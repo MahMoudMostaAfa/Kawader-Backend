@@ -46,7 +46,7 @@ public class UserProfileTests
         var lastName = "Doe";
         var profileType = ProfileType.Freelancer;
 
-        var result = UserProfile.create(userId!, firstName, lastName, profileType);
+        var result = UserProfile.create(userId, firstName, lastName, profileType);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(UserProfileErrors.UserIdIsRequired, result.TopError);

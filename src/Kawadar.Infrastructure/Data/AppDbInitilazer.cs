@@ -1,9 +1,6 @@
 
-using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Domain.Common.Constants;
 using Kawadar.Domain.Common.Results;
-using Kawadar.Domain.UserProfiles;
-using Kawadar.Domain.UserProfiles.Enums;
 using Kawadar.Infrastructure.Identity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -141,43 +138,7 @@ public class ApplicationDbContextInitialiser(
             }
         }
     }
-
-    if(await _userManager.FindByEmailAsync("Ahmed12345@gmail.com") == null)
-    {
-        var client = new AppUser
-        {
-            UserName = "Ahmed123",
-            Email = "Ahmed12345@gmail.com",
-            EmailConfirmed = true
-        };
-        var result = await _userManager.CreateAsync(client, "Ahmed@123");
-        if (result.Succeeded)
-        {
-            await _userManager.AddToRoleAsync(client, DefaultRoles.User);
-            var Profile = UserProfile.create(client.Id, "Ahmed", "Tarek", ProfileType.Client);
-            await _context.UserProfiles.AddAsync(Profile.Value);
-            await _context.SaveChangesAsync();
-        }
     }
-
-    if (await _userManager.FindByEmailAsync("Youssef123@gmail.com") == null)
-    {
-        var client = new AppUser
-        {
-            UserName = "Youssef123",
-            Email = "Youssef123@gmail.com",
-            EmailConfirmed = true
-        };
-        var result = await _userManager.CreateAsync(client, "Youssef@123");
-        if (result.Succeeded)
-        {
-            await _userManager.AddToRoleAsync(client, DefaultRoles.User);
-            var Profile = UserProfile.create(client.Id, "Youssef", "Amin", ProfileType.Client);
-            await _context.UserProfiles.AddAsync(Profile.Value);
-            await _context.SaveChangesAsync();
-        }
-    }
-  }
 }
 
 

@@ -18,8 +18,7 @@ public class JobDetailsProfile : Profile
     .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.job.Title))
     .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.job.Description))
     .ForMember(dest => dest.PosterFullName, opt => opt.MapFrom(src => src.userProfile.FullName))
-    .ForMember(dest => dest.PosterProfilePictureUrl, opt => opt.MapFrom(src => src.userProfile.ProfilePictureUrl))
-    .ForMember(dest => dest.JobId, opt => opt.MapFrom(src => src.job.Id))
+    .ForMember(dest => dest.posterProfilePictureUrl, opt => opt.MapFrom(src => src.userProfile.ProfilePictureUrl))
     .ForMember(dest => dest.PosterUsername, opt => opt.MapFrom(src => src.userDto.UserName))
     .ForMember(dest => dest.JobSlug, opt => opt.MapFrom(src => Uri.EscapeDataString(src.job.JobSlug)))
     .ForMember(dest => dest.Questions, opt => opt.MapFrom(src => src.job.Questions))
@@ -75,7 +74,6 @@ public class JobDetailsProfile : Profile
 
         CreateMap<(JobReport jobReport, Kawadar.Domain.Jobs.Job job, UserDto userDto), BriefJobReportDto>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.jobReport.Id))
-            .ForMember(dest => dest.JobSlug, opt => opt.MapFrom(src => src.job.JobSlug))
             .ForMember(dest => dest.JobTitle, opt => opt.MapFrom(src => src.job.Title))
             .ForMember(dest => dest.ReporterUserName, opt => opt.MapFrom(src => src.userDto.UserName))
             .ForMember(dest => dest.ReportStatus, opt => opt.MapFrom(src => src.jobReport.ReportStatus))

@@ -198,11 +198,5 @@ public class Job : AuditableEntity
     _skills.Remove(skill);
     return Result.Deleted;
   }
-  public Result<Updated> UpdateStatus(JobStatus jobStatus)
-  {
-    if (JobStatus != jobStatus) JobStatus = jobStatus;
-
-    return Result.Updated;
-  }
 
 }

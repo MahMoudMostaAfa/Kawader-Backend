@@ -6,7 +6,4 @@ namespace Kawadar.Application.Common.Hubs;
 public interface INotificationsHubService
 {
   Task SendNotificationAsync(string userId, NotificationDto notificationDto, CancellationToken cancellationToken = default);
-  Task SendNotificationToAllAsync(NotificationDto notificationDto, CancellationToken cancellationToken = default);
-
-
 }

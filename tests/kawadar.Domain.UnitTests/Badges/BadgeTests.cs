@@ -67,7 +67,7 @@ namespace kawadar.Domain.UnitTests.Badges
             string? iconUrl = null;
             var description = "this is a badge";
 
-            var result = Badge.Create(title, iconUrl!, description);
+            var result = Badge.Create(title, iconUrl, description);
             Assert.True(result.IsError);
             Assert.Equal(BadgeErrors.IconIsEmpty.Code, result.TopError.Code);
             Assert.Equal(BadgeErrors.IconIsEmpty.Description, result.TopError.Description);
@@ -93,7 +93,7 @@ namespace kawadar.Domain.UnitTests.Badges
             var iconUrl = "www.Icon.com";
             string? description = null;
 
-            var result = Badge.Create(title, iconUrl, description!);
+            var result = Badge.Create(title, iconUrl, description);
             Assert.True(result.IsError);
             Assert.Equal(BadgeErrors.DescriptionIsEmpty.Code, result.TopError.Code);
             Assert.Equal(BadgeErrors.DescriptionIsEmpty.Description, result.TopError.Description);

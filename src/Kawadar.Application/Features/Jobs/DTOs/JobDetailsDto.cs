@@ -7,8 +7,7 @@ public class JobDetailsDto
   public string Title { get; set; } = null!;
   public string Description { get; set; } = null!;
   public string PosterFullName { get; set; } = null!;
-  public Guid JobId { get; set; } 
-  public string PosterProfilePictureUrl { get; set; } = null!;
+  public string posterProfilePictureUrl { get; set; } = null!;
   public string PosterUsername { get; set; } = null!;
   public string JobSlug { get; set; } = null!;
 

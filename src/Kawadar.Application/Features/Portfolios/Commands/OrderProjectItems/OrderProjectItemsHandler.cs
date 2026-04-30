@@ -22,7 +22,7 @@ namespace Kawadar.Application.Features.Portfolios.Commands.OrderProjectItems
 
             foreach(var order in orderDictionary)
             {
-                if(!itemsDictionary.TryGetValue(order.Key, out _))
+                if(!itemsDictionary.TryGetValue(order.Key, out PortfolioItem value))
                     return Error.NotFound("Item.NotFound", "Item not found");
 
                 var item = itemsDictionary[order.Key];

@@ -40,7 +40,7 @@ namespace kawadar.Domain.UnitTests.Skills
             Guid CreatedBy = Guid.NewGuid();
             var isActive = true;
 
-            var result = Skill.Create(name!, isActive, CreatedBy);
+            var result = Skill.Create(name, isActive, CreatedBy);
             Assert.True(result.IsError);
             Assert.Equal(SkillErrors.NameIsRequired.Code, result.TopError.Code);
             Assert.Equal(SkillErrors.NameIsRequired.Description, result.TopError.Description);

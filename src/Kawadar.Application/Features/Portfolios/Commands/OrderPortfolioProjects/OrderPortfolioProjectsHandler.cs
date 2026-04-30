@@ -24,7 +24,7 @@ namespace Kawadar.Application.Features.Portfolios.Commands.OrderPortfolioProject
 
             foreach(var order in orderDictionary)
             {
-                if(!projectsDictionary.TryGetValue(order.Key, out _))
+                if(!projectsDictionary.TryGetValue(order.Key, out PortfolioProject value))
                     return Error.NotFound("Project.NotFound", "Project not found");
                 var project = projectsDictionary[order.Key];
                 var updateResult = project.UpdateOrder(order.Value);

@@ -19,9 +19,4 @@ public class NotificationsHubService : INotificationsHubService
   {
     return _hubContext.Clients.Group(NotificationHub.UserGroup(userId)).SendAsync("ReceiveNotification", notificationDto, cancellationToken);
   }
-
-  public Task SendNotificationToAllAsync(NotificationDto notificationDto, CancellationToken cancellationToken = default)
-  {
-    return _hubContext.Clients.All.SendAsync("ReceiveNotification", notificationDto, cancellationToken);
-  }
 }

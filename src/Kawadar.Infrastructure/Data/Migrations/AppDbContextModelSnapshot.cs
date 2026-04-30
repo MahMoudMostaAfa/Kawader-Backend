@@ -34,7 +34,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasIndex("SkillsId");
 
-                    b.ToTable("JobSkills");
+                    b.ToTable("JobSkills", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Badges.Badge", b =>
@@ -66,7 +66,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Badges");
+                    b.ToTable("Badges", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Badges.FreelancerBadges.FreelancerBadge", b =>
@@ -93,177 +93,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasIndex("FreelancerId");
 
-                    b.ToTable("FreelancerBadges");
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.Contracts.Contract", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ClientId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("CompletionApprovedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("CompletionRequestedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("EndAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("FreelancerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("JobId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal?>("OneTimeFixedPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<Guid>("ProposalId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("StartAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClientId");
-
-                    b.HasIndex("FreelancerId");
-
-                    b.HasIndex("JobId")
-                        .IsUnique();
-
-                    b.HasIndex("ProposalId")
-                        .IsUnique();
-
-                    b.ToTable("Contracts");
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.Contracts.ContractMilestone", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("CompletionApprovedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("CompletionRequestedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("ContractId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DueDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("ProposalMilestoneId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ContractId");
-
-                    b.HasIndex("ProposalMilestoneId")
-                        .IsUnique();
-
-                    b.ToTable("ContractMilestones");
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.Contracts.Disbutes.Disbute", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ContractId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("RaisedById")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Resolution")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime?>("ResolvedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ContractId")
-                        .IsUnique();
-
-                    b.HasIndex("RaisedById");
-
-                    b.ToTable("Disbutes");
+                    b.ToTable("FreelancerBadges", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Conversations.Conversation", b =>
@@ -308,7 +138,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasIndex("SenderUserId");
 
-                    b.ToTable("Conversations");
+                    b.ToTable("Conversations", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Conversations.Messages.Message", b =>
@@ -350,7 +180,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasIndex("SenderUserId");
 
-                    b.ToTable("Messages");
+                    b.ToTable("Messages", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Conversations.Messages.MessageFile", b =>
@@ -371,7 +201,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasIndex("MessageId");
 
-                    b.ToTable("MessageFiles");
+                    b.ToTable("MessageFiles", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Jobs.Job", b =>
@@ -439,7 +269,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasIndex("SpecilizationId");
 
-                    b.ToTable("Jobs");
+                    b.ToTable("Jobs", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Jobs.JobFiles.JobFile", b =>
@@ -460,7 +290,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasIndex("JobId");
 
-                    b.ToTable("JobFiles");
+                    b.ToTable("JobFiles", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Jobs.JobQuestions.JobQuestion", b =>
@@ -492,7 +322,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasIndex("JobId");
 
-                    b.ToTable("JobQuestions");
+                    b.ToTable("JobQuestions", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Jobs.JobReports.JobReport", b =>
@@ -536,7 +366,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasIndex("ReportedBy");
 
-                    b.ToTable("JobReports");
+                    b.ToTable("JobReports", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Jobs.JobViews.JobView", b =>
@@ -563,7 +393,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasIndex("JobId", "UserProfileId");
 
-                    b.ToTable("JobViews");
+                    b.ToTable("JobViews", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Jobs.SavedJobs.SavedJob", b =>
@@ -591,7 +421,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.HasIndex("JobId", "SavedById")
                         .IsUnique();
 
-                    b.ToTable("SavedJobs");
+                    b.ToTable("SavedJobs", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Notifications.Notification", b =>
@@ -652,7 +482,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Portfolios.Items.PortfolioItem", b =>
@@ -686,7 +516,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasIndex("PortfolioProjectId");
 
-                    b.ToTable("PortfolioItems");
+                    b.ToTable("PortfolioItems", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Portfolios.Project.PortfolioProject", b =>
@@ -740,7 +570,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasIndex("SpecilizationId");
 
-                    b.ToTable("PortfolioProjects");
+                    b.ToTable("PortfolioProjects", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Portfolios.ProjectSkill.PortfolioProjectSkill", b =>
@@ -767,7 +597,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasIndex("SkillId");
 
-                    b.ToTable("ProjectSkills");
+                    b.ToTable("ProjectSkills", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Portfolios.ProjectView.PortfolioProjectView", b =>
@@ -794,7 +624,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasIndex("UserProfileId");
 
-                    b.ToTable("ProjectViews");
+                    b.ToTable("ProjectViews", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Proposals.JobProposal", b =>
@@ -846,7 +676,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.HasIndex("JobId", "FreelancerId")
                         .IsUnique();
 
-                    b.ToTable("JobProposals");
+                    b.ToTable("JobProposals", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Proposals.ProposalMilestones.ProposalMilestone", b =>
@@ -892,7 +722,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasIndex("JobProposalId");
 
-                    b.ToTable("ProposalMilestones");
+                    b.ToTable("ProposalMilestones", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Proposals.QuestionAnswers.ProposalQuestionAnswer", b =>
@@ -930,7 +760,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.HasIndex("JobProposalId", "QuestionId")
                         .IsUnique();
 
-                    b.ToTable("ProposalQuestionAnswers");
+                    b.ToTable("ProposalQuestionAnswers", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Reviews.Review", b =>
@@ -973,7 +803,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasIndex("ReviewerId");
 
-                    b.ToTable("Reviews");
+                    b.ToTable("Reviews", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Skills.FreelancerSkill.FreelancerSkill", b =>
@@ -1008,7 +838,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasIndex("SkillId");
 
-                    b.ToTable("FreelacnerSkills");
+                    b.ToTable("FreelacnerSkills", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Skills.Skill", b =>
@@ -1038,7 +868,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasIndex("CreatedBy");
 
-                    b.ToTable("Skills");
+                    b.ToTable("Skills", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Specilizations.Specilization", b =>
@@ -1063,86 +893,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Specilizations");
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.Subscriptions.SubscriptionPlan", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("BillingCycleType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Price")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("SubscriptionPlans");
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.Subscriptions.UserSubscription", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("AutoRenew")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("CancalledAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("StartedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("SubscriptionPlanId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("TotalPrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SubscriptionPlanId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserSubscriptions");
+                    b.ToTable("Specilizations", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Domain.UserProfiles.UserProfile", b =>
@@ -1264,479 +1015,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("UserProfiles");
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.UserProfiles.UserReports.UserReport", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ActionTaken")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ReportStatus")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ReportType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("ReportedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ReportedUser")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReportedBy");
-
-                    b.HasIndex("ReportedUser");
-
-                    b.ToTable("UserReports");
-                });
-                
-            modelBuilder.Entity("Kawadar.Domain.Violations.Violation", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ActionTaken")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("NoteByAdmin")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RedirectUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("ReferenceId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ReferenceType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ResolvedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("ResolvedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ViolationEvidence")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("ViolationStatus")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ViolationType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<float>("severityScore")
-                        .HasColumnType("real");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ResolvedBy");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Violations");
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.WalletAndPayments.EscrowTransaction", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<Guid>("ContractId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ContractMilestoneId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Note")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<Guid>("ReceiverUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("SenderUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ContractId");
-
-                    b.HasIndex("ContractMilestoneId");
-
-                    b.HasIndex("ReceiverUserId");
-
-                    b.HasIndex("SenderUserId");
-
-                    b.ToTable("EscrowTransactions");
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.WalletAndPayments.Payments.PaymentEventHook", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("EventType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("GatewayEventId")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("HMACSignature")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsProcessed")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsValidSignature")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("PaymentTransactionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("ProcessedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ProcessingError")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RawPayload")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PaymentTransactionId");
-
-                    b.ToTable("PaymentEventHook");
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.WalletAndPayments.Payments.PaymentTransaction", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasMaxLength(3)
-                        .HasColumnType("nvarchar(3)");
-
-                    b.Property<string>("FailureReason")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Gateway")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("GatewayOrderId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("GatewayTransactionId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Method")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("PaidAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("WalletId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("WalletTransactionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("WalletId");
-
-                    b.HasIndex("WalletTransactionId")
-                        .IsUnique()
-                        .HasFilter("[WalletTransactionId] IS NOT NULL");
-
-                    b.ToTable("PaymentTransaction");
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.WalletAndPayments.Payouts.UserPayoutAccount", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("AccountDetailsJson")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DispalyName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDefault")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("PayoutType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserPayoutAccounts");
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.WalletAndPayments.Payouts.WithdrawalRequest", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasMaxLength(3)
-                        .HasColumnType("nvarchar(3)");
-
-                    b.Property<string>("FailureReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime?>("ProcessedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("ProcessedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserPayoutAccountId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("WalletId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("WalletTransactionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProcessedBy");
-
-                    b.HasIndex("UserPayoutAccountId");
-
-                    b.HasIndex("WalletId");
-
-                    b.HasIndex("WalletTransactionId")
-                        .IsUnique()
-                        .HasFilter("[WalletTransactionId] IS NOT NULL");
-
-                    b.ToTable("WithdrawalRequests");
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.WalletAndPayments.Wallet", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Balance")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("EscrowBalance")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("Wallets");
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.WalletAndPayments.WalletTransaction", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("BalanceAfter")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("BalanceBefore")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("ReferenceId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ReferenceType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("WalletId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("WalletId");
-
-                    b.ToTable("WalletTransactions");
+                    b.ToTable("UserProfiles", (string)null);
                 });
 
             modelBuilder.Entity("Kawadar.Infrastructure.Identity.AppUser", b =>
@@ -1967,63 +1246,6 @@ namespace Kawadar.Infrastructure.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Kawadar.Domain.Contracts.Contract", b =>
-                {
-                    b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", null)
-                        .WithMany()
-                        .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", null)
-                        .WithMany()
-                        .HasForeignKey("FreelancerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Kawadar.Domain.Jobs.Job", null)
-                        .WithOne()
-                        .HasForeignKey("Kawadar.Domain.Contracts.Contract", "JobId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Kawadar.Domain.Proposals.JobProposal", null)
-                        .WithOne()
-                        .HasForeignKey("Kawadar.Domain.Contracts.Contract", "ProposalId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.Contracts.ContractMilestone", b =>
-                {
-                    b.HasOne("Kawadar.Domain.Contracts.Contract", null)
-                        .WithMany("ContractMilestones")
-                        .HasForeignKey("ContractId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Kawadar.Domain.Proposals.ProposalMilestones.ProposalMilestone", null)
-                        .WithOne()
-                        .HasForeignKey("Kawadar.Domain.Contracts.ContractMilestone", "ProposalMilestoneId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.Contracts.Disbutes.Disbute", b =>
-                {
-                    b.HasOne("Kawadar.Domain.Contracts.Contract", null)
-                        .WithOne()
-                        .HasForeignKey("Kawadar.Domain.Contracts.Disbutes.Disbute", "ContractId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", null)
-                        .WithMany()
-                        .HasForeignKey("RaisedById")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Kawadar.Domain.Conversations.Conversation", b =>
                 {
                     b.HasOne("Kawadar.Domain.Jobs.Job", "Job")
@@ -2061,7 +1283,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Kawadar.Domain.Conversations.Messages.Message", "ReplayToMessage")
+                    b.HasOne("Kawadar.Domain.Conversations.Messages.Message", null)
                         .WithMany()
                         .HasForeignKey("ReplayToMessageId")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -2071,8 +1293,6 @@ namespace Kawadar.Infrastructure.Data.Migrations
                         .HasForeignKey("SenderUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("ReplayToMessage");
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Conversations.Messages.MessageFile", b =>
@@ -2107,7 +1327,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                             b1.HasKey("MessageFileId");
 
-                            b1.ToTable("MessageFiles");
+                            b1.ToTable("MessageFiles", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("MessageFileId");
@@ -2167,7 +1387,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                             b1.HasKey("JobFileId");
 
-                            b1.ToTable("JobFiles");
+                            b1.ToTable("JobFiles", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("JobFileId");
@@ -2380,45 +1600,6 @@ namespace Kawadar.Infrastructure.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Kawadar.Domain.Subscriptions.SubscriptionPlan", b =>
-                {
-                    b.OwnsOne("Kawadar.Domain.Subscriptions.PlanFeatures", "Features", b1 =>
-                        {
-                            b1.Property<Guid>("SubscriptionPlanId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<int>("ProposalsPerMonth")
-                                .HasColumnType("int");
-
-                            b1.HasKey("SubscriptionPlanId");
-
-                            b1.ToTable("SubscriptionPlans");
-
-                            b1.ToJson("Features");
-
-                            b1.WithOwner()
-                                .HasForeignKey("SubscriptionPlanId");
-                        });
-
-                    b.Navigation("Features")
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.Subscriptions.UserSubscription", b =>
-                {
-                    b.HasOne("Kawadar.Domain.Subscriptions.SubscriptionPlan", null)
-                        .WithMany()
-                        .HasForeignKey("SubscriptionPlanId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Kawadar.Domain.UserProfiles.UserProfile", b =>
                 {
                     b.HasOne("Kawadar.Domain.Specilizations.Specilization", "Specialization")
@@ -2433,144 +1614,6 @@ namespace Kawadar.Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Specialization");
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.UserProfiles.UserReports.UserReport", b =>
-                {
-                    b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", null)
-                        .WithMany()
-                        .HasForeignKey("ReportedBy")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", null)
-                        .WithMany()
-                        .HasForeignKey("ReportedUser")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.Violations.Violation", b =>
-                {
-                    b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", null)
-                        .WithMany()
-                        .HasForeignKey("ResolvedBy")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.WalletAndPayments.EscrowTransaction", b =>
-                {
-                    b.HasOne("Kawadar.Domain.Contracts.Contract", null)
-                        .WithMany()
-                        .HasForeignKey("ContractId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Kawadar.Domain.Contracts.ContractMilestone", null)
-                        .WithMany()
-                        .HasForeignKey("ContractMilestoneId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", null)
-                        .WithMany()
-                        .HasForeignKey("ReceiverUserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", null)
-                        .WithMany()
-                        .HasForeignKey("SenderUserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.WalletAndPayments.Payments.PaymentEventHook", b =>
-                {
-                    b.HasOne("Kawadar.Domain.WalletAndPayments.Payments.PaymentTransaction", null)
-                        .WithMany()
-                        .HasForeignKey("PaymentTransactionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.WalletAndPayments.Payments.PaymentTransaction", b =>
-                {
-                    b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Kawadar.Domain.WalletAndPayments.Wallet", null)
-                        .WithMany()
-                        .HasForeignKey("WalletId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Kawadar.Domain.WalletAndPayments.WalletTransaction", null)
-                        .WithOne()
-                        .HasForeignKey("Kawadar.Domain.WalletAndPayments.Payments.PaymentTransaction", "WalletTransactionId")
-                        .OnDelete(DeleteBehavior.SetNull);
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.WalletAndPayments.Payouts.UserPayoutAccount", b =>
-                {
-                    b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.WalletAndPayments.Payouts.WithdrawalRequest", b =>
-                {
-                    b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", null)
-                        .WithMany()
-                        .HasForeignKey("ProcessedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("Kawadar.Domain.WalletAndPayments.Payouts.UserPayoutAccount", null)
-                        .WithMany()
-                        .HasForeignKey("UserPayoutAccountId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Kawadar.Domain.WalletAndPayments.Wallet", null)
-                        .WithMany()
-                        .HasForeignKey("WalletId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Kawadar.Domain.WalletAndPayments.WalletTransaction", null)
-                        .WithOne()
-                        .HasForeignKey("Kawadar.Domain.WalletAndPayments.Payouts.WithdrawalRequest", "WalletTransactionId")
-                        .OnDelete(DeleteBehavior.NoAction);
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.WalletAndPayments.Wallet", b =>
-                {
-                    b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", null)
-                        .WithOne()
-                        .HasForeignKey("Kawadar.Domain.WalletAndPayments.Wallet", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.WalletAndPayments.WalletTransaction", b =>
-                {
-                    b.HasOne("Kawadar.Domain.WalletAndPayments.Wallet", "Wallet")
-                        .WithMany("Transactions")
-                        .HasForeignKey("WalletId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Wallet");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -2624,11 +1667,6 @@ namespace Kawadar.Infrastructure.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Kawadar.Domain.Contracts.Contract", b =>
-                {
-                    b.Navigation("ContractMilestones");
-                });
-
             modelBuilder.Entity("Kawadar.Domain.Conversations.Conversation", b =>
                 {
                     b.Navigation("Messages");
@@ -2656,11 +1694,6 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.Navigation("Milestones");
 
                     b.Navigation("QuestionAnswers");
-                });
-
-            modelBuilder.Entity("Kawadar.Domain.WalletAndPayments.Wallet", b =>
-                {
-                    b.Navigation("Transactions");
                 });
 #pragma warning restore 612, 618
         }
