@@ -180,12 +180,14 @@ public static class DependencyInjection
     service.AddScoped<IProposalsRepository, ProposalsRepository>();
     service.AddScoped<IWalletRepository, WalletRepository>();
     service.AddScoped<IContractsRepository, ContractsRepository>();
+    service.AddScoped<IUserPayoutAccountRepository, UserPayoutAccountRepository>();
     service.AddScoped<IUnitOfWork, UnitOfWork>();
     service.AddTransient<IIdentityService, IdentityService>();
 
 
     // Account deletion scheduler
     service.AddScoped<IAccountDeletionScheduler, HangfireAccountDeletionScheduler>();
+    service.AddScoped<IEscrowReleaseScheduler, HangfireEscrowReleaseScheduler>();
 
     return service;
   }

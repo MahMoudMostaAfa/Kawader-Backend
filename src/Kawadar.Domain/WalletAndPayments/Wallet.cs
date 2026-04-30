@@ -107,7 +107,15 @@ public class Wallet : AuditableEntity
     return Result.Updated;
   }
 
+  private Result<Updated> AddEscrowedAmount(decimal amount)
+  {
+    if (amount <= 0)
+      return WalletErrors.InvalidAmount;
 
+    EscrowBalance += amount;
+
+    return Result.Updated;
+  }
   public Result<Updated> Deactivate()
   {
     IsActive = false;
@@ -146,6 +154,7 @@ public class Wallet : AuditableEntity
       else if (transaction.Type == TransactionType.SubscriptionCharge) Withdraw(amount);
       else if (transaction.Type == TransactionType.EscrowRefund) Release(amount);
       else if (transaction.Type == TransactionType.EscrowDeduction) Deduct(amount);
+      else if (transaction.Type == TransactionType.EscrowAddition) AddEscrowedAmount(amount);
 
     }
 
@@ -172,8 +181,9 @@ public class Wallet : AuditableEntity
       else if (transaction.Type == TransactionType.SubscriptionCharge) Withdraw(transaction.Amount);
       else if (transaction.Type == TransactionType.EscrowRefund) Release(transaction.Amount);
       else if (transaction.Type == TransactionType.EscrowDeduction) Deduct(transaction.Amount);
-
+      else if (transaction.Type == TransactionType.EscrowAddition) AddEscrowedAmount(transaction.Amount);
     }
+
 
     transaction.ChangeStatus(newStatus);
     return Result.Updated;

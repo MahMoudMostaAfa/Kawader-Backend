@@ -29,7 +29,8 @@ public class Contract : AuditableEntity
   public string Title { get; private set; } = string.Empty;
   public string Description { get; private set; } = string.Empty;
 
-
+  // reson for rejecting completion request, if any
+  public string? RejectionReason { get; private set; }
 
 
   public DateTime StartAt { get; private set; }
@@ -106,4 +107,35 @@ public class Contract : AuditableEntity
     return Result.Updated;
   }
 
+
+  public Result<Updated> RequestCompletion()
+  {
+    if (Status != ContractStatus.Active)
+      return Error.Conflict("Contracts.Status", "Only active contracts can be requested for completion.");
+
+    CompletionRequestedAt = DateTime.UtcNow;
+    Status = ContractStatus.PendingCompletion;
+    return Result.Updated;
+  }
+
+
+  public Result<Updated> ApproveCompletion()
+  {
+    if (Status != ContractStatus.PendingCompletion)
+      return Error.Conflict("Contracts.Status", "Only contracts pending completion can be approved for completion.");
+
+    CompletionApprovedAt = DateTime.UtcNow;
+    Status = ContractStatus.Completed;
+    return Result.Updated;
+  }
+
+  public Result<Updated> RejectCompletion(string reason)
+  {
+    if (Status != ContractStatus.PendingCompletion)
+      return Error.Conflict("Contracts.Status", "Only contracts pending completion can be rejected.");
+
+    RejectionReason = reason;
+    Status = ContractStatus.Active;
+    return Result.Updated;
+  }
 }
