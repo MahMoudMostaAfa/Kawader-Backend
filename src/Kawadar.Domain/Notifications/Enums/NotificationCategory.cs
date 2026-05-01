@@ -7,4 +7,6 @@ public enum NotificationCategory
   Payment = 3,
   System = 4,
   Other = 5
+  ,
+  Contract = 6
 }
