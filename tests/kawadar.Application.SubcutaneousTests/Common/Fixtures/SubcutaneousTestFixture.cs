@@ -41,6 +41,8 @@ public class SubcutaneousTestFixture
         services.AddSingleton<ISkillRepository>(sp => sp.GetRequiredService<InMemorySkillRepository>());
         services.AddSingleton<InMemoryReviewRepository>();
         services.AddSingleton<IReviewRepository>(sp => sp.GetRequiredService<InMemoryReviewRepository>());
+        services.AddSingleton<InMemoryJobViewRepository>();
+        services.AddSingleton<IJobViewRepository>(sp => sp.GetRequiredService<InMemoryJobViewRepository>());
 
         // Scoped so each test scope gets its own FakeUser
         services.AddScoped<FakeUser>();
@@ -57,6 +59,8 @@ public class SubcutaneousTestFixture
         services.AddSingleton<IEmailTemplateService>(sp => sp.GetRequiredService<FakeEmailTemplateService>());
         services.AddSingleton<FakeAIService>();
         services.AddSingleton<IAIService>(sp => sp.GetRequiredService<FakeAIService>());
+        services.AddSingleton<FakeEventBus>();
+        services.AddSingleton<Kawadar.Application.Common.Messaging.IEventBus>(sp => sp.GetRequiredService<FakeEventBus>());
         services.AddSingleton<IUnitOfWork, InMemoryUnitOfWork>();
 
         Services = services.BuildServiceProvider();
