@@ -50,6 +50,6 @@ public class InMemoryUnitOfWork : IUnitOfWork
             await _mediator.Publish(domainEvent, cancellationToken);
         }
 
-        return 0;
+        return 1;
     }
 }
