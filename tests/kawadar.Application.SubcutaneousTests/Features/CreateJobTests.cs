@@ -384,4 +384,73 @@ public class CreateJobTests : IClassFixture<SubcutaneousTestFixture>, IAsyncLife
         Assert.True(result.IsError);
         Assert.Equal("UserAccount.NotActivated", result.TopError.Code);
     }
+
+    // ───────────────── Edge Cases ─────────────────
+
+    [Fact]
+    public async Task CreateJob_WithDurationZero_ShouldFailValidation()
+    {
+        // Arrange
+        var (userId, _) = SeedActivatedClient();
+        var specId = SeedSpecialization();
+
+        await using var scope = _fixture.Services.CreateAsyncScope();
+        scope.ServiceProvider.GetRequiredService<FakeUser>().SetUser(userId);
+
+        var command = new CreateJobCommand(
+            Title: "Invalid Duration Job",
+            Description: "Duration is zero which is invalid.",
+            SpecilizationId: specId,
+            JobType: JobType.FixedPrice,
+            BudgetRange: BudgetRange.From1000To5000,
+            HourlyRateRange: HourlyRateRange.From100To200,
+            DurationInDays: 0,
+            ExperienceLevel: JobExperienceLevel.MidLevel,
+            QuestionDtos: [],
+            SkillIds: [],
+            AttachmentFiles: null,
+            AttachmentLinks: null);
+
+        // Act
+        var result = await scope.Send(command);
+
+        // Assert
+        Assert.True(result.IsError);
+        Assert.Equal(ErrorKind.Validation, result.TopError.Type);
+    }
+
+    [Fact]
+    public async Task CreateJob_WithMoreThan5Questions_ShouldFailValidation()
+    {
+        // Arrange
+        var (userId, _) = SeedActivatedClient();
+        var specId = SeedSpecialization();
+
+        await using var scope = _fixture.Services.CreateAsyncScope();
+        scope.ServiceProvider.GetRequiredService<FakeUser>().SetUser(userId);
+
+        var questions = Enumerable.Range(1, 6).Select(i => new CreateQuestionDto($"Question {i}", false)).ToList();
+
+        var command = new CreateJobCommand(
+            Title: "Too Many Questions Job",
+            Description: "Has 6 questions.",
+            SpecilizationId: specId,
+            JobType: JobType.FixedPrice,
+            BudgetRange: BudgetRange.From1000To5000,
+            HourlyRateRange: HourlyRateRange.From100To200,
+            DurationInDays: 10,
+            ExperienceLevel: JobExperienceLevel.MidLevel,
+            QuestionDtos: questions,
+            SkillIds: [],
+            AttachmentFiles: null,
+            AttachmentLinks: null);
+
+        // Act
+        var result = await scope.Send(command);
+
+        // Assert
+        Assert.True(result.IsError);
+        Assert.Equal(ErrorKind.Validation, result.TopError.Type);
+    }
 }
+
