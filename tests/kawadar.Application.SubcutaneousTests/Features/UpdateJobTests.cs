@@ -221,7 +221,7 @@ public class UpdateJobTests : IClassFixture<SubcutaneousTestFixture>, IAsyncLife
     {
         // Arrange
         var (userId, profileId) = SeedActivatedClient();
-        var jobSlug = SeedJob(profileId, "test-job-to-update");
+        var jobSlug = SeedJob(profileId);
 
         await using var scope = _fixture.Services.CreateAsyncScope();
         scope.ServiceProvider.GetRequiredService<FakeUser>().SetUser(userId);
@@ -251,7 +251,7 @@ public class UpdateJobTests : IClassFixture<SubcutaneousTestFixture>, IAsyncLife
     {
         // Arrange
         var (userId, profileId) = SeedActivatedClient();
-        var jobSlug = SeedJob(profileId, "test-job-to-update");
+        var jobSlug = SeedJob(profileId);
 
         await using var scope = _fixture.Services.CreateAsyncScope();
         scope.ServiceProvider.GetRequiredService<FakeUser>().SetUser(userId);
