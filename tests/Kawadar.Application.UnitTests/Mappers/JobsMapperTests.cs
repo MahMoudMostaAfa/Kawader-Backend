@@ -73,7 +73,7 @@ public class JobsMapperTests
     Assert.Equal(job.Title, result.Title);
     Assert.Equal(job.Description, result.Description);
     Assert.Equal(profile.FullName, result.PosterFullName);
-    Assert.Equal(profile.ProfilePictureUrl, result.posterProfilePictureUrl);
+    Assert.Equal(profile.ProfilePictureUrl, result.PosterProfilePictureUrl);
     Assert.Equal(userDto.UserName, result.PosterUsername);
     Assert.Equal(Uri.EscapeDataString(job.JobSlug), result.JobSlug);
     Assert.Equal(job.Specilization.Name, result.Specilization);
