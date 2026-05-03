@@ -181,6 +181,7 @@ public static class DependencyInjection
     service.AddScoped<IWalletRepository, WalletRepository>();
     service.AddScoped<IContractsRepository, ContractsRepository>();
     service.AddScoped<IUserPayoutAccountRepository, UserPayoutAccountRepository>();
+    service.AddScoped<IWithdrawalRequestRepository, WithdrawalRequestRepository>();
     service.AddScoped<IUnitOfWork, UnitOfWork>();
     service.AddTransient<IIdentityService, IdentityService>();
 
