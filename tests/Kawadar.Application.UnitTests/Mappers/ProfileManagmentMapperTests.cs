@@ -1,5 +1,6 @@
 using AutoMapper;
 using Kawadar.Application.Common.Models;
+using Kawadar.Application.Features.ProfileManagment.Mappers;
 using Kawadar.Domain.UserProfiles;
 using Kawadar.Domain.UserProfiles.Enums;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -13,13 +14,12 @@ public class ProfileManagmentMapperTests
 
   public ProfileManagmentMapperTests()
   {
-    var profileType = typeof(Kawadar.Application.DependencyInjection)
-      .Assembly
-      .GetType("Kawadar.Application.Features.ProfileManagment.Mappers.UserProfileToUserProfileDtoProfile", throwOnError: true)!;
+    var config = new MapperConfiguration(cfg => 
+    {
+        cfg.AddProfile<UserProfileToUserProfileDtoProfile>();
+    }, NullLoggerFactory.Instance);
 
-    var profile = (Profile)Activator.CreateInstance(profileType, true)!;
-
-    var config = new MapperConfiguration(cfg => cfg.AddProfile(profile), NullLoggerFactory.Instance);
+    config.AssertConfigurationIsValid();
     _mapper = config.CreateMapper();
   }
 

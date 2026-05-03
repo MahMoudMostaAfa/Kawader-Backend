@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Kawadar.Application.Common.Models;
 using Kawadar.Application.Features.Violations.Dtos;
 using Kawadar.Domain.Violations;
@@ -28,7 +28,8 @@ namespace Kawadar.Application.Features.Violations.Mapper
                 .ForMember(dest => dest.ResolvedAt, opt => opt.MapFrom(src => src.violation.ResolvedAt))
                 .ForMember(dest => dest.RedirectUrl, opt => opt.MapFrom(src => src.violation.RedirectUrl))
                 .ForMember(dest => dest.NoteByAdmin, opt => opt.MapFrom(src => src.violation.NoteByAdmin))
-                .ForMember(dest => dest.ActionTaken, opt => opt.MapFrom(src => src.violation.ActionTaken));
+                .ForMember(dest => dest.ActionTaken, opt => opt.MapFrom(src => src.violation.ActionTaken))
+                .ForMember(dest => dest.ResolvedByUserName, opt => opt.Ignore());
         }
     }
 }

@@ -11,34 +11,28 @@ namespace Kawadar.Application.Common.Behaviours;
 public class PerformanceBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
-  private readonly Stopwatch _timer;
   private readonly ILogger<TRequest> _logger;
   private readonly IUser _user;
-  // private readonly IIdentityService _identityService;
+  private readonly TimeProvider _timeProvider;
 
   public PerformanceBehaviour(
       ILogger<TRequest> logger,
-      IUser user
-  // IIdentityService identityService)
+      IUser user,
+      TimeProvider? timeProvider = null
   )
   {
-    _timer = new Stopwatch();
-
     _logger = logger;
     _user = user;
-    // _identityService = identityService;
+    _timeProvider = timeProvider ?? TimeProvider.System;
   }
 
   public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
   {
-    _timer.Start();
+    var start = _timeProvider.GetTimestamp();
 
     var response = await next();
 
-
-    _timer.Stop();
-
-    var elapsedMilliseconds = _timer.ElapsedMilliseconds;
+    var elapsedMilliseconds = _timeProvider.GetElapsedTime(start).TotalMilliseconds;
 
     if (elapsedMilliseconds > 500)
     {

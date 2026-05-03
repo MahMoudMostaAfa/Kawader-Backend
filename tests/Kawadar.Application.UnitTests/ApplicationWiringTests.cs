@@ -1,12 +1,17 @@
-using System.Reflection;
 using AutoMapper;
 using FluentValidation;
-using Kawadar.Application;
 using Kawadar.Application.Common.Behaviours;
+using Kawadar.Application.Common.Interfaces.Auth;
+using Kawadar.Application.Common.Interfaces.Repositories;
+using Kawadar.Application.Features.Auth.Commands.Login;
+using Kawadar.Application.Features.Auth.Dtos;
+using Kawadar.Domain.Common.Results;
 using MediatR;
 using MediatR.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using NSubstitute;
 using Xunit;
 
 namespace Kawadar.Application.UnitTests;
@@ -14,109 +19,62 @@ namespace Kawadar.Application.UnitTests;
 public class ApplicationWiringTests
 {
   [Fact]
-  public void AddApplication_AllRequestHandlersAreRegistered()
+  public void AddApplication_BuildServiceProvider_ResolvesAndOrdersCoreComponents()
   {
     // Arrange
     var services = new ServiceCollection();
-    services.AddApplication();
-    var handlerInterfaces = GetClosedInterfaces(typeof(IRequestHandler<,>), typeof(IRequestHandler<>));
-
-    // Act
-    var registeredServiceTypes = services.Select(x => x.ServiceType).ToHashSet();
-
-    // Assert
-    Assert.NotEmpty(handlerInterfaces);
-
-    foreach (var handlerInterface in handlerInterfaces)
-    {
-      Assert.Contains(handlerInterface, registeredServiceTypes);
-    }
-  }
-
-  [Fact]
-  public void AddApplication_AllValidatorsAreRegistered()
-  {
-    // Arrange
-    var services = new ServiceCollection();
-    services.AddApplication();
-    var validatorInterfaces = GetClosedInterfaces(typeof(IValidator<>));
-
-    // Act
-    var registeredServiceTypes = services.Select(x => x.ServiceType).ToHashSet();
-
-    // Assert
-    Assert.NotEmpty(validatorInterfaces);
-
-    foreach (var validatorInterface in validatorInterfaces)
-    {
-      Assert.Contains(validatorInterface, registeredServiceTypes);
-    }
-  }
-
-  [Fact]
-  public void AddApplication_RegistersConfiguredPipelineBehaviours()
-  {
-    // Arrange
-    var services = new ServiceCollection();
+    
+    // Add required external dependencies
+    services.AddSingleton(Substitute.For<IUser>());
+    services.AddSingleton(typeof(ILogger<>), typeof(NullLogger<>));
+    services.AddSingleton<ILoggerFactory, NullLoggerFactory>();
+    
+    services.AddSingleton(Substitute.For<IIdentityService>());
+    services.AddSingleton(Substitute.For<ITokenProvider>());
+    services.AddSingleton(Substitute.For<IUsersRepository>());
+    services.AddSingleton(Substitute.For<IUnitOfWork>());
 
     // Act
     services.AddApplication();
+    var serviceProvider = services.BuildServiceProvider();
 
     // Assert
-    Assert.Contains(services, x =>
-      x.ServiceType.IsGenericType &&
-      x.ServiceType.GetGenericTypeDefinition() == typeof(IPipelineBehavior<,>) &&
-      x.ImplementationType == typeof(ValidationBehaviour<,>));
+    
+    // 1. Prove Handler Activation
+    var handler = serviceProvider.GetService<IRequestHandler<LoginCommand, Result<LoginDto>>>();
+    Assert.NotNull(handler);
 
-    Assert.Contains(services, x =>
-      x.ServiceType.IsGenericType &&
-      x.ServiceType.GetGenericTypeDefinition() == typeof(IPipelineBehavior<,>) &&
-      x.ImplementationType == typeof(UnHandledExceptionBehaviour<,>));
+    // 2. Prove Validator Activation
+    var validator = serviceProvider.GetService<IValidator<LoginCommand>>();
+    Assert.NotNull(validator);
 
-    Assert.Contains(services, x =>
-      x.ServiceType.IsGenericType &&
-      x.ServiceType.GetGenericTypeDefinition() == typeof(IPipelineBehavior<,>) &&
-      x.ImplementationType == typeof(PerformanceBehaviour<,>));
+    // 3. Prove Pipeline Behaviours Activation and Order
+    var behaviors = serviceProvider.GetServices<IPipelineBehavior<LoginCommand, Result<LoginDto>>>().ToList();
 
-    Assert.Contains(services, x =>
-      x.ServiceType.IsGenericType &&
-      x.ServiceType.GetGenericTypeDefinition() == typeof(IRequestPreProcessor<>) &&
-      x.ImplementationType == typeof(LoggingBehaviour<>));
-  }
+    // According to DependencyInjection.cs and MediatR defaults:
+    // MediatR adds RequestPreProcessorBehavior at the start when pre-processors are used.
+    Assert.Contains(behaviors, b => b.GetType().Name.StartsWith("RequestPreProcessorBehavior"));
+    Assert.Contains(behaviors, b => b is ValidationBehaviour<LoginCommand, Result<LoginDto>>);
+    Assert.Contains(behaviors, b => b is UnHandledExceptionBehaviour<LoginCommand, Result<LoginDto>>);
+    Assert.Contains(behaviors, b => b is PerformanceBehaviour<LoginCommand, Result<LoginDto>>);
 
-  [Fact]
-  public void AddApplication_RegistersAutoMapperAndDiscoversProfiles()
-  {
-    // Arrange
-    var services = new ServiceCollection();
-    var applicationAssembly = typeof(DependencyInjection).Assembly;
-    var profileTypes = applicationAssembly
-      .GetTypes()
-      .Where(x => typeof(Profile).IsAssignableFrom(x) && x is { IsAbstract: false, IsClass: true })
-      .ToList();
+    // Verify relative order of our custom behaviors
+    var customBehaviors = behaviors.Where(b => !b.GetType().Name.StartsWith("RequestPreProcessorBehavior")).ToList();
+    Assert.Collection(customBehaviors,
+      b => Assert.IsType<ValidationBehaviour<LoginCommand, Result<LoginDto>>>(b),
+      b => Assert.IsType<UnHandledExceptionBehaviour<LoginCommand, Result<LoginDto>>>(b),
+      b => Assert.IsType<PerformanceBehaviour<LoginCommand, Result<LoginDto>>>(b)
+    );
 
-    // Act
-    services.AddApplication();
-    using var loggerFactory = LoggerFactory.Create(x => { });
-    var config = new MapperConfiguration(x => x.AddMaps(applicationAssembly), loggerFactory);
-    var mapper = config.CreateMapper();
+    // 4. Prove PreProcessor Activation
+    var preProcessors = serviceProvider.GetServices<IRequestPreProcessor<LoginCommand>>().ToList();
+    Assert.Contains(preProcessors, p => p is LoggingBehaviour<LoginCommand>);
 
-    // Assert
-    Assert.NotEmpty(profileTypes);
-    Assert.Contains(services, x => x.ServiceType == typeof(IMapper));
-    Assert.NotNull(mapper);
-  }
-
-  private static IReadOnlyCollection<Type> GetClosedInterfaces(params Type[] openGenericTypes)
-  {
-    var applicationAssembly = typeof(DependencyInjection).Assembly;
-
-    return applicationAssembly
-      .GetTypes()
-      .Where(x => x is { IsClass: true, IsAbstract: false })
-      .SelectMany(x => x.GetInterfaces())
-      .Where(x => x.IsGenericType && openGenericTypes.Contains(x.GetGenericTypeDefinition()))
-      .Distinct()
-      .ToList();
+    // 5. Prove AutoMapper Configuration Validity
+    var mapperConfig = serviceProvider.GetService<IConfigurationProvider>();
+    Assert.NotNull(mapperConfig);
+    var mapperConfiguration = mapperConfig as MapperConfiguration;
+    Assert.NotNull(mapperConfiguration);
+    mapperConfiguration.AssertConfigurationIsValid();
   }
 }

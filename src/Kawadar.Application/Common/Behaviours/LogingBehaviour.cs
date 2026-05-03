@@ -11,7 +11,7 @@ public class LoggingBehaviour<TRequest>(ILogger<TRequest> logger, IUser user) : 
   private readonly IUser _user = user;
   // private readonly IIdentityService _identityService = identityService;
 
-  public async Task Process(TRequest request, CancellationToken cancellationToken)
+  public Task Process(TRequest request, CancellationToken cancellationToken)
   {
     var requestName = typeof(TRequest).Name;
     var userId = _user.Id ?? string.Empty;
@@ -21,8 +21,8 @@ public class LoggingBehaviour<TRequest>(ILogger<TRequest> logger, IUser user) : 
     // {
     //   userName = await _identityService.GetUserNameAsync(userId);
     // }
-    await Task.Delay(0);
     _logger.LogInformation(
         "Request: {Name} {@UserId} {@UserName} {@Request}", requestName, userId, userName, request);
+    return Task.CompletedTask;
   }
 }

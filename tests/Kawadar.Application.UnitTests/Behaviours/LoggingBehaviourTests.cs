@@ -56,7 +56,9 @@ public class LoggingBehaviourTests
     _logger.Received(1).Log(
       Arg.Is<LogLevel>(x => x == LogLevel.Information),
       Arg.Any<EventId>(),
-      Arg.Is<object>(state => state.ToString()!.Contains(nameof(LoggingTestRequest))),
+      Arg.Is<object>(state => 
+        state.ToString()!.Contains(nameof(LoggingTestRequest)) && 
+        state.ToString()!.Contains("  ")), // Check for double space indicating empty UserId/UserName
       Arg.Any<Exception>(),
       Arg.Any<Func<object, Exception?, string>>());
   }

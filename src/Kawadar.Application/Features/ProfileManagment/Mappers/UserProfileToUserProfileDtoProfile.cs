@@ -4,7 +4,7 @@ using Kawadar.Domain.UserProfiles;
 
 namespace Kawadar.Application.Features.ProfileManagment.Mappers;
 
-class UserProfileToUserProfileDtoProfile : Profile
+public class UserProfileToUserProfileDtoProfile : Profile
 {
   public UserProfileToUserProfileDtoProfile()
   {
@@ -30,7 +30,8 @@ class UserProfileToUserProfileDtoProfile : Profile
     .ForMember(dest => dest.specilizationId, opt => opt.MapFrom(src => src.userProfile.SpecializationId))
     .ForMember(dest => dest.IsBanned, opt => opt.MapFrom(src => src.userProfile.IsBanned))
     .ForMember(dest => dest.BannedUntil, opt => opt.MapFrom(src => src.userProfile.BannedUntil))
-    .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => src.userProfile.IsDeleted));
+    .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => src.userProfile.IsDeleted))
+    .ForMember(dest => dest.skills, opt => opt.Ignore());
 
   }
 }
