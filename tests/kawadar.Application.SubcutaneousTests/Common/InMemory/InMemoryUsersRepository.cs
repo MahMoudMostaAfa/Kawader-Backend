@@ -3,12 +3,15 @@ using Kawadar.Application.Common.Models;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.UserProfiles;
 using Kawadar.Domain.UserProfiles.Enums;
+using Kawadar.Domain.UserProfiles.UserReports;
+using Kawadar.Domain.Jobs.JobReports.Enums;
 
 namespace kawadar.Application.SubcutaneousTests.Common.InMemory;
 
 public class InMemoryUsersRepository : IUsersRepository
 {
     public readonly List<UserProfile> Users = [];
+    public readonly List<UserReport> UserReports = [];
 
     public Task<Result<Success>> CreateUserProfileAsync(UserProfile userProfile)
     {
@@ -100,5 +103,45 @@ public class InMemoryUsersRepository : IUsersRepository
         return Task.FromResult(Users.Count(u => u.IsIdentityVerified == true));
     }
 
-    public void Clear() => Users.Clear();
+    public Task<Success> AddUserReport(UserReport report)
+    {
+        UserReports.Add(report);
+        return Task.FromResult(Result.Success);
+    }
+
+    public Task<PaginatedList<UserReport>> GetUserReports(ReportType? reportType, ReportStatus? reportStatus, int page, int pageSize, string sortBy)
+    {
+        var query = UserReports.AsEnumerable();
+        if (reportType.HasValue) query = query.Where(r => r.ReportType == reportType.Value);
+        if (reportStatus.HasValue) query = query.Where(r => r.ReportStatus == reportStatus.Value);
+
+        var all = query.ToList();
+        var items = all.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+        return Task.FromResult(new PaginatedList<UserReport>(items, all.Count, page, pageSize));
+    }
+
+    public Task<PaginatedList<UserReport>> GetUserReportsByUserId(Guid Id, ReportStatus? reportstatus, ReportType? reportType, int page, int pageSize, string sortBy)
+    {
+        var query = UserReports.Where(r => r.ReportedUser == Id);
+        if (reportType.HasValue) query = query.Where(r => r.ReportType == reportType.Value);
+        if (reportstatus.HasValue) query = query.Where(r => r.ReportStatus == reportstatus.Value);
+
+        var all = query.ToList();
+        var items = all.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+        return Task.FromResult(new PaginatedList<UserReport>(items, all.Count, page, pageSize));
+    }
+
+    public Task<Result<UserReport>> GetUserReportById(Guid Id)
+    {
+        var report = UserReports.FirstOrDefault(r => r.Id == Id);
+        return Task.FromResult(report is not null
+            ? (Result<UserReport>)report
+            : Error.NotFound("UserReport.NotFound", $"UserReport '{Id}' not found."));
+    }
+
+    public void Clear()
+    {
+        Users.Clear();
+        UserReports.Clear();
+    }
 }

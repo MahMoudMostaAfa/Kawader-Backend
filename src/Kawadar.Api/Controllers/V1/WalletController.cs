@@ -31,9 +31,9 @@ public class WalletController : ApiController
 
 
   [HttpGet("summary")]
-  public async Task<IActionResult> GetWalletSummary(CancellationToken ct = default)
+  public Task<IActionResult> GetWalletSummary(CancellationToken ct = default)
   {
     // Implementation for wallet summary goes here
-    return Ok();
+    return Task.FromResult<IActionResult>(Ok());
   }
 }
