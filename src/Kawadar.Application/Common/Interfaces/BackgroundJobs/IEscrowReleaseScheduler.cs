@@ -4,5 +4,5 @@ namespace Kawadar.Application.Common.Interfaces.BackgroundJobs;
 
 public interface IEscrowReleaseScheduler
 {
-  void ScheduleEscrowRelease(EscrowTransaction transaction, TimeSpan delay);
+  void ScheduleEscrowRelease(Guid escrowTransactionId, TimeSpan delay);
 }

@@ -5,6 +5,7 @@ using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Application.Features.WalletAndPayments.DTOs;
 using Kawadar.Domain.Common.Results;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace Kawadar.Application.Features.WalletAndPayments.Queries.GetMyPayoutAccounts;
 
@@ -15,6 +16,7 @@ public class GetMyPayoutAccountsQueryHandler : IRequestHandler<GetMyPayoutAccoun
   private readonly IUsersRepository _usersRepository;
   private readonly IUserPayoutAccountRepository _payoutAccountRepository;
 
+
   public GetMyPayoutAccountsQueryHandler(IMapper mapper, IUser user,
     IUsersRepository usersRepository, IUserPayoutAccountRepository payoutAccountRepository)
   {
@@ -22,6 +24,7 @@ public class GetMyPayoutAccountsQueryHandler : IRequestHandler<GetMyPayoutAccoun
     _user = user;
     _usersRepository = usersRepository;
     _payoutAccountRepository = payoutAccountRepository;
+
   }
 
   public async Task<Result<List<UserPayoutAccountDto>>> Handle(GetMyPayoutAccountsQuery request, CancellationToken cancellationToken)
@@ -37,8 +40,7 @@ public class GetMyPayoutAccountsQueryHandler : IRequestHandler<GetMyPayoutAccoun
     if (accountsResult.IsError) return accountsResult.Errors;
 
     var accounts = accountsResult.Value;
-    var accountDtos = _mapper.Map<List<UserPayoutAccountDto>>(accounts);
-
+    var accountDtos = accounts.Select(account => _mapper.Map<UserPayoutAccountDto>(account)).ToList();
     return accountDtos;
   }
 }

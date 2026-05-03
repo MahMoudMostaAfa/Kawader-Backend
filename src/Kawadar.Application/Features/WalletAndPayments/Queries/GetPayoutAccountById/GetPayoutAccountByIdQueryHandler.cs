@@ -4,7 +4,9 @@ using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Application.Features.WalletAndPayments.DTOs;
 using Kawadar.Domain.Common.Results;
+using Kawadar.Domain.WalletAndPayments.Payouts;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace Kawadar.Application.Features.WalletAndPayments.Queries.GetPayoutAccountById;
 
@@ -14,14 +16,16 @@ public class GetPayoutAccountByIdQueryHandler : IRequestHandler<GetPayoutAccount
   private readonly IUser _user;
   private readonly IUsersRepository _usersRepository;
   private readonly IUserPayoutAccountRepository _payoutAccountRepository;
+  private readonly ILogger<GetPayoutAccountByIdQueryHandler> _logger;
 
   public GetPayoutAccountByIdQueryHandler(IMapper mapper, IUser user,
-    IUsersRepository usersRepository, IUserPayoutAccountRepository payoutAccountRepository)
+    IUsersRepository usersRepository, IUserPayoutAccountRepository payoutAccountRepository, ILogger<GetPayoutAccountByIdQueryHandler> logger)
   {
     _mapper = mapper;
     _user = user;
     _usersRepository = usersRepository;
     _payoutAccountRepository = payoutAccountRepository;
+    _logger = logger;
   }
 
   public async Task<Result<UserPayoutAccountDto>> Handle(GetPayoutAccountByIdQuery request, CancellationToken cancellationToken)
@@ -40,6 +44,7 @@ public class GetPayoutAccountByIdQueryHandler : IRequestHandler<GetPayoutAccount
     // Ensure the account belongs to the authenticated user
     if (account.UserId != userProfile.Id) return ApplicationErrors.UnauthorizedAccess;
 
+    _logger.LogInformation("Fetched payout account  details json {accountDetails}", account.AccountDetailsJson);
     var accountDto = _mapper.Map<UserPayoutAccountDto>(account);
 
     return accountDto;

@@ -1,6 +1,7 @@
 
 
 using Kawadar.Api.Requests.Contracts;
+using Kawadar.Application.Features.Contracts.Commands.AcceptContractCompletion;
 using Kawadar.Application.Features.Contracts.Commands.CancelContract;
 using Kawadar.Application.Features.Contracts.Commands.CreateContract;
 using Kawadar.Application.Features.Contracts.Commands.EditContractDeadline;
@@ -125,7 +126,13 @@ public class ContractsController : ApiController
   [HttpPost("{id:guid}/accept-completion")]
   public async Task<IActionResult> AcceptContractCompletion(Guid id, CancellationToken ct)
   {
-    // This endpoint is not implemented yet, but it will be similar to RejectContractCompletion, with a different command and event.
-    return NoContent();
+
+    var command = new AcceptContractCompletionCommand(id);
+    var result = await _sender.Send(command, ct);
+
+    return result.Match(
+      _ => NoContent(),
+      errors => Problem(errors)
+    );
   }
 }

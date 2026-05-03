@@ -8,6 +8,6 @@ namespace Kawadar.Application.Features.WalletAndPayments.Commands.AddPayoutAccou
 public record AddPayoutAccountCommand(
   PayoutType PayoutType,
   string DisplayName,
-  PayoutAccountDetails AccountDetails,
+  PayoutAccountDetails? AccountDetails,
   bool IsDefault
 ) : IRequest<Result<Guid>>;

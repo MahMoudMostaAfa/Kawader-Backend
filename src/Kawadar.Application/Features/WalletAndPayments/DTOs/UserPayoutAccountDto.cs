@@ -6,8 +6,8 @@ public class UserPayoutAccountDto
 {
   public Guid Id { get; set; }
   public PayoutType PayoutType { get; set; }
-  public string DispalyName { get; set; } = null!;
-  public Kawadar.Domain.WalletAndPayments.Payouts.PayoutAccountDetails AccountDetails { get; set; } = null!;
+  public string DisplayName { get; set; } = null!;
+  public Kawadar.Domain.WalletAndPayments.Payouts.PayoutAccountDetails? AccountDetails { get; set; } = null!;
   public bool IsDefault { get; set; }
   public bool IsActive { get; set; }
   public DateTime CreatedAt { get; set; }
