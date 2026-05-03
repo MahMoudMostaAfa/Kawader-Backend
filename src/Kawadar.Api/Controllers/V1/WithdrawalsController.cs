@@ -79,3 +79,8 @@ public class WithdrawalsController : ApiController
     );
   }
 }
+
+
+/// <summary>
+/// Controller for handling withdrawal requests, including creating new requests, listing user's requests, getting details of a specific request, and cancelling pending requests.
+/// </summary>
