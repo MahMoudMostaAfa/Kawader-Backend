@@ -55,26 +55,26 @@ IRequestHandler<AcceptContractCompletionCommand, Result<Updated>>
     var acceptCompletionResult = contract.ApproveCompletion();
     if (acceptCompletionResult.IsError) return acceptCompletionResult.Errors;
 
-    await _unitOfWork.SaveChangesAsync(cancellationToken);
-    // get escrow Trnasaction 
 
     var escrowTransactionResult = await _walletRepository.GetEscrowTransactionByContractId(contract.Id);
     if (escrowTransactionResult.IsError) return escrowTransactionResult.Errors;
     var escrowTransaction = escrowTransactionResult.Value;
 
-    var walletResult = await _walletRepository.GetByUserIdAsync(contract.FreelancerId);
-    if (walletResult.IsError) return walletResult.Errors;
-    var wallet = walletResult.Value;
+    var freelancerWalletResult = await _walletRepository.GetByUserIdAsync(contract.FreelancerId);
+    if (freelancerWalletResult.IsError) return freelancerWalletResult.Errors;
+    var freelancerWallet = freelancerWalletResult.Value;
+
+    var clientWalletResult = await _walletRepository.GetByUserIdAsync(contract.ClientId);
+    if (clientWalletResult.IsError) return clientWalletResult.Errors;
+    var clientWallet = clientWalletResult.Value;
 
     // deduct ecsrow ammount from client wallet
-
-    var updatedWallet = wallet.AddTransaction(escrowTransaction.Amount, TransactionType.EscrowDeduction, WalletTransactionReferenceType.Contract, contract.Id, null, WalletTransactionStatus.Completed);
+    var updatedWallet = clientWallet.AddTransaction(escrowTransaction.Amount, TransactionType.EscrowDeduction, WalletTransactionReferenceType.Contract, contract.Id, null, WalletTransactionStatus.Completed);
     if (updatedWallet.IsError) return updatedWallet.Errors;
 
 
     //  deduct platform fee from the ecrow transaction  and ecrow transaction for the freelancer
-
-    var platformFee = escrowTransaction.Amount * 0.1m; // Assuming a 10% platform fee
+    var platformFee = escrowTransaction.Amount * PlatformPolicy.PlatformFeePercentage;
 
     var feeEscrowTransaction = EscrowTransaction.Create(contract.Id, null, EcrowTransactionType.PlatformFeeDeducted, platformFee, contract.ClientId, contract.FreelancerId, null);
 
@@ -84,9 +84,6 @@ IRequestHandler<AcceptContractCompletionCommand, Result<Updated>>
     _walletRepository.AddEscrowTransaction(feeTransaction);
 
     // add ecrow ammount to freelancer wallet (after deducting platform fee) and add transaction for the freelancer
-    var freelancerWalletResult = await _walletRepository.GetByUserIdAsync(contract.FreelancerId);
-    if (freelancerWalletResult.IsError) return freelancerWalletResult.Errors;
-    var freelancerWallet = freelancerWalletResult.Value;
     freelancerWallet.AddTransaction(escrowTransaction.Amount - platformFee, TransactionType.EscrowAddition, WalletTransactionReferenceType.Contract, contract.Id, null, WalletTransactionStatus.Completed);
     // add ecrow transaction for the freelancer
     var freelancerEscrowTransaction = EscrowTransaction.Create(contract.Id, null, EcrowTransactionType.Hold, escrowTransaction.Amount - platformFee, contract.ClientId, contract.FreelancerId, null);
@@ -103,7 +100,7 @@ IRequestHandler<AcceptContractCompletionCommand, Result<Updated>>
     job.UpdateStatus(JobStatus.Completed);
 
 
-    _escrowReleaseScheduler.ScheduleEscrowRelease(freelancerTransaction, TimeSpan.FromDays(7));
+    _escrowReleaseScheduler.ScheduleEscrowRelease(freelancerTransaction.Id, TimeSpan.FromMinutes(2));
 
     await _unitOfWork.SaveChangesAsync(cancellationToken);
     return Result.Updated;

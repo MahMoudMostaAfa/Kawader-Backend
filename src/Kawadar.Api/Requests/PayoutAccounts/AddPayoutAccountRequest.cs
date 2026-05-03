@@ -13,6 +13,9 @@ public class AddPayoutAccountRequest
   /// Send one of: MobileWalletAccountDetails, BankTransferAccountDetails, or InstaPayAccountDetails
   /// depending on the PayoutType.
   /// </summary>
-  public PayoutAccountDetails AccountDetails { get; set; } = null!;
+  public MobileWalletAccountDetails? MobileWalletAccountDetails { get; set; }
+  public BankTransferAccountDetails? BankTransferAccountDetails { get; set; }
+  public InstaPayAccountDetails? InstaPayAccountDetails { get; set; }
+
   public bool IsDefault { get; set; }
 }

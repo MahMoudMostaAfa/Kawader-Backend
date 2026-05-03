@@ -7,6 +7,6 @@ namespace Kawadar.Application.Features.WalletAndPayments.Commands.UpdatePayoutAc
 public record UpdatePayoutAccountCommand(
   Guid AccountId,
   string DisplayName,
-  PayoutAccountDetails AccountDetails,
+  PayoutAccountDetails? AccountDetails,
   bool IsDefault
 ) : IRequest<Result<Updated>>;
