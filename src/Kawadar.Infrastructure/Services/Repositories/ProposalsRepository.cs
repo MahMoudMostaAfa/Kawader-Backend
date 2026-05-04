@@ -64,7 +64,7 @@ public class ProposalsRepository : IProposalsRepository
 
   public async Task<Result<PaginatedList<JobProposal>>> GetProposalsAsync(Guid jobId, JobProposalType? Type, JobProposalStatus? Status, int Page = 1, int PageSize = 10, string DatesortBy = "newest", string? PriceSortBy = null, string? EstimatedTimeSortBy = null)
   {
-    var query = _context.JobProposals.Where(jp => jp.JobId == jobId).AsQueryable();
+    var query = _context.JobProposals.Where(jp => jp.JobId == jobId && jp.Status != JobProposalStatus.Withdrawn).AsQueryable();
 
     if (Type.HasValue) query = query.Where(jp => jp.ProposalType == Type.Value);
 
@@ -103,26 +103,26 @@ public class ProposalsRepository : IProposalsRepository
 
     return new PaginatedList<JobProposal>(items, totalCount, Page, PageSize);
   }
-    
-    public async Task<int> GetProposalsCount()
-    {
-        return await _context.JobProposals.CountAsync();
-    }
 
-    public async Task<int> GetNumberOfProposalsThisMonth()
-    {
-        var now = DateTime.UtcNow;
-        var currentMonthStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-        var NextMonthStart = currentMonthStart.AddMonths(1);
+  public async Task<int> GetProposalsCount()
+  {
+    return await _context.JobProposals.CountAsync();
+  }
 
-        var proposals = await _context.JobProposals.Where(x => x.CreatedAt >= currentMonthStart && x.CreatedAt < NextMonthStart).CountAsync();
-        return proposals;
-    }
+  public async Task<int> GetNumberOfProposalsThisMonth()
+  {
+    var now = DateTime.UtcNow;
+    var currentMonthStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+    var NextMonthStart = currentMonthStart.AddMonths(1);
 
-    public async Task<Dictionary<JobProposalStatus, int>> GetDistributionBasedOnStatus()
-    {
-        var distribution = await _context.JobProposals.GroupBy(x => x.Status).ToDictionaryAsync(x => x.Key, x => x.Count());
-        return distribution;
-    }
+    var proposals = await _context.JobProposals.Where(x => x.CreatedAt >= currentMonthStart && x.CreatedAt < NextMonthStart).CountAsync();
+    return proposals;
+  }
+
+  public async Task<Dictionary<JobProposalStatus, int>> GetDistributionBasedOnStatus()
+  {
+    var distribution = await _context.JobProposals.GroupBy(x => x.Status).ToDictionaryAsync(x => x.Key, x => x.Count());
+    return distribution;
+  }
 
 }

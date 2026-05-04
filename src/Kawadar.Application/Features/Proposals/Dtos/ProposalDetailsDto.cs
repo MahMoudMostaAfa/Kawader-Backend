@@ -25,6 +25,7 @@ public class ProposalDetailsDto
 
 
   public List<QuestionWithAnswerDto>? QuestionsWithAnswer { get; set; }
+  public DateTime SubmittedAt { get; set; }
 
 
 }
