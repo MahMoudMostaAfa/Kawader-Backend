@@ -5,6 +5,7 @@ using Kawadar.Application.Features.WalletAndPayments.Commands.SetDefaultPayoutAc
 using Kawadar.Application.Features.WalletAndPayments.Commands.UpdatePayoutAccount;
 using Kawadar.Application.Features.WalletAndPayments.Queries.GetMyPayoutAccounts;
 using Kawadar.Application.Features.WalletAndPayments.Queries.GetPayoutAccountById;
+using Kawadar.Domain.WalletAndPayments.Payouts;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,10 +30,19 @@ public class PayoutAccountsController : ApiController
   [EndpointDescription("Adds a new payout account (MobileWallet, BankTransfer, InstaPay) for the authenticated user.")]
   public async Task<IActionResult> AddPayoutAccount([FromBody] AddPayoutAccountRequest request, CancellationToken ct)
   {
+    // Map the incoming request to the command, handling the polymorphic account details
+
+    PayoutAccountDetails? accountDetails = request.PayoutType switch
+    {
+      Domain.WalletAndPayments.Payouts.Enums.PayoutType.MobileWallet => request.MobileWalletAccountDetails,
+      Domain.WalletAndPayments.Payouts.Enums.PayoutType.BankTransfer => request.BankTransferAccountDetails,
+      Domain.WalletAndPayments.Payouts.Enums.PayoutType.InstaPay => request.InstaPayAccountDetails,
+      _ => null
+    };
     var command = new AddPayoutAccountCommand(
       request.PayoutType,
       request.DisplayName,
-      request.AccountDetails,
+      accountDetails,
       request.IsDefault
     );
     var result = await _sender.Send(command, ct);
@@ -78,10 +88,14 @@ public class PayoutAccountsController : ApiController
   [EndpointDescription("Updates the display name, account details, and default flag of a payout account.")]
   public async Task<IActionResult> UpdatePayoutAccount([FromRoute] Guid accountId, [FromBody] UpdatePayoutAccountRequest request, CancellationToken ct)
   {
+    // Map the incoming request to the command, handling the polymorphic account details
+    PayoutAccountDetails? accountDetails = request.MobileWalletAccountDetails as PayoutAccountDetails
+      ?? request.BankTransferAccountDetails as PayoutAccountDetails
+      ?? request.InstaPayAccountDetails as PayoutAccountDetails;
     var command = new UpdatePayoutAccountCommand(
       accountId,
       request.DisplayName,
-      request.AccountDetails,
+      accountDetails,
       request.IsDefault
     );
     var result = await _sender.Send(command, ct);
