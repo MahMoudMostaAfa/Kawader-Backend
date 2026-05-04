@@ -1,5 +1,10 @@
 
+using Kawadar.Application.Common.Models;
+using Kawadar.Application.Features.WalletAndPayments.DTOs;
+using Kawadar.Application.Features.WalletAndPayments.Queries.GetAdminWalletById;
+using Kawadar.Application.Features.WalletAndPayments.Queries.GetAdminWallets;
 using Kawadar.Application.Features.WalletAndPayments.Queries.GetMyWallet;
+using Kawadar.Domain.Common.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +21,49 @@ public class WalletController : ApiController
   public WalletController(ISender sender)
   {
     _sender = sender;
+  }
+
+  [HttpGet("/api/v{version:apiVersion}/admin/wallets")]
+  // [Authorize(Policy = Permissions.ViewWallets)]
+  [ProducesResponseType(typeof(PaginatedList<AdminWalletDto>), StatusCodes.Status200OK)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [EndpointName("GetAdminWallets")]
+  [EndpointSummary("Lists all wallets")]
+  [EndpointDescription("Lists all wallets with optional filters for admin review.")]
+  public async Task<IActionResult> GetAdminWallets(
+    [FromQuery] Guid? userId,
+    [FromQuery] bool? isActive,
+    [FromQuery] decimal? minBalance,
+    [FromQuery] decimal? maxBalance,
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 10,
+    [FromQuery] string sortBy = "newest",
+    CancellationToken ct = default)
+  {
+    var query = new GetAdminWalletsQuery(userId, isActive, minBalance, maxBalance, page, pageSize, sortBy);
+    var result = await _sender.Send(query, ct);
+
+    return result.Match(
+      wallets => Ok(wallets),
+      errors => Problem(errors));
+  }
+
+  [HttpGet("/api/v{version:apiVersion}/admin/wallets/{walletId:guid}")]
+  // [Authorize(Policy = Permissions.ViewWallets)]
+  [ProducesResponseType(typeof(AdminWalletDto), StatusCodes.Status200OK)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [EndpointName("GetAdminWalletById")]
+  [EndpointSummary("Gets wallet details")]
+  [EndpointDescription("Gets wallet details for any user by wallet ID.")]
+  public async Task<IActionResult> GetAdminWalletById([FromRoute] Guid walletId, CancellationToken ct = default)
+  {
+    var query = new GetAdminWalletByIdQuery(walletId);
+    var result = await _sender.Send(query, ct);
+
+    return result.Match(
+      wallet => Ok(wallet),
+      errors => Problem(errors));
   }
   [HttpGet]
   [EndpointName(nameof(GetMyWallet))]
