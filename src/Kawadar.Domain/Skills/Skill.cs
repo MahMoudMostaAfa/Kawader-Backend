@@ -1,4 +1,4 @@
-﻿using Kawadar.Domain.Common;
+using Kawadar.Domain.Common;
 using Kawadar.Domain.Common.Results;
 
 namespace Kawadar.Domain.Skills
@@ -9,7 +9,7 @@ namespace Kawadar.Domain.Skills
         public bool IsActive { get; private set; }
         public Guid CreatedBy { get; private set; }
 
-        private Skill(string name, bool isActive, Guid createdBy)
+        private Skill(string name, bool isActive, Guid createdBy) : base(Guid.NewGuid())
         {
             Name = name;
             IsActive = isActive;
