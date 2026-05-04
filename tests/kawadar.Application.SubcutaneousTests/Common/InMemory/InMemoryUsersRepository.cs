@@ -51,6 +51,13 @@ public class InMemoryUsersRepository : IUsersRepository
         if (ExperienceYear.HasValue) query = query.Where(u => u.ExperienceYear == ExperienceYear.Value);
         if (specilizationId.HasValue) query = query.Where(u => u.SpecializationId == specilizationId.Value);
 
+        // Apply sort before pagination
+        query = sortBy?.ToLowerInvariant() switch
+        {
+            "oldest" => query.OrderBy(u => u.CreatedAt),
+            _        => query.OrderByDescending(u => u.CreatedAt)
+        };
+
         var all = query.ToList();
         var items = all.Skip((page - 1) * pageSize).Take(pageSize).ToList();
         return Task.FromResult(new PaginatedList<UserProfile>(items, all.Count, page, pageSize));
@@ -68,7 +75,14 @@ public class InMemoryUsersRepository : IUsersRepository
         if (IsOnline.HasValue) query = query.Where(u => u.IsOnline == IsOnline.Value);
         if (IsDeleted.HasValue) query = query.Where(u => u.IsDeleted == IsDeleted.Value);
 
-        var all = query.ToList();
+        // Apply sort before pagination
+        var ordered = sortBy?.ToLowerInvariant() switch
+        {
+            "oldest" => query.OrderBy(u => u.CreatedAt),
+            _        => query.OrderByDescending(u => u.CreatedAt)
+        };
+
+        var all = ordered.ToList();
         var items = all.Skip((page - 1) * pageSize).Take(pageSize).ToList();
         return Task.FromResult(new PaginatedList<UserProfile>(items, all.Count, page, pageSize));
     }
@@ -94,7 +108,9 @@ public class InMemoryUsersRepository : IUsersRepository
 
     public Task<Result<int>> GetNewUsersThisMonth()
     {
-        var count = Users.Count(u => u.CreatedAt >= DateTime.UtcNow.AddDays(-30));
+        var now = DateTime.UtcNow;
+        var startOfMonth = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+        var count = Users.Count(u => u.CreatedAt >= startOfMonth);
         return Task.FromResult<Result<int>>(count);
     }
 
@@ -115,6 +131,13 @@ public class InMemoryUsersRepository : IUsersRepository
         if (reportType.HasValue) query = query.Where(r => r.ReportType == reportType.Value);
         if (reportStatus.HasValue) query = query.Where(r => r.ReportStatus == reportStatus.Value);
 
+        // Apply sort before pagination
+        query = sortBy?.ToLowerInvariant() switch
+        {
+            "oldest" => query.OrderBy(r => r.CreatedAt),
+            _        => query.OrderByDescending(r => r.CreatedAt)
+        };
+
         var all = query.ToList();
         var items = all.Skip((page - 1) * pageSize).Take(pageSize).ToList();
         return Task.FromResult(new PaginatedList<UserReport>(items, all.Count, page, pageSize));
@@ -126,7 +149,14 @@ public class InMemoryUsersRepository : IUsersRepository
         if (reportType.HasValue) query = query.Where(r => r.ReportType == reportType.Value);
         if (reportstatus.HasValue) query = query.Where(r => r.ReportStatus == reportstatus.Value);
 
-        var all = query.ToList();
+        // Apply sort before pagination
+        var ordered = sortBy?.ToLowerInvariant() switch
+        {
+            "oldest" => query.OrderBy(r => r.CreatedAt),
+            _        => query.OrderByDescending(r => r.CreatedAt)
+        };
+
+        var all = ordered.ToList();
         var items = all.Skip((page - 1) * pageSize).Take(pageSize).ToList();
         return Task.FromResult(new PaginatedList<UserReport>(items, all.Count, page, pageSize));
     }

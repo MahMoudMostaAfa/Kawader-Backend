@@ -66,6 +66,13 @@ public class InMemoryJobsRepository : IJobsRepository
         if (skillIds is { Count: > 0 })
             query = query.Where(j => j.Skills.Any(s => skillIds.Contains(s.Id)));
 
+        // Apply sort before pagination
+        query = sortBy?.ToLowerInvariant() switch
+        {
+            "oldest" => query.OrderBy(j => j.CreatedAt),
+            _        => query.OrderByDescending(j => j.CreatedAt) // default: newest
+        };
+
         var all = query.ToList();
         var items = all.Skip((page - 1) * pageSize).Take(pageSize).ToList();
         return Task.FromResult(new PaginatedList<Job>(items, all.Count, page, pageSize));
@@ -89,6 +96,13 @@ public class InMemoryJobsRepository : IJobsRepository
         var query = JobReports.AsEnumerable();
         if (reportType.HasValue) query = query.Where(r => r.ReportType == reportType.Value);
         if (reportStatus.HasValue) query = query.Where(r => r.ReportStatus == reportStatus.Value);
+
+        // Apply sort before pagination
+        query = sortBy?.ToLowerInvariant() switch
+        {
+            "oldest" => query.OrderBy(r => r.CreatedAt),
+            _        => query.OrderByDescending(r => r.CreatedAt)
+        };
 
         var all = query.ToList();
         var items = all.Skip((page - 1) * pageSize).Take(pageSize).ToList();
@@ -139,10 +153,16 @@ public class InMemoryJobsRepository : IJobsRepository
 
     public Task<Result<Dictionary<int, int>>> GetAverageJobPostingPerMonthDistribution()
     {
-        var distribution = Jobs
-            .GroupBy(j => j.CreatedAt.Month)
-            .ToDictionary(g => g.Key, g => g.Count());
-        return Task.FromResult<Result<Dictionary<int, int>>>(distribution);
+        // Group by (Year, Month) to get the count per calendar month across all years,
+        // then average those counts per month-of-year (1–12).
+        var averagePerMonth = Jobs
+            .GroupBy(j => new { j.CreatedAt.Year, j.CreatedAt.Month })
+            .GroupBy(g => g.Key.Month)
+            .ToDictionary(
+                mg => mg.Key,
+                mg => (int)Math.Round(mg.Average(g => g.Count())));
+
+        return Task.FromResult<Result<Dictionary<int, int>>>(averagePerMonth);
     }
 
     public void Clear()

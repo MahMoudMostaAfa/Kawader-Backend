@@ -3,6 +3,7 @@ using kawadar.Application.SubcutaneousTests.Common.Fakes;
 using kawadar.Application.SubcutaneousTests.Common.Fixtures;
 using kawadar.Application.SubcutaneousTests.Common.Helpers;
 using kawadar.Application.SubcutaneousTests.Common.InMemory;
+using Kawadar.Application.Common.Messaging.Messages;
 using Kawadar.Application.Features.ProfileManagment.Commands.UploadIdentity;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Tests.Common.UserProfiles;
@@ -86,7 +87,17 @@ public class UploadIdentityTests : IClassFixture<SubcutaneousTestFixture>, IAsyn
 
         var eventBus = _fixture.Services.GetRequiredService<FakeEventBus>();
         Assert.Equal(2, eventBus.PublishedMessages.Count);
-        // It publishes UploadIdentityMessage and ProcessingIdentityDataMessage
+
+        // Assert specific message payload types (not just count)
+        Assert.Contains(typeof(UploadIdentityMessage), eventBus.PublishedMessageTypes);
+        Assert.Contains(typeof(ProcessingIdentityDataMessage), eventBus.PublishedMessageTypes);
+
+        // Assert that the UploadIdentityMessage carries the correct profile
+        var uploadMsg = eventBus.PublishedOf<UploadIdentityMessage>().Single();
+        Assert.Equal(profileId, uploadMsg.UserProfileId);
+
+        var processingMsg = eventBus.PublishedOf<ProcessingIdentityDataMessage>().Single();
+        Assert.Equal(profileId, processingMsg.UserProfileId);
     }
 
     [Fact]

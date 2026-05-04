@@ -47,7 +47,14 @@ public class InMemoryProposalsRepository : IProposalsRepository
         if (Type.HasValue) query = query.Where(p => p.ProposalType == Type.Value);
         if (Status.HasValue) query = query.Where(p => p.Status == Status.Value);
 
-        var all = query.ToList();
+        // Apply sort before pagination
+        var ordered = DatesortBy?.ToLowerInvariant() switch
+        {
+            "oldest" => query.OrderBy(p => p.CreatedAt),
+            _        => query.OrderByDescending(p => p.CreatedAt)
+        };
+
+        var all = ordered.ToList();
         var items = all.Skip((Page - 1) * PageSize).Take(PageSize).ToList();
         var paginated = new PaginatedList<JobProposal>(items, all.Count, Page, PageSize);
         return Task.FromResult<Result<PaginatedList<JobProposal>>>(paginated);
@@ -61,7 +68,14 @@ public class InMemoryProposalsRepository : IProposalsRepository
     {
         var query = Proposals.Where(p => p.FreelancerId == FreelancerId);
 
-        var all = query.ToList();
+        // Apply sort before pagination
+        var ordered = SortBy?.ToLowerInvariant() switch
+        {
+            "oldest" => query.OrderBy(p => p.CreatedAt),
+            _        => query.OrderByDescending(p => p.CreatedAt)
+        };
+
+        var all = ordered.ToList();
         var items = all.Skip((Page - 1) * PageSize).Take(PageSize).ToList();
         var paginated = new PaginatedList<JobProposal>(items, all.Count, Page, PageSize);
         return Task.FromResult<Result<PaginatedList<JobProposal>>>(paginated);
@@ -77,7 +91,9 @@ public class InMemoryProposalsRepository : IProposalsRepository
 
     public Task<int> GetNumberOfProposalsThisMonth()
     {
-        var count = Proposals.Count(p => p.CreatedAt >= DateTime.UtcNow.AddDays(-30));
+        var now = DateTime.UtcNow;
+        var startOfMonth = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+        var count = Proposals.Count(p => p.CreatedAt >= startOfMonth);
         return Task.FromResult(count);
     }
 

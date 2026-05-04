@@ -12,8 +12,22 @@ public class FakeIdentityService : IIdentityService
     private readonly Dictionary<string, List<(string Type, string Value)>> _claims = new();
     private readonly Dictionary<string, bool> _emailConfirmed = new();
 
+    // Token stores: maps userId → issued token
+    private readonly Dictionary<string, string> _passwordResetTokens = new();
+    private readonly Dictionary<string, string> _emailConfirmationTokens = new();
+
     public Task<Result<UserDto>> RegisterAsync(string email, string userName, string password)
     {
+        // Reject duplicate e-mail
+        if (_users.Values.Any(u => string.Equals(u.Email, email, StringComparison.OrdinalIgnoreCase)))
+            return Task.FromResult<Result<UserDto>>(
+                Error.Conflict("Identity.DuplicateEmail", $"Email '{email}' is already taken."));
+
+        // Reject duplicate username
+        if (_users.Values.Any(u => string.Equals(u.UserName, userName, StringComparison.OrdinalIgnoreCase)))
+            return Task.FromResult<Result<UserDto>>(
+                Error.Conflict("Identity.DuplicateUserName", $"Username '{userName}' is already taken."));
+
         var id = Guid.NewGuid().ToString();
         var user = new UserDto { Id = id, Email = email, UserName = userName, EmailConfirmed = false };
         _users[id] = user;
@@ -53,7 +67,12 @@ public class FakeIdentityService : IIdentityService
         if (!_users.ContainsKey(userId))
             return Task.FromResult<Result<Success>>(Error.NotFound("User.NotFound", "User not found."));
 
+        if (!_passwordResetTokens.TryGetValue(userId, out var issued) || issued != token)
+            return Task.FromResult<Result<Success>>(
+                Error.Unauthorized("Identity.InvalidToken", "Password reset token is invalid or expired."));
+
         _passwords[userId] = newPassword;
+        _passwordResetTokens.Remove(userId); // tokens are one-time-use
         return Task.FromResult<Result<Success>>(Result.Success);
     }
 
@@ -62,7 +81,9 @@ public class FakeIdentityService : IIdentityService
         if (!_users.ContainsKey(userId))
             return Task.FromResult<Result<string>>(Error.NotFound("User.NotFound", "User not found."));
 
-        return Task.FromResult<Result<string>>("fake-reset-token");
+        var token = $"reset-{userId}-{Guid.NewGuid():N}";
+        _passwordResetTokens[userId] = token;
+        return Task.FromResult<Result<string>>(token);
     }
 
     public Task<Result<Success>> ConfirmEmailAsync(string userId, string token)
@@ -70,7 +91,12 @@ public class FakeIdentityService : IIdentityService
         if (!_users.ContainsKey(userId))
             return Task.FromResult<Result<Success>>(Error.NotFound("User.NotFound", "User not found."));
 
+        if (!_emailConfirmationTokens.TryGetValue(userId, out var issued) || issued != token)
+            return Task.FromResult<Result<Success>>(
+                Error.Unauthorized("Identity.InvalidToken", "Email confirmation token is invalid or expired."));
+
         _emailConfirmed[userId] = true;
+        _emailConfirmationTokens.Remove(userId); // tokens are one-time-use
         _users[userId] = new UserDto
         {
             Id = _users[userId].Id,
@@ -86,7 +112,9 @@ public class FakeIdentityService : IIdentityService
         if (!_users.ContainsKey(userId))
             return Task.FromResult<Result<string>>(Error.NotFound("User.NotFound", "User not found."));
 
-        return Task.FromResult<Result<string>>("fake-confirm-token");
+        var token = $"confirm-{userId}-{Guid.NewGuid():N}";
+        _emailConfirmationTokens[userId] = token;
+        return Task.FromResult<Result<string>>(token);
     }
 
     public Task<Result<Success>> UpdateUserAsync(string userId, string? email, string? userName)
@@ -245,5 +273,7 @@ public class FakeIdentityService : IIdentityService
         _roles.Clear();
         _claims.Clear();
         _emailConfirmed.Clear();
+        _passwordResetTokens.Clear();
+        _emailConfirmationTokens.Clear();
     }
 }

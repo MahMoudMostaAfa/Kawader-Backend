@@ -20,7 +20,17 @@ public class InMemoryReviewRepository : IReviewRepository
     {
         var query = Reviews.Where(r => r.RevieweeId == Id);
         if (Rating.HasValue) query = query.Where(r => Math.Abs(r.Rating - Rating.Value) < 0.01f);
-        var all = query.ToList();
+
+        // Apply sort before pagination
+        var ordered = sortBy?.ToLowerInvariant() switch
+        {
+            "oldest"         => query.OrderBy(r => r.CreatedAt),
+            "rating_asc"     => query.OrderBy(r => r.Rating),
+            "rating_desc"    => query.OrderByDescending(r => r.Rating),
+            _                => query.OrderByDescending(r => r.CreatedAt) // default: newest
+        };
+
+        var all = ordered.ToList();
         var items = all.Skip((page - 1) * pageSize).Take(pageSize).ToList();
         return Task.FromResult(new PaginatedList<Review>(items, all.Count, page, pageSize));
     }

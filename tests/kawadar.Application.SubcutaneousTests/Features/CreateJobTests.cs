@@ -136,6 +136,11 @@ public class CreateJobTests : IClassFixture<SubcutaneousTestFixture>, IAsyncLife
         Assert.Equal(JobType.FixedPrice, job.JobType);
         Assert.Equal(profileId, job.PostedById);
         Assert.Equal(specId, job.SpecilizationId);
+
+        // Verify valid slug: non-empty, URL-safe (no spaces), contains slugified title prefix
+        Assert.NotEmpty(job.JobSlug);
+        Assert.DoesNotContain(" ", job.JobSlug);
+        Assert.StartsWith("react-native-developer-", job.JobSlug);
     }
 
     // ───────────────────── Hourly Job: Happy Path ─────────────────────
