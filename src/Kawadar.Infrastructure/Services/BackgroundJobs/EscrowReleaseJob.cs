@@ -19,8 +19,17 @@ public class EscrowReleaseJob
     _walletRepository = walletRepository;
 
   }
-  public async Task ExecuteAsync(EscrowTransaction transaction, CancellationToken cancellationToken)
+  public async Task ExecuteAsync(Guid escrowTransactionId, CancellationToken cancellationToken)
   {
+
+    var escrowTransactionResult = await _walletRepository.GetEscrowTransactionById(escrowTransactionId, cancellationToken);
+    if (escrowTransactionResult.IsError)
+    {
+      _logger.LogError("Failed to retrieve escrow transaction with id {EscrowTransactionId}.", escrowTransactionId);
+      // throw error to trigger retry mechanism
+      throw new InvalidOperationException($"Failed to retrieve escrow transaction with id {escrowTransactionId}.");
+    }
+    var transaction = escrowTransactionResult.Value;
 
     var walletResult = await _walletRepository.GetByUserIdAsync(transaction.ReceiverUserId);
     if (walletResult.IsError)

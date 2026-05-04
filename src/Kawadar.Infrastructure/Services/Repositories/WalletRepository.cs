@@ -41,4 +41,11 @@ public class WalletRepository : IWalletRepository
     if (transaction is null) return Error.NotFound();
     return transaction;
   }
+
+  public async Task<Result<EscrowTransaction>> GetEscrowTransactionById(Guid escrowTransactionId, CancellationToken cancellationToken = default)
+  {
+    var transaction = await _context.EscrowTransactions.FirstOrDefaultAsync(et => et.Id == escrowTransactionId);
+    if (transaction is null) return Error.NotFound();
+    return transaction;
+  }
 }

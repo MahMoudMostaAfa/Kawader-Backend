@@ -1,10 +1,14 @@
+using System.Text.Json.Serialization;
 using Kawadar.Domain.WalletAndPayments.Payouts.Enums;
 
 namespace Kawadar.Domain.WalletAndPayments.Payouts;
 
 
 
-
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
+[JsonDerivedType(typeof(MobileWalletAccountDetails), "mobile_wallet")]
+[JsonDerivedType(typeof(BankTransferAccountDetails), "bank_transfer")]
+[JsonDerivedType(typeof(InstaPayAccountDetails), "instapay")]
 public abstract class PayoutAccountDetails;
 public class MobileWalletAccountDetails : PayoutAccountDetails
 {

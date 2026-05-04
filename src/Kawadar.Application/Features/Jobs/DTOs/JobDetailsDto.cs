@@ -4,10 +4,11 @@ using Kawadar.Domain.Jobs.Enums;
 
 public class JobDetailsDto
 {
+  public Guid Id { get; set; }
   public string Title { get; set; } = null!;
   public string Description { get; set; } = null!;
   public string PosterFullName { get; set; } = null!;
-  public Guid JobId { get; set; } 
+  public Guid JobId { get; set; }
   public string PosterProfilePictureUrl { get; set; } = null!;
   public string PosterUsername { get; set; } = null!;
   public string JobSlug { get; set; } = null!;
@@ -22,6 +23,7 @@ public class JobDetailsDto
   public int DurationInDays { get; set; }
   public JobExperienceLevel ExperienceLevel { get; set; }
   public JobStatus JobStatus { get; set; }
+  public DateTime CreatedAt { get; set; }
 }
 
 public class JobQuestionDto

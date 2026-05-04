@@ -10,6 +10,9 @@ public class UpdatePayoutAccountRequest
   /// Structured account details object.
   /// Send one of: MobileWalletAccountDetails, BankTransferAccountDetails, or InstaPayAccountDetails.
   /// </summary>
-  public PayoutAccountDetails AccountDetails { get; set; } = null!;
+  public MobileWalletAccountDetails? MobileWalletAccountDetails { get; set; }
+  public BankTransferAccountDetails? BankTransferAccountDetails { get; set; }
+  public InstaPayAccountDetails? InstaPayAccountDetails { get; set; }
+
   public bool IsDefault { get; set; }
 }

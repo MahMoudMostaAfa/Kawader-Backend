@@ -11,9 +11,9 @@ public class HangfireEscrowReleaseScheduler : IEscrowReleaseScheduler
   {
     _backgroundJobClient = backgroundJobClient;
   }
-  public void ScheduleEscrowRelease(EscrowTransaction transaction, TimeSpan delay)
+  public void ScheduleEscrowRelease(Guid escrowTransactionId, TimeSpan delay)
   {
 
-    _backgroundJobClient.Schedule<EscrowReleaseJob>(job => job.ExecuteAsync(transaction, CancellationToken.None), delay);
+    _backgroundJobClient.Schedule<EscrowReleaseJob>(job => job.ExecuteAsync(escrowTransactionId, CancellationToken.None), delay);
   }
 }
