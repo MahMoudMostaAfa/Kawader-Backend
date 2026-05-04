@@ -1,4 +1,5 @@
 using Kawadar.Application.Common.Interfaces.Repositories;
+using Kawadar.Application.Common.Models;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.WalletAndPayments.Payouts;
 using Kawadar.Domain.WalletAndPayments.Payouts.Enums;
@@ -46,5 +47,33 @@ public class WithdrawalRequestRepository : IWithdrawalRequestRepository
       .ToListAsync(cancellationToken);
 
     return requests;
+  }
+
+  public async Task<PaginatedList<WithdrawalRequest>> GetAllAsync(
+    WithdrawalStatus? status,
+    int page,
+    int pageSize,
+    string sortBy,
+    CancellationToken cancellationToken)
+  {
+    var query = _context.WithdrawalRequests.AsQueryable();
+
+    if (status.HasValue)
+    {
+      query = query.Where(w => w.Status == status.Value);
+    }
+
+    query = sortBy == "oldest"
+      ? query.OrderBy(w => w.CreatedAt)
+      : query.OrderByDescending(w => w.CreatedAt);
+
+    var totalCount = await query.CountAsync(cancellationToken);
+
+    var items = await query
+      .Skip((page - 1) * pageSize)
+      .Take(pageSize)
+      .ToListAsync(cancellationToken);
+
+    return new PaginatedList<WithdrawalRequest>(items, totalCount, page, pageSize);
   }
 }

@@ -1,8 +1,15 @@
+using Kawadar.Api.Requests.Admin;
 using Kawadar.Api.Requests.Wallet;
+using Kawadar.Application.Common.Models;
+using Kawadar.Application.Features.WalletAndPayments.Commands.ApproveWithdrawalRequest;
 using Kawadar.Application.Features.WalletAndPayments.Commands.CancelWithdrawalRequest;
 using Kawadar.Application.Features.WalletAndPayments.Commands.CreateWithdrawalRequest;
+using Kawadar.Application.Features.WalletAndPayments.Commands.RejectWithdrawalRequest;
+using Kawadar.Application.Features.WalletAndPayments.DTOs;
+using Kawadar.Application.Features.WalletAndPayments.Queries.GetAdminWithdrawals;
 using Kawadar.Application.Features.WalletAndPayments.Queries.GetMyWithdrawalRequests;
 using Kawadar.Application.Features.WalletAndPayments.Queries.GetWithdrawalRequestById;
+using Kawadar.Domain.Common.Constants;
 using Kawadar.Domain.WalletAndPayments.Payouts.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -20,6 +27,65 @@ public class WithdrawalsController : ApiController
   public WithdrawalsController(ISender sender)
   {
     _sender = sender;
+  }
+
+  [HttpGet("/api/v{version:apiVersion}/admin/withdrawals")]
+  // [Authorize(Policy = Permissions.ViewWithdrawals)]
+  [ProducesResponseType(typeof(PaginatedList<WithdrawalRequestDto>), StatusCodes.Status200OK)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [EndpointName("GetAdminWithdrawals")]
+  [EndpointSummary("List admin withdrawals")]
+  [EndpointDescription("Lists withdrawal requests for admin review with optional filters.")]
+  public async Task<IActionResult> GetAdminWithdrawals(
+    [FromQuery] WithdrawalStatus? status,
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 10,
+    [FromQuery] string sortBy = "newest",
+    CancellationToken ct = default)
+  {
+    var query = new GetAdminWithdrawalsQuery(status, page, pageSize, sortBy);
+    var result = await _sender.Send(query, ct);
+
+    return result.Match(
+      withdrawals => Ok(withdrawals),
+      errors => Problem(errors));
+  }
+
+  [HttpPost("/api/v{version:apiVersion}/admin/withdrawals/{withdrawalId:guid}/approve")]
+  // [Authorize(Policy = Permissions.ApproveWithdrawals)]
+  [ProducesResponseType(StatusCodes.Status204NoContent)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+  [EndpointName("ApproveWithdrawal")]
+  [EndpointSummary("Approve withdrawal")]
+  [EndpointDescription("Approves and processes a withdrawal request, creating a wallet transaction and deducting the balance.")]
+  public async Task<IActionResult> ApproveWithdrawal([FromRoute] Guid withdrawalId, CancellationToken ct)
+  {
+    var result = await _sender.Send(new ApproveWithdrawalRequestCommand(withdrawalId), ct);
+
+    return result.Match(
+      _ => NoContent(),
+      errors => Problem(errors));
+  }
+
+  [HttpPost("/api/v{version:apiVersion}/admin/withdrawals/{withdrawalId:guid}/reject")]
+  // [Authorize(Policy = Permissions.RejectWithdrawals)]
+  [ProducesResponseType(StatusCodes.Status204NoContent)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+  [EndpointName("RejectWithdrawal")]
+  [EndpointSummary("Reject withdrawal")]
+  [EndpointDescription("Rejects a withdrawal request with a reason.")]
+  public async Task<IActionResult> RejectWithdrawal(
+    [FromRoute] Guid withdrawalId,
+    [FromBody] RejectWithdrawalRequest request,
+    CancellationToken ct)
+  {
+    var result = await _sender.Send(new RejectWithdrawalRequestCommand(withdrawalId, request.Reason), ct);
+
+    return result.Match(
+      _ => NoContent(),
+      errors => Problem(errors));
   }
 
   [HttpPost("withdraw")]
