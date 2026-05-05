@@ -14,7 +14,7 @@ namespace Kawadar.Application.Features.Portfolios.Commands.CreateProject
 {
     public class CreateProjectCommandHandler(IUnitOfWork unitOfWork, IUser user, IPortfolioProjectRepository projectRepository
         , IUsersRepository usersRepository, ISpecilizationRepository specilizationRepository
-        , IStorageClient storageClient, IMapper mapper) : IRequestHandler<CreateProjectCommand, Result<ProjectDTO>>
+        , IStorageClient storageClient, ISubscriptionsRepository subscriptionsRepository, IMapper mapper) : IRequestHandler<CreateProjectCommand, Result<ProjectDTO>>
     {
         public async Task<Result<ProjectDTO>> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
         {
@@ -28,6 +28,17 @@ namespace Kawadar.Application.Features.Portfolios.Commands.CreateProject
 
             var previousProjects = await projectRepository.GetAllByFreelancerId(freelancer.Id);
             var displayOrder = previousProjects.Count() + 1;
+
+            var UserSubscriptionResult = await subscriptionsRepository.GetActiveUserSubscription(result.Value.Id);
+            if (UserSubscriptionResult.IsSuccess)
+            {
+                var plan = await subscriptionsRepository.GetSubscriptionPlanById(UserSubscriptionResult.Value.SubscriptionPlanId);
+                if (plan.IsError) return plan.Errors;
+
+                if (plan.Value.Features.TotalProtfolioProjects < displayOrder)
+                    return Error.Conflict("You exceeded the number of portfolio projects for your subscription");
+            }
+            if (displayOrder > FreePlanFeatures.PortfolioProjects) return Error.Conflict("");
 
             using var stream = request.ProjectImage.OpenReadStream();
             var uploadResult = await storageClient.UploadFileAsync(stream, request.ProjectImage.FileName,

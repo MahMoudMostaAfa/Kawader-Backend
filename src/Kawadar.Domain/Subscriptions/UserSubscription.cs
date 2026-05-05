@@ -44,4 +44,9 @@ public class UserSubscription : AuditableEntity
     return userSubscription;
   }
 
+    public Result<Updated> Cancel()
+    {
+        Status = UserSubscriptionStatus.Cancalled;
+        return Result.Updated;
+    }
 }
