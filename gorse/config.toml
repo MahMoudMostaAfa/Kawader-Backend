@@ -1,0 +1,34 @@
+# Gorse server configuration
+
+[database]
+# Use Postgres for both data store and cache store
+data_store = "postgres://gorse:gorsepass@gorse-postgres:5432/gorse?sslmode=disable"
+cache_store = "postgres://gorse:gorsepass@gorse-postgres:5432/gorse?sslmode=disable"
+
+[master]
+# REST API settings (used by gorse-in-one)
+api_key = "change-me"
+http_port = 8088
+
+[dashboard]
+# Optional admin UI
+user_name = "admin"
+password = "admin"
+http_port = 8088
+
+[recommend]
+# How often to retrain the model (default: 60m)
+fit_period = "10m"
+# How often to collect/process new data (default: 60m)  
+data_collection_period = "1m"
+# Default recommendation count
+n_recommend = 10
+
+[monitor]
+# Prometheus metrics endpoint (optional)
+enable_metrics = true
+metrics_port = 9100
+
+[log]
+# Log level: debug, info, warn, error
+level = "info"
