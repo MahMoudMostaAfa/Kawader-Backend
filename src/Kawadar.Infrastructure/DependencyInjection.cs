@@ -22,6 +22,8 @@ using Azure.Storage.Blobs;
 using Azure.Identity;
 using Kawadar.Infrastructure.Services.CloudServices;
 using Kawadar.Infrastructure.Services.AIServices;
+using Kawadar.Infrastructure.Services.RecommendationServices;
+using Kawadar.Infrastructure.Settings;
 using Kawadar.Application.Common.Messaging;
 using Kawadar.Infrastructure.Messaging;
 using MassTransit;
@@ -160,6 +162,10 @@ public static class DependencyInjection
     service.AddSingleton<IEmailTemplateService, EmailTemplateService>();
     // AI services
     service.AddScoped<IAIService, GeminiApiService>();
+
+    // Recommendation engine (Gorse)
+    service.Configure<GorseSettings>(configuration.GetSection(GorseSettings.SectionName));
+    service.AddSingleton<IRecommendationService, GorseRecommendationService>();
 
     // repositories and unit of work
     service.AddScoped<IUsersRepository, UsersRepository>();
