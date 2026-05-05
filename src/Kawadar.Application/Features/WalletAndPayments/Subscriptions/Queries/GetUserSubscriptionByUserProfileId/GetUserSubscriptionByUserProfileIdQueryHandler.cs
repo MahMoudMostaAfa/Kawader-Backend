@@ -27,12 +27,12 @@ namespace Kawadar.Application.Features.WalletAndPayments.Subscriptions.Queries.G
             if (subscriptions.IsError) return subscriptions.Errors;
 
             var subscriptionDictionary = subscriptions.Value.ToDictionary(x => x.Id);
-            var userSubscriptionDtos = subscriptions.Value.Select(pair => mapper.Map<UserSubscriptionDto>(pair)).ToList();
+            var userSubscriptionDtos = userSubscriptions.Items.Select(pair => mapper.Map<UserSubscriptionDto>(pair)).ToList();
 
             for(int i = 0; i < userSubscriptions.Items.Count; i++)
             {
                 var userSubscription = userSubscriptions.Items[i];
-                var subscriptionPlanTitle = subscriptionDictionary[userSubscription.Id].Name;
+                var subscriptionPlanTitle = subscriptionDictionary[userSubscription.SubscriptionPlanId].Name;
                 userSubscriptionDtos[i].SubscriptionPlanTitle = subscriptionPlanTitle;
             }
 

@@ -47,6 +47,7 @@ public class UserSubscription : AuditableEntity
     public Result<Updated> Cancel()
     {
         Status = UserSubscriptionStatus.Cancalled;
+        CancalledAt = DateTime.UtcNow;
         return Result.Updated;
     }
 }
