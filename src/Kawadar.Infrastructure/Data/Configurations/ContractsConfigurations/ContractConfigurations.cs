@@ -34,7 +34,7 @@ public class ContractConfigurations : IEntityTypeConfiguration<Contract>
     builder.HasMany(c => c.ContractMilestones)
       .WithOne()
       .HasForeignKey(c => c.ContractId)
-      .OnDelete(DeleteBehavior.Restrict);
+      .OnDelete(DeleteBehavior.Cascade);
 
 
     builder.Navigation(p => p.ContractMilestones).HasField("_contractMilestones").UsePropertyAccessMode(PropertyAccessMode.Field);

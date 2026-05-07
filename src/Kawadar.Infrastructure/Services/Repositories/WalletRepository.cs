@@ -98,6 +98,14 @@ public class WalletRepository : IWalletRepository
     return transaction;
   }
 
+  public async Task<Result<EscrowTransaction>> GetEscrowTransactionByContractMilestoneId(Guid contractMilestoneId, CancellationToken cancellationToken = default)
+  {
+    var transaction = await _context.EscrowTransactions
+      .FirstOrDefaultAsync(et => et.ContractMilestoneId == contractMilestoneId, cancellationToken);
+    if (transaction is null) return Error.NotFound();
+    return transaction;
+  }
+
   public async Task<Result<EscrowTransaction>> GetEscrowTransactionById(Guid escrowTransactionId, CancellationToken cancellationToken = default)
   {
     var transaction = await _context.EscrowTransactions.FirstOrDefaultAsync(et => et.Id == escrowTransactionId);
