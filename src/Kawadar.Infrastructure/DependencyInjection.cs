@@ -22,6 +22,8 @@ using Azure.Storage.Blobs;
 using Azure.Identity;
 using Kawadar.Infrastructure.Services.CloudServices;
 using Kawadar.Infrastructure.Services.AIServices;
+using Kawadar.Infrastructure.Services.RecommendationServices;
+using Kawadar.Infrastructure.Settings;
 using Kawadar.Application.Common.Messaging;
 using Kawadar.Infrastructure.Messaging;
 using MassTransit;
@@ -161,6 +163,10 @@ public static class DependencyInjection
     // AI services
     service.AddScoped<IAIService, GeminiApiService>();
 
+    // Recommendation engine (Gorse)
+    service.Configure<GorseSettings>(configuration.GetSection(GorseSettings.SectionName));
+    service.AddSingleton<IRecommendationService, GorseRecommendationService>();
+
     // repositories and unit of work
     service.AddScoped<IUsersRepository, UsersRepository>();
     service.AddScoped<IStorageClient, AzureStorageClient>();
@@ -180,6 +186,8 @@ public static class DependencyInjection
     service.AddScoped<IProposalsRepository, ProposalsRepository>();
     service.AddScoped<IWalletRepository, WalletRepository>();
     service.AddScoped<IContractsRepository, ContractsRepository>();
+    service.AddScoped<IUserPayoutAccountRepository, UserPayoutAccountRepository>();
+    service.AddScoped<IWithdrawalRequestRepository, WithdrawalRequestRepository>();
     service.AddScoped<IUnitOfWork, UnitOfWork>();
     service.AddTransient<IIdentityService, IdentityService>();
     service.AddScoped<ISubscriptionsRepository, SubscriptionRepository>();
@@ -187,6 +195,7 @@ public static class DependencyInjection
 
     // Account deletion scheduler
     service.AddScoped<IAccountDeletionScheduler, HangfireAccountDeletionScheduler>();
+    service.AddScoped<IEscrowReleaseScheduler, HangfireEscrowReleaseScheduler>();
 
     return service;
   }
@@ -356,7 +365,6 @@ public static class DependencyInjection
 
     // online status tracking service
     services.AddSingleton<IPersistanceService, PersistanceService>();
-
     services.AddScoped<INotificationsHubService, NotificationsHubService>();
     services.AddScoped<IConversationsHubService, ConversationsHubService>();
 

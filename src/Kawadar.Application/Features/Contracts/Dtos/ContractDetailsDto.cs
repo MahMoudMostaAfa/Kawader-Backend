@@ -34,6 +34,10 @@ public class ContractMilestoneDto
   public decimal Amount { get; set; }
   public DateTime DueDate { get; set; }
 
+  public DateTime? CompletionRequestedAt { get; set; }
+  public DateTime? CompletionApprovedAt { get; set; }
+  public string? RejectionReason { get; set; }
+
   public int Order { get; set; }
 
   public ContractMilestoneStatus Status { get; set; }

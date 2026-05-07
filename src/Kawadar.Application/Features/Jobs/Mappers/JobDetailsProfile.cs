@@ -31,7 +31,9 @@ public class JobDetailsProfile : Profile
     .ForMember(dest => dest.HourlyRateRange, opt => opt.MapFrom(src => src.job.HourlyRateRange))
     .ForMember(dest => dest.DurationInDays, opt => opt.MapFrom(src => src.job.DurationInDays))
     .ForMember(dest => dest.ExperienceLevel, opt => opt.MapFrom(src => src.job.ExperienceLevel))
-    .ForMember(dest => dest.JobStatus, opt => opt.MapFrom(src => src.job.JobStatus));
+    .ForMember(dest => dest.JobStatus, opt => opt.MapFrom(src => src.job.JobStatus))
+    .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.job.Id))
+     .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.job.CreatedAt));
 
     CreateMap<JobFile, JobAttachmentDto>()
     .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
@@ -62,7 +64,8 @@ public class JobDetailsProfile : Profile
     .ForMember(dest => dest.ExperienceLevel, opt => opt.MapFrom(src => src.ExperienceLevel))
     .ForMember(dest => dest.JobStatus, opt => opt.MapFrom(src => src.JobStatus))
     .ForMember(dest => dest.Skills, opt => opt.MapFrom(src => src.Skills))
-    .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
+    .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
+    .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
 
     CreateMap<(JobReport jobReport, Kawadar.Domain.Jobs.Job job, UserDto userDto), FullJobReportDto>()
     .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.jobReport.Id))
@@ -73,12 +76,12 @@ public class JobDetailsProfile : Profile
     .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.jobReport.Content))
     .ForMember(dest => dest.ActionTaken, opt => opt.MapFrom(src => src.jobReport.ActionTaken));
 
-        CreateMap<(JobReport jobReport, Kawadar.Domain.Jobs.Job job, UserDto userDto), BriefJobReportDto>()
-            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.jobReport.Id))
-            .ForMember(dest => dest.JobSlug, opt => opt.MapFrom(src => src.job.JobSlug))
-            .ForMember(dest => dest.JobTitle, opt => opt.MapFrom(src => src.job.Title))
-            .ForMember(dest => dest.ReporterUserName, opt => opt.MapFrom(src => src.userDto.UserName))
-            .ForMember(dest => dest.ReportStatus, opt => opt.MapFrom(src => src.jobReport.ReportStatus))
-            .ForMember(dest => dest.ReportType, opt => opt.MapFrom(src => src.jobReport.ReportType));
-    }
+    CreateMap<(JobReport jobReport, Kawadar.Domain.Jobs.Job job, UserDto userDto), BriefJobReportDto>()
+        .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.jobReport.Id))
+        .ForMember(dest => dest.JobSlug, opt => opt.MapFrom(src => src.job.JobSlug))
+        .ForMember(dest => dest.JobTitle, opt => opt.MapFrom(src => src.job.Title))
+        .ForMember(dest => dest.ReporterUserName, opt => opt.MapFrom(src => src.userDto.UserName))
+        .ForMember(dest => dest.ReportStatus, opt => opt.MapFrom(src => src.jobReport.ReportStatus))
+        .ForMember(dest => dest.ReportType, opt => opt.MapFrom(src => src.jobReport.ReportType));
+  }
 }

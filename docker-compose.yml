@@ -20,6 +20,8 @@ services:
         condition: service_started
       loki:
         condition: service_started
+      gorse:
+        condition: service_started
     restart: unless-stopped
     networks:
       - kawadar-network
@@ -109,6 +111,47 @@ services:
     networks:
       - kawadar-network
 
+  # ───────────────────────────────────────────────
+  # Gorse (Recommendation Engine)
+  # ───────────────────────────────────────────────
+
+  gorse-postgres:
+    container_name: "gorse-postgres"
+    image: postgres:16
+    environment:
+      POSTGRES_USER: gorse
+      POSTGRES_PASSWORD: gorsepass
+      POSTGRES_DB: gorse
+    ports:
+      - "5433:5432"
+    volumes:
+      - gorse_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gorse -d gorse"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    networks:
+      - kawadar-network
+
+  gorse:
+    container_name: "gorse"
+    image: zhenghaoz/gorse-in-one:latest
+    ports:
+      - "8087:8088" # Gorse REST API (gorse-in-one serves API on 8088)
+      - "8088:8088" # Gorse dashboard UI (optional)
+    environment:
+      GORSE_CONFIG: /etc/gorse/config.toml
+    volumes:
+      - ./gorse/config.toml:/etc/gorse/config.toml:ro
+    depends_on:
+      gorse-postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - kawadar-network
+
 networks:
   kawadar-network:
     driver: bridge
@@ -119,3 +162,4 @@ volumes:
   grafana_data:
   loki_data:
   api_logs:
+  gorse_pg_data:

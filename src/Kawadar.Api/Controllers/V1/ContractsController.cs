@@ -1,9 +1,20 @@
 
 
 using Kawadar.Api.Requests.Contracts;
+using Kawadar.Application.Features.Contracts.Commands.AcceptContractCompletion;
 using Kawadar.Application.Features.Contracts.Commands.CancelContract;
 using Kawadar.Application.Features.Contracts.Commands.CreateContract;
 using Kawadar.Application.Features.Contracts.Commands.EditContractDeadline;
+using Kawadar.Application.Features.Contracts.Commands.RejectContractCompletion;
+using Kawadar.Application.Features.Contracts.Commands.RequestContractCompletion;
+using Kawadar.Application.Features.Contracts.Milestones.Commands.DeleteContractMilestone;
+using Kawadar.Application.Features.Contracts.Milestones.Commands.ApproveContractMilestone;
+using Kawadar.Application.Features.Contracts.Milestones.Commands.RejectContractMilestone;
+using Kawadar.Application.Features.Contracts.Milestones.Commands.StartContractMilestone;
+using Kawadar.Application.Features.Contracts.Milestones.Commands.SubmitContractMilestone;
+using Kawadar.Application.Features.Contracts.Milestones.Commands.UpdateContractMilestone;
+using Kawadar.Application.Features.Contracts.Milestones.Queries.GetContractMilestoneById;
+using Kawadar.Application.Features.Contracts.Milestones.Queries.GetContractMilestones;
 using Kawadar.Application.Features.Contracts.Queries.GetContractDetails;
 using Kawadar.Application.Features.Contracts.Queries.GetMyContracts;
 using MassTransit.Futures.Contracts;
@@ -54,6 +65,102 @@ public class ContractsController : ApiController
 
   }
 
+  [HttpGet("{contractId:guid}/milestones")]
+  public async Task<IActionResult> GetContractMilestones([FromRoute] Guid contractId, CancellationToken ct)
+  {
+    var query = new GetContractMilestonesQuery(contractId);
+    var result = await _sender.Send(query, ct);
+
+    return result.Match(
+      milestones => Ok(milestones),
+      errors => Problem(errors)
+    );
+  }
+
+  [HttpGet("{contractId:guid}/milestones/{milestoneId:guid}")]
+  public async Task<IActionResult> GetContractMilestoneById([FromRoute] Guid contractId, [FromRoute] Guid milestoneId, CancellationToken ct)
+  {
+    var query = new GetContractMilestoneByIdQuery(contractId, milestoneId);
+    var result = await _sender.Send(query, ct);
+
+    return result.Match(
+      milestone => Ok(milestone),
+      errors => Problem(errors)
+    );
+  }
+
+  [HttpPut("{contractId:guid}/milestones/{milestoneId:guid}")]
+  public async Task<IActionResult> UpdateContractMilestone([FromRoute] Guid contractId, [FromRoute] Guid milestoneId, [FromBody] UpdateContractMilestoneRequest request, CancellationToken ct)
+  {
+    var command = new UpdateContractMilestoneCommand(contractId, milestoneId, request.DueDate);
+    var result = await _sender.Send(command, ct);
+
+    return result.Match(
+      _ => NoContent(),
+      errors => Problem(errors)
+    );
+  }
+
+  [HttpDelete("{contractId:guid}/milestones/{milestoneId:guid}")]
+  public async Task<IActionResult> DeleteContractMilestone([FromRoute] Guid contractId, [FromRoute] Guid milestoneId, CancellationToken ct)
+  {
+    var command = new DeleteContractMilestoneCommand(contractId, milestoneId);
+    var result = await _sender.Send(command, ct);
+
+    return result.Match(
+      _ => NoContent(),
+      errors => Problem(errors)
+    );
+  }
+
+  [HttpPost("{contractId:guid}/milestones/{milestoneId:guid}/start")]
+  public async Task<IActionResult> StartContractMilestone([FromRoute] Guid contractId, [FromRoute] Guid milestoneId, CancellationToken ct)
+  {
+    var command = new StartContractMilestoneCommand(contractId, milestoneId);
+    var result = await _sender.Send(command, ct);
+
+    return result.Match(
+      _ => NoContent(),
+      errors => Problem(errors)
+    );
+  }
+
+  [HttpPost("{contractId:guid}/milestones/{milestoneId:guid}/submit")]
+  public async Task<IActionResult> SubmitContractMilestone([FromRoute] Guid contractId, [FromRoute] Guid milestoneId, CancellationToken ct)
+  {
+    var command = new SubmitContractMilestoneCommand(contractId, milestoneId);
+    var result = await _sender.Send(command, ct);
+
+    return result.Match(
+      _ => NoContent(),
+      errors => Problem(errors)
+    );
+  }
+
+  [HttpPost("{contractId:guid}/milestones/{milestoneId:guid}/approve")]
+  public async Task<IActionResult> ApproveContractMilestone([FromRoute] Guid contractId, [FromRoute] Guid milestoneId, CancellationToken ct)
+  {
+    var command = new ApproveContractMilestoneCommand(contractId, milestoneId);
+    var result = await _sender.Send(command, ct);
+
+    return result.Match(
+      _ => NoContent(),
+      errors => Problem(errors)
+    );
+  }
+
+  [HttpPost("{contractId:guid}/milestones/{milestoneId:guid}/reject")]
+  public async Task<IActionResult> RejectContractMilestone([FromRoute] Guid contractId, [FromRoute] Guid milestoneId, [FromBody] RejectContractMilestoneRequest request, CancellationToken ct)
+  {
+    var command = new RejectContractMilestoneCommand(contractId, milestoneId, request.Reason);
+    var result = await _sender.Send(command, ct);
+
+    return result.Match(
+      _ => NoContent(),
+      errors => Problem(errors)
+    );
+  }
+
   [HttpGet]
   [EndpointName(nameof(GetMyContracts))]
   [EndpointSummary("Get a list of my (client -freelancer) contracts")]
@@ -89,6 +196,44 @@ public class ContractsController : ApiController
   {
     var command = new EditContractDeadlineCommand(id, request.NewDeadline);
     var result = await _sender.Send(command, ct);
+    return result.Match(
+      _ => NoContent(),
+      errors => Problem(errors)
+    );
+  }
+
+  [HttpPost("{id:guid}/request-completion")]
+  public async Task<IActionResult> RequestContractCompletion(Guid id, CancellationToken ct)
+  {
+    var command = new RequesContractCompletionCommand(id);
+    var result = await _sender.Send(command, ct);
+    return result.Match(
+      _ => NoContent(),
+      errors => Problem(errors)
+    );
+  }
+  [HttpPost("{id:guid}/reject-completion")]
+  public async Task<IActionResult> RejectContractCompletion([FromRoute] Guid id, [FromBody] RejectCompletionRequest request, CancellationToken ct)
+  {
+
+    var command = new RejectContractCompletionCommand(id, request.Reason);
+    var result = await _sender.Send(command, ct);
+    return result.Match(
+      _ => NoContent(),
+      errors => Problem(errors)
+    );
+
+
+  }
+
+
+  [HttpPost("{id:guid}/accept-completion")]
+  public async Task<IActionResult> AcceptContractCompletion(Guid id, CancellationToken ct)
+  {
+
+    var command = new AcceptContractCompletionCommand(id);
+    var result = await _sender.Send(command, ct);
+
     return result.Match(
       _ => NoContent(),
       errors => Problem(errors)

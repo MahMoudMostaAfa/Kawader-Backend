@@ -133,6 +133,9 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.Property<Guid>("ProposalId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("StartAt")
                         .HasColumnType("datetime2");
 
@@ -200,6 +203,9 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.Property<Guid>("ProposalMilestoneId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -1310,7 +1316,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.ToTable("UserReports");
                 });
-                
+
             modelBuilder.Entity("Kawadar.Domain.Violations.Violation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1999,7 +2005,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.HasOne("Kawadar.Domain.Contracts.Contract", null)
                         .WithMany("ContractMilestones")
                         .HasForeignKey("ContractId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Kawadar.Domain.Proposals.ProposalMilestones.ProposalMilestone", null)
@@ -2389,6 +2395,12 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                             b1.Property<int>("ProposalsPerMonth")
                                 .HasColumnType("int");
+
+                            b1.Property<int>("TotalProtfolioProjects")
+                                .HasColumnType("int");
+
+                            b1.Property<bool>("TwentyFourSevenSupport")
+                                .HasColumnType("bit");
 
                             b1.HasKey("SubscriptionPlanId");
 

@@ -36,6 +36,9 @@ public class ContractDetailsDtoProfile : Profile
       Description = cm.Description,
       Amount = cm.Amount,
       DueDate = cm.DueDate,
+      CompletionRequestedAt = cm.CompletionRequestedAt,
+      CompletionApprovedAt = cm.CompletionApprovedAt,
+      RejectionReason = cm.RejectionReason,
       Order = cm.Order,
       Status = cm.Status
     }).ToList()));

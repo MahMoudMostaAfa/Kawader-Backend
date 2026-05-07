@@ -50,4 +50,31 @@ public class UserPayoutAccount : AuditableEntity
 
   }
 
+  public Result<Updated> Update(string displayName, string accountDetailsJson, bool isDefault)
+  {
+    DispalyName = displayName;
+    AccountDetailsJson = accountDetailsJson;
+    IsDefault = isDefault;
+    return Result.Updated;
+  }
+
+  public Result<Updated> Deactivate()
+  {
+    IsActive = false;
+    IsDefault = false;
+    return Result.Updated;
+  }
+
+  public Result<Updated> SetAsDefault()
+  {
+    IsDefault = true;
+    return Result.Updated;
+  }
+
+  public Result<Updated> ClearDefault()
+  {
+    IsDefault = false;
+    return Result.Updated;
+  }
+
 }

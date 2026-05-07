@@ -29,7 +29,8 @@ public class Contract : AuditableEntity
   public string Title { get; private set; } = string.Empty;
   public string Description { get; private set; } = string.Empty;
 
-
+  // reson for rejecting completion request, if any
+  public string? RejectionReason { get; private set; }
 
 
   public DateTime StartAt { get; private set; }
@@ -76,6 +77,139 @@ public class Contract : AuditableEntity
 
   }
 
+  public Result<Updated> UpdateMilestone(Guid milestoneId, DateTime dueDate)
+  {
+    var milestone = _contractMilestones.FirstOrDefault(m => m.Id == milestoneId);
+    if (milestone is null)
+      return Error.NotFound("Contracts.Milestones", "Milestone not found.");
+
+    if (milestone.Status != ContractMilestoneStatus.Pending)
+      return Error.Conflict("Contracts.Milestones", "Only pending milestones can be updated.");
+
+    if (dueDate <= DateTime.UtcNow)
+      return Error.Validation("Contracts.Milestones", "Due date must be in the future.");
+
+    if (dueDate <= milestone.DueDate)
+      return Error.Validation("Contracts.Milestones", "Due date can only be postponed.");
+
+    var nextMilestone = _contractMilestones
+      .Where(m => m.Order > milestone.Order)
+      .OrderBy(m => m.Order)
+      .FirstOrDefault();
+
+    if (nextMilestone is not null && dueDate > nextMilestone.DueDate)
+      return Error.Validation("Contracts.Milestones", "Due date cannot exceed the next milestone due date.");
+
+    return milestone.UpdateDueDate(dueDate);
+  }
+
+  public Result<Updated> RemoveMilestone(Guid milestoneId)
+  {
+    if (Status != ContractStatus.Active)
+      return Error.Conflict("Contracts.Milestones", "Only active contracts can remove milestones.");
+
+    var milestone = _contractMilestones.FirstOrDefault(m => m.Id == milestoneId);
+    if (milestone is null)
+      return Error.NotFound("Contracts.Milestones", "Milestone not found.");
+
+    if (milestone.Status != ContractMilestoneStatus.Pending)
+      return Error.Conflict("Contracts.Milestones", "Only pending milestones can be removed.");
+
+    _contractMilestones.Remove(milestone);
+
+    var orderedMilestones = _contractMilestones.OrderBy(m => m.Order).ToList();
+    for (var i = 0; i < orderedMilestones.Count; i++)
+    {
+      orderedMilestones[i].UpdateOrder(i + 1);
+    }
+
+    return Result.Updated;
+  }
+
+  public Result<Updated> StartMilestone(Guid milestoneId)
+  {
+    if (Type != ContractType.MilestoneBased)
+      return Error.Conflict("Contracts.Milestones", "Milestones can only be started for milestone-based contracts.");
+
+    if (Status != ContractStatus.Active)
+      return Error.Conflict("Contracts.Milestones", "Only active contracts can start milestones.");
+
+    var milestone = _contractMilestones.FirstOrDefault(m => m.Id == milestoneId);
+    if (milestone is null)
+      return Error.NotFound("Contracts.Milestones", "Milestone not found.");
+
+    var previousMilestone = _contractMilestones
+      .Where(m => m.Order < milestone.Order)
+      .OrderByDescending(m => m.Order)
+      .FirstOrDefault();
+
+    if (previousMilestone is not null && previousMilestone.Status != ContractMilestoneStatus.Approved)
+      return Error.Conflict("Contracts.Milestones", "Previous milestone must be approved before starting this milestone.");
+
+    return milestone.Start();
+  }
+
+  public Result<Updated> SubmitMilestone(Guid milestoneId)
+  {
+    if (Type != ContractType.MilestoneBased)
+      return Error.Conflict("Contracts.Milestones", "Milestones can only be submitted for milestone-based contracts.");
+
+    if (Status != ContractStatus.Active)
+      return Error.Conflict("Contracts.Milestones", "Only active contracts can submit milestones.");
+
+    var milestone = _contractMilestones.FirstOrDefault(m => m.Id == milestoneId);
+    if (milestone is null)
+      return Error.NotFound("Contracts.Milestones", "Milestone not found.");
+
+    return milestone.SubmitForReview();
+  }
+
+  public Result<Updated> ApproveMilestone(Guid milestoneId)
+  {
+    if (Type != ContractType.MilestoneBased)
+      return Error.Conflict("Contracts.Milestones", "Milestones can only be approved for milestone-based contracts.");
+
+    if (Status != ContractStatus.Active)
+      return Error.Conflict("Contracts.Milestones", "Only active contracts can approve milestones.");
+
+    var milestone = _contractMilestones.FirstOrDefault(m => m.Id == milestoneId);
+    if (milestone is null)
+      return Error.NotFound("Contracts.Milestones", "Milestone not found.");
+
+    return milestone.Approve();
+  }
+
+  public Result<Updated> RejectMilestone(Guid milestoneId, string? reason)
+  {
+    if (Type != ContractType.MilestoneBased)
+      return Error.Conflict("Contracts.Milestones", "Milestones can only be rejected for milestone-based contracts.");
+
+    if (Status != ContractStatus.Active)
+      return Error.Conflict("Contracts.Milestones", "Only active contracts can reject milestones.");
+
+    var milestone = _contractMilestones.FirstOrDefault(m => m.Id == milestoneId);
+    if (milestone is null)
+      return Error.NotFound("Contracts.Milestones", "Milestone not found.");
+
+    return milestone.Reject(reason);
+  }
+
+  public Result<Updated> CompleteFromMilestones()
+  {
+    if (Type != ContractType.MilestoneBased)
+      return Error.Conflict("Contracts.Status", "Only milestone-based contracts can be completed from milestones.");
+
+    if (Status != ContractStatus.Active)
+      return Error.Conflict("Contracts.Status", "Only active contracts can be completed from milestones.");
+
+    if (_contractMilestones.Any(m => m.Status != ContractMilestoneStatus.Approved))
+      return Error.Conflict("Contracts.Status", "All milestones must be approved before completing the contract.");
+
+    CompletionApprovedAt = DateTime.UtcNow;
+    Status = ContractStatus.Completed;
+    return Result.Updated;
+  }
+
   public Result<Updated> ChangeStatus(ContractStatus newStatus)
   {
     if (Status == ContractStatus.Canceled)
@@ -106,4 +240,35 @@ public class Contract : AuditableEntity
     return Result.Updated;
   }
 
+
+  public Result<Updated> RequestCompletion()
+  {
+    if (Status != ContractStatus.Active)
+      return Error.Conflict("Contracts.Status", "Only active contracts can be requested for completion.");
+
+    CompletionRequestedAt = DateTime.UtcNow;
+    Status = ContractStatus.PendingCompletion;
+    return Result.Updated;
+  }
+
+
+  public Result<Updated> ApproveCompletion()
+  {
+    if (Status != ContractStatus.PendingCompletion)
+      return Error.Conflict("Contracts.Status", "Only contracts pending completion can be approved for completion.");
+
+    CompletionApprovedAt = DateTime.UtcNow;
+    Status = ContractStatus.Completed;
+    return Result.Updated;
+  }
+
+  public Result<Updated> RejectCompletion(string reason)
+  {
+    if (Status != ContractStatus.PendingCompletion)
+      return Error.Conflict("Contracts.Status", "Only contracts pending completion can be rejected.");
+
+    RejectionReason = reason;
+    Status = ContractStatus.Active;
+    return Result.Updated;
+  }
 }
