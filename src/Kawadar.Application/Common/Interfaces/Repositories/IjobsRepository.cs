@@ -32,7 +32,7 @@ public interface IJobsRepository
   public Task<PaginatedList<JobReport>> GetJobReports(ReportType? reportType, ReportStatus? reportStatus, string sortBy, int page, int pageSize);
   public Task<Result<JobReport>> GetJobReportById(Guid Id);
   public Task<Result<Job>> GetJobByIdAsync(Guid Id);
-  public Task<Result<List<JobReport>>> GetReportsByJobSlug(string slug);
+    public Task<Result<PaginatedList<JobReport>>> GetReportsByJobSlug(string slug, ReportType? reportType, ReportStatus? reportStatus, int page, int pageSize, string sortBy);
   public Task<Result<Dictionary<JobStatus, int>>> GetJobStatusDistribution();
   public Task<Result<Dictionary<string, int>>> GetJobSpecilizationDistribution();
   public Task<Result<Dictionary<int, int>>> GetAverageJobPostingPerMonthDistribution();

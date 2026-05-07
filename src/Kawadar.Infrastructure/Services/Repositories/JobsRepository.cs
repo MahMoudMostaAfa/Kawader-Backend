@@ -188,13 +188,39 @@ public class JobsRepository : IJobsRepository
     return jobs;
   }
 
-  public async Task<Result<List<JobReport>>> GetReportsByJobSlug(string slug)
+  public async Task<Result<PaginatedList<JobReport>>> GetReportsByJobSlug(string slug, ReportType? reportType, ReportStatus? reportStatus, int page, int pageSize, string sortBy)
   {
-    var job = await _context.Jobs.FirstOrDefaultAsync(x => x.JobSlug == slug);
-    if (job is null) return Error.NotFound("Job not found.");
-    var jobReports = await _context.JobReports.Where(x => x.JobId == job.Id).ToListAsync();
-    return jobReports;
-  }
+        var query = _context.JobReports.AsQueryable();
+
+        var job = await _context.Jobs.Where(x => x.JobSlug == slug).FirstOrDefaultAsync();
+
+        if(job is null)
+        {
+            return Error.NotFound("No such job with this slug exists");
+        }
+
+        query = query.Where(x => x.JobId == job.Id);
+        if (reportType.HasValue)
+        {
+            query = query.Where(x => x.ReportType == reportType);
+        }
+
+        if (reportStatus.HasValue)
+        {
+            query = query.Where(x => x.ReportStatus == reportStatus);
+        }
+
+        query = sortBy == "oldest" ? query.OrderBy(j => j.CreatedAt) : query.OrderByDescending(j => j.CreatedAt);
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return new PaginatedList<JobReport>(items, totalCount, page, pageSize);
+    }
 
     //If there is no job with one of the status there won't be an entry for it in the dictionary
     public async Task<Result<Dictionary<JobStatus, int>>> GetJobStatusDistribution()

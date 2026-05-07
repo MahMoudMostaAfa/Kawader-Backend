@@ -190,6 +190,7 @@ public static class DependencyInjection
     service.AddScoped<IWithdrawalRequestRepository, WithdrawalRequestRepository>();
     service.AddScoped<IUnitOfWork, UnitOfWork>();
     service.AddTransient<IIdentityService, IdentityService>();
+    service.AddScoped<ISubscriptionsRepository, SubscriptionRepository>();
 
 
     // Account deletion scheduler

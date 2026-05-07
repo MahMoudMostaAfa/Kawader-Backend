@@ -34,4 +34,14 @@ public class SubscriptionPlan : AuditableEntity
     return subscriptionPlan;
   }
 
+    public Result<Updated> Update(decimal price, int ProposalsPerMonth, int PortfolioProjects, bool TwentyFourSevenSupport)
+    {
+        Price = price;
+        Features.ProposalsPerMonth = ProposalsPerMonth;
+        Features.TotalProtfolioProjects = PortfolioProjects;
+        Features.TwentyFourSevenSupport = TwentyFourSevenSupport;
+        UpdatedAt = DateTime.UtcNow;
+
+        return Result.Updated;
+    }
 }

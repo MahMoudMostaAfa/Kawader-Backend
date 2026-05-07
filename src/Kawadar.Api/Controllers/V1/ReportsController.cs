@@ -217,9 +217,16 @@ namespace Kawadar.Api.Controllers.V1
         [ProducesResponseType(typeof(List<BriefJobReportDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetReportsByJobSlug([FromRoute] string slug, CancellationToken ct)
+        public async Task<IActionResult> GetReportsByJobSlug(
+            [FromRoute] string slug,
+            [FromQuery] ReportStatus? status,
+            [FromQuery] ReportType? type,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string sortBy = "newest",
+            CancellationToken ct = default)
         {
-            var query = new GetReportsByJobSlugQuery(slug);
+            var query = new GetReportsByJobSlugQuery(slug, status, type, page, pageSize, sortBy);
             var result = await _sender.Send(query, ct);
 
             return result.Match(
