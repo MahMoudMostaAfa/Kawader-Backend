@@ -1,20 +1,21 @@
 ﻿using AutoMapper;
 using Kawadar.Application.Common.Constants;
 using Kawadar.Application.Common.Errors;
+using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
-using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Features.Portfolios.DTOs;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Portfolios.Project;
-using MediatR;
+using Kawadar.Domain.Portfolios.ProjectSkill;
 using Kawadar.Domain.Specilizations;
+using MediatR;
 
 namespace Kawadar.Application.Features.Portfolios.Commands.CreateProject
 {
     public class CreateProjectCommandHandler(IUnitOfWork unitOfWork, IUser user, IPortfolioProjectRepository projectRepository
         , IUsersRepository usersRepository, ISpecilizationRepository specilizationRepository
-        , IStorageClient storageClient, ISubscriptionsRepository subscriptionsRepository, IMapper mapper) : IRequestHandler<CreateProjectCommand, Result<ProjectDTO>>
+        , IStorageClient storageClient, ISubscriptionsRepository subscriptionsRepository, IMapper mapper, ISkillRepository skillRepository) : IRequestHandler<CreateProjectCommand, Result<ProjectDTO>>
     {
         public async Task<Result<ProjectDTO>> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
         {
@@ -38,7 +39,7 @@ namespace Kawadar.Application.Features.Portfolios.Commands.CreateProject
                 if (plan.Value.Features.TotalProtfolioProjects < displayOrder)
                     return Error.Conflict("You exceeded the number of portfolio projects for your subscription");
             }
-            if (displayOrder > FreePlanFeatures.PortfolioProjects) return Error.Conflict("");
+            if (displayOrder > FreePlanFeatures.PortfolioProjects) return Error.Conflict();
 
             using var stream = request.ProjectImage.OpenReadStream();
             var uploadResult = await storageClient.UploadFileAsync(stream, request.ProjectImage.FileName,
@@ -53,8 +54,8 @@ namespace Kawadar.Application.Features.Portfolios.Commands.CreateProject
             {
                 var newSpecilization = Specilization.Create(request.specilization, true);
                 if (newSpecilization.IsError) return newSpecilization.Errors;
-                var addResult = await specilizationRepository.AddAsync(newSpecilization.Value);
-                if (addResult.IsError) return addResult.Errors;
+                var addSpeciliationResult = await specilizationRepository.AddAsync(newSpecilization.Value);
+                if (addSpeciliationResult.IsError) return addSpeciliationResult.Errors;
                 specilizationId = newSpecilization.Value.Id;
             }
             else if (SpecilizationResult.IsSuccess)
@@ -73,6 +74,20 @@ namespace Kawadar.Application.Features.Portfolios.Commands.CreateProject
             if (resultProject.IsError) return resultProject.Errors;
 
             await projectRepository.AddAsync(resultProject.Value);
+
+            List<PortfolioProjectSkill> projectSkills = new();
+            foreach (var skill in request.skills)
+            {
+                var skillExistsResult = await skillRepository.getByIdAsync(skill);
+                if (skillExistsResult.IsError) return skillExistsResult.Errors;
+
+                var projectSkillResult = PortfolioProjectSkill.Create(resultProject.Value.Id, skillExistsResult.Value.Id);
+                if (projectSkillResult.IsError) return projectSkillResult.Errors;
+                projectSkills.Add(projectSkillResult.Value);
+            }
+
+            var addResult = await skillRepository.addSkillToProject(projectSkills);
+            if (addResult.IsError) return addResult.Errors;
             var projectDTO = mapper.Map<ProjectDTO>(resultProject.Value);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 

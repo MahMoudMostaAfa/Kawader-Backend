@@ -170,4 +170,9 @@ public class InMemoryJobsRepository : IJobsRepository
         Jobs.Clear();
         JobReports.Clear();
     }
+
+    public Task<Result<PaginatedList<JobReport>>> GetReportsByJobSlug(string slug, ReportType? reportType, ReportStatus? reportStatus, int page, int pageSize, string sortBy)
+    {
+        throw new NotImplementedException();
+    }
 }

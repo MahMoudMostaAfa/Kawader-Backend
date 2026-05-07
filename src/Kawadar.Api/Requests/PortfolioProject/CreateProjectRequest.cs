@@ -1,6 +1,4 @@
-﻿using Kawadar.Domain.Portfolios.Project.Enum;
-
-namespace Kawadar.Api.Requests.PortfolioProject
+﻿namespace Kawadar.Api.Requests.PortfolioProject
 {
     public class CreateProjectRequest
     {
@@ -9,5 +7,6 @@ namespace Kawadar.Api.Requests.PortfolioProject
         public IFormFile? ProjectImage { get; set; }
         public string? ProjectUrl { get; set; }
         public string specilizationName { get; set; } = "";
+        public string skills { get; set; } = null!;
     }
 }
