@@ -38,7 +38,13 @@ namespace Kawadar.Api.Controllers.V1
         [EndpointDescription("Creates a new portfolio project with the freelancerId.")]
         public async Task<IActionResult> CreatePortfolioProject([FromForm] CreateProjectRequest request, CancellationToken ct = default)
         {
-            var command = new CreateProjectCommand(request.title, request.description, request.specilizationName, request.ProjectImage!, request.ProjectUrl!);
+            var skillIds = request.skills
+                ?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(s => Guid.TryParse(s, out var g) ? g : Guid.Empty)
+                .Where(g => g != Guid.Empty)
+                .ToList() ?? [];
+
+            var command = new CreateProjectCommand(request.title, request.description, request.specilizationName, request.ProjectImage!, request.ProjectUrl!, skillIds);
             var result = await _sender.Send(command, ct);
 
             return result.Match(

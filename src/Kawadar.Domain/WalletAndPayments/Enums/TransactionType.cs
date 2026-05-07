@@ -11,5 +11,4 @@ public enum TransactionType
   EscrowDeduction,
 
   SubscriptionCharge,
-  EscrowAddition
 }

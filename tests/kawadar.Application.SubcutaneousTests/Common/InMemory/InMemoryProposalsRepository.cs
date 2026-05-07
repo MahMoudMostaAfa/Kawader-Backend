@@ -103,4 +103,9 @@ public class InMemoryProposalsRepository : IProposalsRepository
     }
 
     public void Clear() => Proposals.Clear();
+
+    public Task<Result<int>> GetUserProposalsThisMonth(Guid UserProfileId)
+    {
+        throw new NotImplementedException();
+    }
 }
