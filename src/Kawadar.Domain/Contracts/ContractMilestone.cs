@@ -21,6 +21,8 @@ public class ContractMilestone : AuditableEntity
 
   public DateTime? CompletionApprovedAt { get; private set; }
 
+  public string? RejectionReason { get; private set; }
+
   private ContractMilestone()
   {
 
@@ -40,6 +42,67 @@ public class ContractMilestone : AuditableEntity
   public static Result<ContractMilestone> Create(Guid contractId, Guid proposalMilestoneId, string title, string description, decimal amount, int order, DateTime dueDate)
   {
     return new ContractMilestone(contractId, proposalMilestoneId, title, description, amount, order, dueDate);
+  }
+
+  public Result<Updated> UpdateDetails(string title, string description, decimal amount, DateTime dueDate)
+  {
+    Title = title;
+    Description = description;
+    Amount = amount;
+    DueDate = dueDate;
+    return Result.Updated;
+  }
+
+  public Result<Updated> UpdateDueDate(DateTime dueDate)
+  {
+    DueDate = dueDate;
+    return Result.Updated;
+  }
+
+  public void UpdateOrder(int order)
+  {
+    Order = order;
+  }
+
+  public Result<Updated> Start()
+  {
+    if (Status != ContractMilestoneStatus.Pending)
+      return Error.Conflict("Contracts.Milestones", "Only pending milestones can be started.");
+
+    Status = ContractMilestoneStatus.InProgress;
+    return Result.Updated;
+  }
+
+  public Result<Updated> SubmitForReview()
+  {
+    if (Status != ContractMilestoneStatus.InProgress)
+      return Error.Conflict("Contracts.Milestones", "Only in-progress milestones can be submitted for review.");
+
+    Status = ContractMilestoneStatus.SubmittedForReview;
+    CompletionRequestedAt = DateTime.UtcNow;
+    return Result.Updated;
+  }
+
+  public Result<Updated> Approve()
+  {
+    if (Status != ContractMilestoneStatus.SubmittedForReview)
+      return Error.Conflict("Contracts.Milestones", "Only milestones submitted for review can be approved.");
+
+    Status = ContractMilestoneStatus.Approved;
+    CompletionApprovedAt = DateTime.UtcNow;
+    return Result.Updated;
+  }
+
+  public Result<Updated> Reject(string? reason)
+  {
+    if (Status != ContractMilestoneStatus.SubmittedForReview)
+      return Error.Conflict("Contracts.Milestones", "Only milestones submitted for review can be rejected.");
+
+    RejectionReason = reason;
+    Status = ContractMilestoneStatus.InProgress;
+    CompletionRequestedAt = null;
+    CompletionApprovedAt = null;
+    return Result.Updated;
   }
 
 

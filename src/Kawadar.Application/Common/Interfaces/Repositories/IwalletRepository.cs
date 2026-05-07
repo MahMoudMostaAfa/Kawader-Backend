@@ -20,6 +20,7 @@ public interface IWalletRepository
     CancellationToken cancellationToken = default);
 
   Task<Result<EscrowTransaction>> GetEscrowTransactionByContractId(Guid contractId, CancellationToken cancellationToken = default);
+  Task<Result<EscrowTransaction>> GetEscrowTransactionByContractMilestoneId(Guid contractMilestoneId, CancellationToken cancellationToken = default);
   Task<Result<EscrowTransaction>> GetEscrowTransactionById(Guid escrowTransactionId, CancellationToken cancellationToken = default);
   void AddEscrowTransaction(EscrowTransaction transaction);
 
