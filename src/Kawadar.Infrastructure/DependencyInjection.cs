@@ -24,6 +24,7 @@ using Kawadar.Infrastructure.Services.CloudServices;
 using Kawadar.Infrastructure.Services.AIServices;
 using Kawadar.Infrastructure.Services.RecommendationServices;
 using Kawadar.Infrastructure.Settings;
+using Kawadar.Infrastructure.Services.PaymentServices;
 using Kawadar.Application.Common.Messaging;
 using Kawadar.Infrastructure.Messaging;
 using MassTransit;
@@ -189,7 +190,12 @@ public static class DependencyInjection
     service.AddScoped<IUserPayoutAccountRepository, UserPayoutAccountRepository>();
     service.AddScoped<IWithdrawalRequestRepository, WithdrawalRequestRepository>();
     service.AddScoped<IUnitOfWork, UnitOfWork>();
+    service.AddScoped<IPaymentRepository, PaymentRepository>();
     service.AddTransient<IIdentityService, IdentityService>();
+
+    // Paymob payment gateway
+    service.Configure<PaymobSettings>(configuration.GetSection(PaymobSettings.SectionName));
+    service.AddHttpClient<IPaymobService, PaymobService>();
 
 
     // Account deletion scheduler
