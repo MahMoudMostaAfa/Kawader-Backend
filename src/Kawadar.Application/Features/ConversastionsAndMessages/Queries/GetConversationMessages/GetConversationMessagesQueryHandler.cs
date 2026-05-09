@@ -9,7 +9,7 @@ using MediatR;
 
 namespace Kawadar.Application.Features.ConversastionsAndMessages.Queries.GetConversationMessages;
 
-public class GetConversationMessagesQueryHandler : IRequestHandler<GetConversationMessagesQuery, Result<PaginatedList<MessageDto>>>
+public class GetConversationMessagesQueryHandler : IRequestHandler<GetConversationMessagesQuery, Result<ConversationMessagesDto>>
 {
   private readonly IConversationsRepository _conversationsRepository;
 
@@ -30,7 +30,7 @@ public class GetConversationMessagesQueryHandler : IRequestHandler<GetConversati
   }
 
 
-  public async Task<Result<PaginatedList<MessageDto>>> Handle(GetConversationMessagesQuery request, CancellationToken cancellationToken)
+  public async Task<Result<ConversationMessagesDto>> Handle(GetConversationMessagesQuery request, CancellationToken cancellationToken)
   {
     var userId = _user.Id;
     if (userId is null) return ApplicationErrors.UserIsNotAuthenticated;
@@ -42,6 +42,9 @@ public class GetConversationMessagesQueryHandler : IRequestHandler<GetConversati
     var conversationResult = await _conversationsRepository.GetConversationByIdAsync(request.conversationId);
     if (conversationResult.IsError) return conversationResult.Errors;
     var conversation = conversationResult.Value;
+
+    var proposalId = conversation.ProposalId;
+    var jobId = conversation.JobId ?? conversation.Proposal?.JobId;
 
 
     // CHECK THAT USER IS A PARTICIPANT IN THE CONVERSATION
@@ -92,6 +95,11 @@ public class GetConversationMessagesQueryHandler : IRequestHandler<GetConversati
 
 
     var paginatedList = new PaginatedList<MessageDto>(messageDtos, messages.TotalCount, request.PageNumber, request.PageSize);
-    return paginatedList;
+    return new ConversationMessagesDto
+    {
+      ProposalId = proposalId,
+      JobId = jobId,
+      Messages = paginatedList
+    };
   }
 }

@@ -44,6 +44,12 @@ public class ProposalsRepository : IProposalsRepository
 
   }
 
+  public async Task<Result<bool>> ProposalExistsForJobAndFreelancerAsync(Guid jobId, Guid freelancerId, CancellationToken cancellationToken = default)
+  {
+    var exists = await _context.JobProposals.AnyAsync(p => p.JobId == jobId && p.FreelancerId == freelancerId, cancellationToken);
+    return exists;
+  }
+
   public async Task<Result<PaginatedList<JobProposal>>> GetFreelancerProposals(Guid FreelancerId, int Page = 1,
   int PageSize = 10, string SortBy = "newest")
   {

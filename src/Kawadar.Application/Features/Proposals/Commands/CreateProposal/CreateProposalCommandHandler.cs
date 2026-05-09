@@ -52,6 +52,10 @@ public class CreateProposalCommandHandler : IRequestHandler<CreateProposalComman
 
       return Error.Validation(description: "Fixed price proposals are not allowed for hourly jobs.");
 
+    var existsResult = await _proposalsRepository.ProposalExistsForJobAndFreelancerAsync(request.JobId, userProfile.Id, cancellationToken);
+    if (existsResult.IsError) return existsResult.Errors;
+    if (existsResult.Value) return JobProposalErrors.ProposalAlreadyExistsForJob;
+
     var jobQuestions = job.Questions.ToHashSet();
     var questionIds = jobQuestions.Select(q => q.Id).ToHashSet();
     // check if the provided question answers are valid

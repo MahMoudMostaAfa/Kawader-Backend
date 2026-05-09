@@ -1,4 +1,5 @@
 using Kawadar.Domain.Conversations;
+using Kawadar.Domain.Proposals;
 using Kawadar.Domain.UserProfiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -23,6 +24,11 @@ public class ConversationConfiguration : IEntityTypeConfiguration<Conversation>
         .WithMany()
         .HasForeignKey(c => c.JobId)
         .OnDelete(DeleteBehavior.SetNull);
+
+    builder.HasOne<JobProposal>()
+      .WithMany()
+      .HasForeignKey(c => c.ProposalId)
+      .OnDelete(DeleteBehavior.SetNull);
 
     builder.HasMany(c => c.Messages)
         .WithOne()

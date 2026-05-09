@@ -55,6 +55,8 @@ public class GetMyConversationsQueryHandler : IRequestHandler<GetMyConversations
       validConversationDtos.Add(new ConversationDto
       {
         Id = c.Id,
+        ProposalId = c.ProposalId,
+        JobId = c.JobId ?? c.Proposal?.JobId,
         IsLastMessageByCurrentUser = c.LastMessage != null && c.LastMessage.SenderUserId == currentUserProfile.Id,
         LastMessageContent = c.LastMessage != null ? c.LastMessage.Content : string.Empty,
         LastMessageSentAt = c.LastMessage != null ? c.LastMessage.CreatedAt : c.CreatedAt,

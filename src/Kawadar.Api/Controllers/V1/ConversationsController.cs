@@ -27,7 +27,7 @@ public class ConversationsController : ApiController
   public async Task<IActionResult> CreateConversation([FromBody] CreateConversationRequest request)
   {
 
-    var command = new CreateConversationCommand(request.ReceiverUserName, request.JobId, request.Title, request.InitialMessageContent);
+    var command = new CreateConversationCommand(request.ReceiverUserName, request.ProposalId, request.Title, request.InitialMessageContent);
 
     var result = await _sender.Send(command);
 
