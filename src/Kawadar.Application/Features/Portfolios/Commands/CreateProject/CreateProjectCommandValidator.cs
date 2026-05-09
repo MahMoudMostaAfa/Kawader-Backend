@@ -24,6 +24,14 @@ namespace Kawadar.Application.Features.Portfolios.Commands.CreateProject
 
             RuleFor(x => x.ProjectImage.Length).LessThanOrEqualTo(10 * 1024 * 1024)
                 .WithMessage("Maximum File length is 10 MB");
+
+            RuleFor(x => x.skills).NotNull().WithMessage("Skills List can't be null")
+                .NotEmpty().WithMessage("Skills List must have at least one item");
+
+            RuleForEach(x => x.skills).ChildRules(item =>
+            {
+                item.RuleFor(x => x).NotEqual(Guid.Empty).WithMessage("Skill Id can't be empty");
+            });
         }
     }
 }

@@ -110,6 +110,26 @@ public class ProposalsRepository : IProposalsRepository
     return new PaginatedList<JobProposal>(items, totalCount, Page, PageSize);
   }
 
+    public async Task<Result<int>> GetUserProposalsThisMonth(Guid UserProfileId)
+    {
+        var userProfile = await _context.UserProfiles.Where(x => x.Id == UserProfileId).FirstOrDefaultAsync();
+        if (userProfile is null) return Error.NotFound();
+
+        var userJoinedAt = userProfile.CreatedAt;
+        var now = DateTime.UtcNow;
+        var monthsSinceJoin = ((now.Year - userJoinedAt.Year) * 12) + now.Month - userJoinedAt.Month;
+        var currentCycleStart = userJoinedAt.AddMonths(monthsSinceJoin);
+        var currentCycleEnd = currentCycleStart.AddMonths(1);
+
+        var currentProposalsCount = await _context.JobProposals
+            .Where(x => x.FreelancerId == UserProfileId
+                && x.CreatedAt >= currentCycleStart
+                && x.CreatedAt < currentCycleEnd) 
+            .CountAsync();
+
+        return currentProposalsCount;
+    }
+
   public async Task<int> GetProposalsCount()
   {
     return await _context.JobProposals.CountAsync();

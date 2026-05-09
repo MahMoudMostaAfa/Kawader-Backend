@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Kawadar.Api.Controllers.V1
 {
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}")]
     public class ViolationsController : ApiController
     {
         private ISender _sender;

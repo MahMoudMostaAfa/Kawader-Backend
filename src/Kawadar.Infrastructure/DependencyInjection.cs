@@ -192,6 +192,7 @@ public static class DependencyInjection
     service.AddScoped<IUnitOfWork, UnitOfWork>();
     service.AddScoped<IPaymentRepository, PaymentRepository>();
     service.AddTransient<IIdentityService, IdentityService>();
+    service.AddScoped<ISubscriptionsRepository, SubscriptionRepository>();
 
     // Paymob payment gateway
     service.Configure<PaymobSettings>(configuration.GetSection(PaymobSettings.SectionName));
