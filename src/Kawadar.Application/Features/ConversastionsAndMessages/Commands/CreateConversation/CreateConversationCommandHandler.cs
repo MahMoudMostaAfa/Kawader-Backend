@@ -17,6 +17,7 @@ public class CreateConversationCommandHandler : IRequestHandler<CreateConversati
   private readonly IUsersRepository _usersRepository;
 
   private readonly IJobsRepository _jobsRepository;
+  private readonly IProposalsRepository _proposalsRepository;
   private readonly IConversationsRepository _conversationsRepository;
 
   private readonly IUnitOfWork _unitOfWork;
@@ -24,11 +25,12 @@ public class CreateConversationCommandHandler : IRequestHandler<CreateConversati
 
   private readonly ILogger<CreateConversationCommandHandler> _logger;
 
-  public CreateConversationCommandHandler(IUser user, IUsersRepository usersRepository, IJobsRepository jobsRepository, IConversationsRepository conversationsRepository, IUnitOfWork unitOfWork, ILogger<CreateConversationCommandHandler> logger, IIdentityService identityService)
+  public CreateConversationCommandHandler(IUser user, IUsersRepository usersRepository, IJobsRepository jobsRepository, IProposalsRepository proposalsRepository, IConversationsRepository conversationsRepository, IUnitOfWork unitOfWork, ILogger<CreateConversationCommandHandler> logger, IIdentityService identityService)
   {
     _user = user;
     _usersRepository = usersRepository;
     _jobsRepository = jobsRepository;
+    _proposalsRepository = proposalsRepository;
     _conversationsRepository = conversationsRepository;
     _unitOfWork = unitOfWork;
     _logger = logger;
@@ -50,18 +52,31 @@ public class CreateConversationCommandHandler : IRequestHandler<CreateConversati
     var receiverUserProfile = receiverUserProfileResult.Value;
 
 
-    if (request.JobId is not null)
+    var proposalResult = await _proposalsRepository.GetByIdAsync(request.ProposalId, cancellationToken);
+    if (proposalResult.IsError) return proposalResult.Errors;
+    var proposal = proposalResult.Value;
+
+    var jobResult = await _jobsRepository.GetJobByIdAsync(proposal.JobId);
+    if (jobResult.IsError) return jobResult.Errors;
+    var job = jobResult.Value;
+
+    var isSenderJobOwner = job.PostedById == senderUserResult.Value.Id;
+    var isSenderFreelancer = proposal.FreelancerId == senderUserResult.Value.Id;
+    var isReceiverJobOwner = job.PostedById == receiverUserProfile.Id;
+    var isReceiverFreelancer = proposal.FreelancerId == receiverUserProfile.Id;
+
+    if (!((isSenderJobOwner && isReceiverFreelancer) || (isSenderFreelancer && isReceiverJobOwner)))
     {
-
-      var jobResult = await _jobsRepository.GetJobByIdAsync(request.JobId.Value);
-      if (jobResult.IsError) return jobResult.Errors;
-      if (jobResult.Value.PostedById != senderUserResult.Value.Id) return ApplicationErrors.UnauthorizedAccess;
-
+      return ApplicationErrors.UnauthorizedAccess;
     }
+
+    var conversationExistsResult = await _conversationsRepository.ConversationExistsForProposalAsync(request.ProposalId, cancellationToken);
+    if (conversationExistsResult.IsError) return conversationExistsResult.Errors;
+    if (conversationExistsResult.Value) return ConversationErrors.ProposalConversationAlreadyExists;
 
     // create the conversation
 
-    var ConversationResult = Conversation.Create(request.Title, senderUserResult.Value.Id, receiverUserProfile.Id, request.JobId);
+    var ConversationResult = Conversation.Create(request.Title, senderUserResult.Value.Id, receiverUserProfile.Id, request.ProposalId, job.Id);
     if (ConversationResult.IsError) return ConversationResult.Errors;
 
     var conversation = ConversationResult.Value;

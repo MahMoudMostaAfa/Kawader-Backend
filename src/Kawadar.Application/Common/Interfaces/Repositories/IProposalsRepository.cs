@@ -12,6 +12,8 @@ public interface IProposalsRepository
   public Task<Result<JobProposal>> GetDetailsByIdAsync(Guid proposalId, CancellationToken ct = default);
   public Task<Result<JobProposal>> GetByIdAsync(Guid proposalId, CancellationToken cancellationToken = default);
 
+  public Task<Result<bool>> ProposalExistsForJobAndFreelancerAsync(Guid jobId, Guid freelancerId, CancellationToken cancellationToken = default);
+
 
   public Task<Result<PaginatedList<JobProposal>>> GetProposalsAsync(
   Guid jobId,

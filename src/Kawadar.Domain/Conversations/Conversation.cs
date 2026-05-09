@@ -4,6 +4,7 @@ using Kawadar.Domain.Conversations.Enums;
 using Kawadar.Domain.Conversations.Events;
 using Kawadar.Domain.Conversations.Messages;
 using Kawadar.Domain.Jobs;
+using Kawadar.Domain.Proposals;
 
 namespace Kawadar.Domain.Conversations;
 
@@ -20,6 +21,8 @@ public class Conversation : AuditableEntity
 
   public Guid? JobId { get; private set; }
   public Job? Job { get; private set; }
+  public Guid? ProposalId { get; private set; }
+  public JobProposal? Proposal { get; private set; }
   public Guid? LastMessageId { get; private set; }
 
   public Message? LastMessage { get; private set; }
@@ -30,20 +33,21 @@ public class Conversation : AuditableEntity
   private Conversation() { }
 
 
-  private Conversation(string title, Guid senderUserId, Guid receiverUserId, Guid? jobId) : base(Guid.NewGuid())
+  private Conversation(string title, Guid senderUserId, Guid receiverUserId, Guid proposalId, Guid? jobId) : base(Guid.NewGuid())
   {
     Title = title;
     SenderUserId = senderUserId;
     ReceiverUserId = receiverUserId;
+    ProposalId = proposalId;
     JobId = jobId;
   }
 
 
-  public static Result<Conversation> Create(string title, Guid senderUserId, Guid receiverUserId, Guid? jobId)
+  public static Result<Conversation> Create(string title, Guid senderUserId, Guid receiverUserId, Guid proposalId, Guid? jobId)
   {
     if (senderUserId == receiverUserId) return ConversationErrors.SenderAndReceiverCannotBeTheSame;
 
-    var conversation = new Conversation(title, senderUserId, receiverUserId, jobId);
+    var conversation = new Conversation(title, senderUserId, receiverUserId, proposalId, jobId);
 
 
     return conversation;

@@ -37,7 +37,10 @@ public class ConversationsRepository : IConversationsRepository
 
   public async Task<Result<Conversation>> GetConversationByIdAsync(Guid conversationId, CancellationToken cancellationToken)
   {
-    var conversation = await _context.Conversations.Include(c => c.LastMessage).FirstOrDefaultAsync(c => c.Id == conversationId);
+    var conversation = await _context.Conversations
+      .Include(c => c.LastMessage)
+      .Include(c => c.Proposal)
+      .FirstOrDefaultAsync(c => c.Id == conversationId);
 
     if (conversation == null) return Error.NotFound("Conversations.NotFound", "Conversation not found");
     return conversation;
@@ -48,6 +51,7 @@ public class ConversationsRepository : IConversationsRepository
     var conversationsQuery = _context.Conversations
         .Where(c => c.SenderUserId == userId || c.ReceiverUserId == userId)
         .Include(c => c.LastMessage)
+      .Include(c => c.Proposal)
         .OrderByDescending(c => c.LastMessage != null ? c.LastMessage.CreatedAt : c.CreatedAt).AsQueryable();
 
     var totalCount = await conversationsQuery.CountAsync();
@@ -67,6 +71,12 @@ public class ConversationsRepository : IConversationsRepository
     var message = await _context.Messages.Include(m => m.Files).Include(m => m.ReplayToMessage).FirstOrDefaultAsync(m => m.Id == messageId);
     if (message == null) return Error.NotFound("Messages.NotFound", "Message not found");
     return message;
+  }
+
+  public async Task<Result<bool>> ConversationExistsForProposalAsync(Guid proposalId, CancellationToken cancellationToken = default)
+  {
+    var exists = await _context.Conversations.AnyAsync(c => c.ProposalId == proposalId, cancellationToken);
+    return exists;
   }
 
   public async Task<Result<PaginatedList<Message>>> GetMessagesForConversationAsync(Guid conversationId, int pageNumber, int pageSize, CancellationToken cancellationToken = default)
