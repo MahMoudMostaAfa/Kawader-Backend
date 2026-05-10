@@ -23,6 +23,14 @@ fit_period = "10m"
 data_collection_period = "1m"
 # Default recommendation count
 n_recommend = 10
+# Feedback types and weights
+
+[recommend.data_source]
+
+positive_feedback_types = ["star"]
+read_feedback_types = ["view"]
+negative_feedback_types = ["dislike"]
+feedback_type_weight = { star = 1.0, view = 0.3, dislike = -1.0 }
 
 [monitor]
 # Prometheus metrics endpoint (optional)

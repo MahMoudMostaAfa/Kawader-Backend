@@ -1,3 +1,4 @@
+using Kawadar.Application.Common.Models;
 using Kawadar.Domain.Common.Results;
 
 namespace Kawadar.Application.Common.Interfaces;
@@ -12,16 +13,16 @@ public interface IRecommendationService
   // ─── Users ───────────────────────────────────
 
   /// <summary>Insert a single user into the recommendation engine.</summary>
-  Task<Result<Success>> InsertUserAsync(string userId, object? labels = null, string? comment = null, CancellationToken ct = default);
+  Task<Result<Success>> InsertUserAsync(Guid userId, object? labels = null, string? comment = null, CancellationToken ct = default);
 
   /// <summary>Insert multiple users into the recommendation engine.</summary>
   Task<Result<Success>> InsertUsersAsync(IEnumerable<RecommendationUser> users, CancellationToken ct = default);
 
   /// <summary>Get a user by ID.</summary>
-  Task<Result<RecommendationUser>> GetUserAsync(string userId, CancellationToken ct = default);
+  Task<Result<RecommendationUser>> GetUserAsync(Guid userId, CancellationToken ct = default);
 
   /// <summary>Delete a user by ID.</summary>
-  Task<Result<Deleted>> DeleteUserAsync(string userId, CancellationToken ct = default);
+  Task<Result<Deleted>> DeleteUserAsync(Guid userId, CancellationToken ct = default);
 
   // ─── Items ───────────────────────────────────
 
@@ -49,27 +50,27 @@ public interface IRecommendationService
 
   /// <summary>
   /// Get personalized item recommendations for a user.
-  /// Returns a list of scored item IDs ordered by relevance.
+  /// Returns a paginated list of job IDs ordered by relevance.
   /// </summary>
-  Task<Result<List<ScoredItem>>> GetRecommendationsAsync(string userId, CancellationToken ct = default);
+  Task<Result<PaginatedList<Guid>>> GetRecommendationsAsync(Guid userId, int pageNumber, int pageSize, CancellationToken ct = default);
 
   /// <summary>
   /// Get similar users (neighbors) for a given user.
   /// </summary>
-  Task<Result<List<ScoredItem>>> GetUserNeighborsAsync(string userId, int count = 10, CancellationToken ct = default);
+  Task<Result<List<ScoredItem>>> GetUserNeighborsAsync(Guid userId, int count = 10, CancellationToken ct = default);
 }
 
 
 // ─── DTOs (kept in Application layer, no Gorse dependency) ───
 
 /// <summary>A user in the recommendation engine.</summary>
-public record RecommendationUser(string UserId, object? Labels = null, string? Comment = null);
+public record RecommendationUser(Guid UserId, object? Labels = null, string? Comment = null);
 
 /// <summary>An item in the recommendation engine.</summary>
 public record RecommendationItem(string ItemId, string[]? Categories = null, object? Labels = null, string? Comment = null);
 
 /// <summary>A user-item interaction.</summary>
-public record RecommendationFeedback(string FeedbackType, string UserId, string ItemId);
+public record RecommendationFeedback(string FeedbackType, Guid UserId, string ItemId);
 
 /// <summary>A scored result (item or user) returned from the recommendation engine.</summary>
-public record ScoredItem(string Id, double Score);
+public record ScoredItem(Guid Id, double Score);

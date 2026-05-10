@@ -1,6 +1,7 @@
 using Gorse.NET.Models;
 using Gorse.NET.Utilities;
 using Kawadar.Application.Common.Interfaces;
+using Kawadar.Application.Common.Models;
 using Kawadar.Infrastructure.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -30,18 +31,19 @@ public class GorseRecommendationService : IRecommendationService
 
   // ─── Users ───────────────────────────────────
 
-  public async Task<Domain.Common.Results.Result<Domain.Common.Results.Success>> InsertUserAsync(string userId, object? labels = null, string? comment = null, CancellationToken ct = default)
+  public async Task<Domain.Common.Results.Result<Domain.Common.Results.Success>> InsertUserAsync(Guid userId, object? labels = null, string? comment = null, CancellationToken ct = default)
   {
     try
     {
+      var userIdValue = userId.ToString();
       await _client.InsertUserAsync(new User
       {
-        UserId = userId,
+        UserId = userIdValue,
         Labels = labels,
         Comment = comment ?? ""
       });
 
-      _logger.LogInformation("Inserted user {UserId} into Gorse", userId);
+      _logger.LogInformation("Inserted user {UserId} into Gorse", userIdValue);
       return DomainResult.Success;
     }
     catch (GorseException ex) { return HandleException(ex, "InsertUser"); }
@@ -54,7 +56,7 @@ public class GorseRecommendationService : IRecommendationService
     {
       var gorseUsers = users.Select(u => new User
       {
-        UserId = u.UserId,
+        UserId = u.UserId.ToString(),
         Labels = u.Labels,
         Comment = u.Comment ?? ""
       }).ToList();
@@ -68,23 +70,27 @@ public class GorseRecommendationService : IRecommendationService
     catch (Exception ex) { return HandleUnexpected(ex, "InsertUsers"); }
   }
 
-  public async Task<Domain.Common.Results.Result<RecommendationUser>> GetUserAsync(string userId, CancellationToken ct = default)
+  public async Task<Domain.Common.Results.Result<RecommendationUser>> GetUserAsync(Guid userId, CancellationToken ct = default)
   {
     try
     {
-      var user = await _client.GetUserAsync(userId);
-      return new RecommendationUser(user.UserId, user.Labels, user.Comment);
+      var user = await _client.GetUserAsync(userId.ToString());
+      if (!Guid.TryParse(user.UserId, out var parsedUserId))
+        return DomainError.Failure("Recommendation.InvalidUserId", "Gorse returned a user ID that is not a valid GUID.");
+
+      return new RecommendationUser(parsedUserId, user.Labels, user.Comment);
     }
     catch (GorseException ex) { return HandleException(ex, "GetUser"); }
     catch (Exception ex) { return HandleUnexpected(ex, "GetUser"); }
   }
 
-  public async Task<Domain.Common.Results.Result<Domain.Common.Results.Deleted>> DeleteUserAsync(string userId, CancellationToken ct = default)
+  public async Task<Domain.Common.Results.Result<Domain.Common.Results.Deleted>> DeleteUserAsync(Guid userId, CancellationToken ct = default)
   {
     try
     {
-      await _client.DeleteUserAsync(userId);
-      _logger.LogInformation("Deleted user {UserId} from Gorse", userId);
+      var userIdValue = userId.ToString();
+      await _client.DeleteUserAsync(userIdValue);
+      _logger.LogInformation("Deleted user {UserId} from Gorse", userIdValue);
       return DomainResult.Deleted;
     }
     catch (GorseException ex) { return HandleException(ex, "DeleteUser"); }
@@ -167,7 +173,7 @@ public class GorseRecommendationService : IRecommendationService
       var gorseFeedback = feedbacks.Select(f => new Feedback
       {
         FeedbackType = f.FeedbackType,
-        UserId = f.UserId,
+        UserId = f.UserId.ToString(),
         ItemId = f.ItemId,
         Timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ")
       }).ToArray();
@@ -183,34 +189,53 @@ public class GorseRecommendationService : IRecommendationService
 
   // ─── Recommendations ─────────────────────────
 
-  public async Task<Domain.Common.Results.Result<List<ScoredItem>>> GetRecommendationsAsync(string userId, CancellationToken ct = default)
+  public async Task<Domain.Common.Results.Result<PaginatedList<Guid>>> GetRecommendationsAsync(Guid userId, int pageNumber, int pageSize, CancellationToken ct = default)
   {
     try
     {
-      var result = await _client.GetRecommendAsync(userId);
+      if (pageNumber < 1 || pageSize < 1)
+        return DomainError.Failure("Recommendation.InvalidPagination", "Page number and page size must be positive.");
+
+      var result = await _client.GetRecommendAsync(userId.ToString());
 
       if (result is not { Length: > 0 })
-        return new List<ScoredItem>();
+        return new PaginatedList<Guid>(new List<Guid>(), 0, pageNumber, pageSize);
 
       // v0.5.0 returns List<string> (item IDs only, no scores)
-      var scored = result
-        .Select((id, index) => new ScoredItem(id, 1.0 - (index * 0.01)))
+      var orderedIds = result
+        .Select((id, index) => new { Id = id, Score = 1.0 - (index * 0.01) })
+        .OrderByDescending(x => x.Score)
+        .Select(x => x.Id)
         .ToList();
 
-      return scored;
+      var parsedIds = orderedIds
+        .Select(id => Guid.TryParse(id, out var parsed) ? parsed : (Guid?)null)
+        .Where(id => id.HasValue)
+        .Select(id => id!.Value)
+        .ToList();
+
+      var totalCount = parsedIds.Count;
+      var items = parsedIds
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .ToList();
+
+      return new PaginatedList<Guid>(items, totalCount, pageNumber, pageSize);
     }
     catch (GorseException ex) { return HandleException(ex, "GetRecommendations"); }
     catch (Exception ex) { return HandleUnexpected(ex, "GetRecommendations"); }
   }
 
-  public async Task<Domain.Common.Results.Result<List<ScoredItem>>> GetUserNeighborsAsync(string userId, int count = 10, CancellationToken ct = default)
+  public async Task<Domain.Common.Results.Result<List<ScoredItem>>> GetUserNeighborsAsync(Guid userId, int count = 10, CancellationToken ct = default)
   {
     try
     {
-      var result = await _client.GetUserNeighborsAsync(userId, count);
+      var result = await _client.GetUserNeighborsAsync(userId.ToString(), count);
 
       var scored = result
-        .Select(r => new ScoredItem(r.Id, r.Score))
+        .Select(r => Guid.TryParse(r.Id, out var parsed) ? new ScoredItem(parsed, r.Score) : null)
+        .Where(r => r is not null)
+        .Select(r => r!)
         .ToList();
 
       return scored;

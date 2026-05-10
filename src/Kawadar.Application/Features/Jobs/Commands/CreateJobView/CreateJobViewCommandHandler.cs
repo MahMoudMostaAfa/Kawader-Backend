@@ -15,19 +15,22 @@ public class CreateJobViewCommandHandler : IRequestHandler<CreateJobViewCommand,
   private readonly IJobViewRepository _jobViewRepository;
   private readonly IUsersRepository _usersRepository;
   private readonly IUnitOfWork _unitOfWork;
+  private readonly IRecommendationService _recommendationService;
 
   public CreateJobViewCommandHandler(
     IUser user,
     IJobsRepository jobsRepository,
     IJobViewRepository jobViewRepository,
     IUsersRepository usersRepository,
-    IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork
+    , IRecommendationService recommendationService)
   {
     _user = user;
     _jobsRepository = jobsRepository;
     _jobViewRepository = jobViewRepository;
     _usersRepository = usersRepository;
     _unitOfWork = unitOfWork;
+    _recommendationService = recommendationService;
   }
 
   public async Task<Result<Created>> Handle(CreateJobViewCommand request, CancellationToken cancellationToken)
@@ -53,6 +56,11 @@ public class CreateJobViewCommandHandler : IRequestHandler<CreateJobViewCommand,
 
     await _jobViewRepository.AddAsync(jobViewResult.Value);
     await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+    var feedback = new RecommendationFeedback("star", userProfile.Id, job.Id.ToString());
+
+    await _recommendationService.InsertFeedbackAsync(new[] { feedback }, cancellationToken);
+
 
     return Result.Created;
   }
