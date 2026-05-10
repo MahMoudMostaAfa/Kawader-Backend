@@ -6,6 +6,7 @@ using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.UserProfiles;
 using Kawadar.Domain.UserProfiles.Enums;
 using Kawadar.Domain.UserProfiles.Events;
+using Kawadar.Domain.WalletAndPayments;
 using MediatR;
 
 namespace Kawadar.Application.Features.Auth.Commands.Register;
@@ -16,13 +17,16 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Su
   private readonly IUsersRepository _usersRepository;
   private readonly IIdentityService _identityService;
 
+  private readonly IWalletRepository _walletRepository;
 
 
-  public RegisterCommandHandler(IUnitOfWork unitOfWork, IUsersRepository usersRepository, IIdentityService identityService)
+
+  public RegisterCommandHandler(IUnitOfWork unitOfWork, IUsersRepository usersRepository, IIdentityService identityService, IWalletRepository walletRepository)
   {
     _unitOfWork = unitOfWork;
     _usersRepository = usersRepository;
     _identityService = identityService;
+    _walletRepository = walletRepository;
 
   }
   public async Task<Result<Success>> Handle(RegisterCommand request, CancellationToken cancellationToken)
@@ -60,6 +64,18 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Su
     }
 
     var userProfile = userProfileResult.Value;
+
+    // create wallet for the user
+    var walletResult = Wallet.Create(userProfile.Id);
+    if (walletResult.IsError) return walletResult.Errors;
+    var wallet = walletResult.Value;
+    _walletRepository.Add(wallet);
+
+
+
+
+
+
     userProfile.AddDomainEvent(new CreatedUserEvent(userId, request.Email, request.FirstName));
 
     await _unitOfWork.SaveChangesAsync(cancellationToken);

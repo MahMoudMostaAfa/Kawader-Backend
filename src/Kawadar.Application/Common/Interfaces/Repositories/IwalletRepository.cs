@@ -26,4 +26,6 @@ public interface IWalletRepository
 
   void AddWalletTransaction(WalletTransaction transaction);
 
+  void Add(Wallet wallet);
+
 }

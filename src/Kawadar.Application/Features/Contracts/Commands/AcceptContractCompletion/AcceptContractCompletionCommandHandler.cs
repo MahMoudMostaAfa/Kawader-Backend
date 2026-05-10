@@ -100,7 +100,7 @@ IRequestHandler<AcceptContractCompletionCommand, Result<Updated>>
     job.UpdateStatus(JobStatus.Completed);
 
 
-    _escrowReleaseScheduler.ScheduleEscrowRelease(freelancerTransaction.Id, TimeSpan.FromMinutes(2));
+    _escrowReleaseScheduler.ScheduleEscrowRelease(freelancerTransaction.Id, PlatformPolicy.EscrowReleaseDelay);
 
     await _unitOfWork.SaveChangesAsync(cancellationToken);
     return Result.Updated;

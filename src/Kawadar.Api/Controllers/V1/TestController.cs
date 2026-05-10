@@ -1,5 +1,6 @@
 
 using Kawadar.Application.Common.Interfaces;
+using Kawadar.Application.Common.Interfaces.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kawadar.Api.Controllers.V1;
@@ -10,9 +11,14 @@ namespace Kawadar.Api.Controllers.V1;
 public class TestController : ApiController
 {
   private readonly IRecommendationService _recommendation;
+  private readonly IUnitOfWork _unitOfWork;
+  private readonly IWalletRepository _walletRepository;
 
-  public TestController(IRecommendationService recommendation)
+  public TestController(IRecommendationService recommendation, IUnitOfWork unitOfWork, IWalletRepository walletRepository)
   {
+    _unitOfWork = unitOfWork;
+    _walletRepository = walletRepository;
+
     _recommendation = recommendation;
   }
 
@@ -219,11 +225,30 @@ public class TestController : ApiController
       Hint = "Wait ~1-2 minutes for the model to train, then call GET /gorse/recommend/user-1 to see recommendations."
     });
   }
+
+
+
+  [HttpPost("wallet/insert-transaction")]
+
+  public async Task<IActionResult> InsertWalletTransaction([FromBody] InsertWalletTransactionRequest request, CancellationToken ct)
+  {
+    var walletResult = await _walletRepository.GetByUserIdAsync(request.UserId);
+    if (walletResult.IsError) return Problem(walletResult.Errors);
+
+    var wallet = walletResult.Value;
+    wallet.AddTransaction(request.Amount, Domain.WalletAndPayments.Enums.TransactionType.Deposit, Domain.WalletAndPayments.Enums.WalletTransactionReferenceType.Manual, Guid.CreateVersion7(), null, Domain.WalletAndPayments.Enums.WalletTransactionStatus.Completed);
+    await _unitOfWork.SaveChangesAsync(ct);
+
+
+    return Ok();
+  }
 }
 
 // ──────────────────────────────────────────────
 // Request DTOs
 // ──────────────────────────────────────────────
+
+public record InsertWalletTransactionRequest(Guid UserId, decimal Amount);
 
 public record InsertUserRequest(string UserId, object? Labels = null, string? Comment = null);
 public record InsertItemRequest(string ItemId, string[]? Categories = null, object? Labels = null, string? Comment = null);

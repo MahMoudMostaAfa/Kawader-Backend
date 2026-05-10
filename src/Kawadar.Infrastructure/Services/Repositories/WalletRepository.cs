@@ -112,4 +112,9 @@ public class WalletRepository : IWalletRepository
     if (transaction is null) return Error.NotFound();
     return transaction;
   }
+
+  public void Add(Wallet wallet)
+  {
+    _context.Wallets.Add(wallet);
+  }
 }
