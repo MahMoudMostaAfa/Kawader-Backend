@@ -43,7 +43,7 @@ public class TestController : ApiController
   /// Get a user by ID from Gorse.
   /// </summary>
   [HttpGet("gorse/users/{userId}")]
-  public async Task<IActionResult> GetGorseUser(string userId, CancellationToken ct)
+  public async Task<IActionResult> GetGorseUser(Guid userId, CancellationToken ct)
   {
     var result = await _recommendation.GetUserAsync(userId, ct);
 
@@ -56,7 +56,7 @@ public class TestController : ApiController
   /// Delete a user from Gorse.
   /// </summary>
   [HttpDelete("gorse/users/{userId}")]
-  public async Task<IActionResult> DeleteGorseUser(string userId, CancellationToken ct)
+  public async Task<IActionResult> DeleteGorseUser(Guid userId, CancellationToken ct)
   {
     var result = await _recommendation.DeleteUserAsync(userId, ct);
 
@@ -136,9 +136,9 @@ public class TestController : ApiController
   /// Note: Recommendations are generated after the model trains (fit_period).
   /// </summary>
   [HttpGet("gorse/recommend/{userId}")]
-  public async Task<IActionResult> GetGorseRecommendations(string userId, CancellationToken ct)
+  public async Task<IActionResult> GetGorseRecommendations(Guid userId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, CancellationToken ct = default)
   {
-    var result = await _recommendation.GetRecommendationsAsync(userId, ct);
+    var result = await _recommendation.GetRecommendationsAsync(userId, pageNumber, pageSize, ct);
 
     return result.IsSuccess
       ? Ok(result.Value)
@@ -149,7 +149,7 @@ public class TestController : ApiController
   /// Get similar users (neighbors) for a given user.
   /// </summary>
   [HttpGet("gorse/neighbors/{userId}")]
-  public async Task<IActionResult> GetGorseUserNeighbors(string userId, [FromQuery] int n = 10, CancellationToken ct = default)
+  public async Task<IActionResult> GetGorseUserNeighbors(Guid userId, [FromQuery] int n = 10, CancellationToken ct = default)
   {
     var result = await _recommendation.GetUserNeighborsAsync(userId, n, ct);
 
@@ -170,11 +170,15 @@ public class TestController : ApiController
   public async Task<IActionResult> SeedGorseData(CancellationToken ct)
   {
     // 1. Insert sample users
+    var user1Id = Guid.NewGuid();
+    var user2Id = Guid.NewGuid();
+    var user3Id = Guid.NewGuid();
+
     var users = new[]
     {
-      new RecommendationUser("user-1", new { skills = new[] { "dotnet", "csharp", "sql" }, level = "senior" }, "Ahmed - Senior .NET Developer"),
-      new RecommendationUser("user-2", new { skills = new[] { "react", "typescript", "nodejs" }, level = "mid" }, "Sara - Mid Frontend Developer"),
-      new RecommendationUser("user-3", new { skills = new[] { "dotnet", "angular", "sql" }, level = "junior" }, "Omar - Junior Full-Stack Developer"),
+      new RecommendationUser(user1Id, new { skills = new[] { "dotnet", "csharp", "sql" }, level = "senior" }, "Ahmed - Senior .NET Developer"),
+      new RecommendationUser(user2Id, new { skills = new[] { "react", "typescript", "nodejs" }, level = "mid" }, "Sara - Mid Frontend Developer"),
+      new RecommendationUser(user3Id, new { skills = new[] { "dotnet", "angular", "sql" }, level = "junior" }, "Omar - Junior Full-Stack Developer"),
     };
     var usersResult = await _recommendation.InsertUsersAsync(users, ct);
     if (usersResult.IsError)
@@ -197,20 +201,20 @@ public class TestController : ApiController
     var feedbacks = new[]
     {
       // user-1 (dotnet dev) likes dotnet jobs
-      new RecommendationFeedback("like", "user-1", "job-1"),
-      new RecommendationFeedback("like", "user-1", "job-3"),
-      new RecommendationFeedback("view", "user-1", "job-4"),
+      new RecommendationFeedback("like", user1Id, "job-1"),
+      new RecommendationFeedback("like", user1Id, "job-3"),
+      new RecommendationFeedback("view", user1Id, "job-4"),
 
       // user-2 (react dev) likes frontend jobs
-      new RecommendationFeedback("like", "user-2", "job-2"),
-      new RecommendationFeedback("like", "user-2", "job-5"),
-      new RecommendationFeedback("view", "user-2", "job-1"),
+      new RecommendationFeedback("like", user2Id, "job-2"),
+      new RecommendationFeedback("like", user2Id, "job-5"),
+      new RecommendationFeedback("view", user2Id, "job-1"),
 
       // user-3 (full-stack) likes mixed jobs
-      new RecommendationFeedback("like", "user-3", "job-4"),
-      new RecommendationFeedback("like", "user-3", "job-1"),
-      new RecommendationFeedback("view", "user-3", "job-3"),
-      new RecommendationFeedback("view", "user-3", "job-2"),
+      new RecommendationFeedback("like", user3Id, "job-4"),
+      new RecommendationFeedback("like", user3Id, "job-1"),
+      new RecommendationFeedback("view", user3Id, "job-3"),
+      new RecommendationFeedback("view", user3Id, "job-2"),
     };
     var feedbackResult = await _recommendation.InsertFeedbackAsync(feedbacks, ct);
     if (feedbackResult.IsError)
@@ -222,7 +226,8 @@ public class TestController : ApiController
       UsersInserted = users.Length,
       ItemsInserted = items.Length,
       FeedbackInserted = feedbacks.Length,
-      Hint = "Wait ~1-2 minutes for the model to train, then call GET /gorse/recommend/user-1 to see recommendations."
+      UserIds = new[] { user1Id, user2Id, user3Id },
+      Hint = $"Wait ~1-2 minutes for the model to train, then call GET /gorse/recommend/{user1Id} to see recommendations."
     });
   }
 
@@ -250,6 +255,6 @@ public class TestController : ApiController
 
 public record InsertWalletTransactionRequest(Guid UserId, decimal Amount);
 
-public record InsertUserRequest(string UserId, object? Labels = null, string? Comment = null);
+public record InsertUserRequest(Guid UserId, object? Labels = null, string? Comment = null);
 public record InsertItemRequest(string ItemId, string[]? Categories = null, object? Labels = null, string? Comment = null);
-public record InsertFeedbackRequest(string FeedbackType, string UserId, string ItemId);
+public record InsertFeedbackRequest(string FeedbackType, Guid UserId, string ItemId);

@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Kawadar.Application.Features.Reviews.Commands.CreateReview;
 using Kawadar.Application.Features.Jobs.Queries.GetJobById;
+using Kawadar.Application.Features.Jobs.Queries.GetRecommendationJobs;
 
 namespace Kawadar.Api.Controllers.V1;
 
@@ -74,7 +75,9 @@ public class JobsController : ApiController
         questionDtos,
         skillIds,
         request.AttachmentFiles,
-        attachmentLinks
+        attachmentLinks,
+        request.IsPrivate,
+        request.PrivateToUserId
     );
 
     var result = await _sender.Send(command, ct);
@@ -359,5 +362,26 @@ public class JobsController : ApiController
           errors => Problem(errors)
       );
   }
+
+  [HttpGet("/recommendations")]
+  [EndpointSummary("Gets recommended jobs for a user based on a specific job")]
+  [EndpointDescription("Returns a list of jobs recommended for the authenticated user based on their interaction with a specific job identified by its slug. The recommendations are personalized using AI algorithms that analyze the user's behavior and preferences.")]
+  [ProducesResponseType(typeof(List<JobSummaryDto>), StatusCodes.Status200OK)]
+
+  public async Task<IActionResult> GetRecommendedJobsForJob(
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 10,
+    CancellationToken ct = default)
+  {
+    var query = new GetRecommandationJobsQuery(page, pageSize);
+    var result = await _sender.Send(query, ct);
+
+    return result.Match(
+        jobs => Ok(jobs),
+        errors => Problem(errors)
+    );
+  }
+
+
 
 }

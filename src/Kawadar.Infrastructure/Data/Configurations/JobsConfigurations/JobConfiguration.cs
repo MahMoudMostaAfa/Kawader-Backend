@@ -38,6 +38,10 @@ public class JobConfiguration : IEntityTypeConfiguration<Job>
             .WithOne()
             .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
+
+
+        builder.HasOne<UserProfile>().WithMany().HasForeignKey(j => j.PrivateToUserId).OnDelete(DeleteBehavior.NoAction).IsRequired(false);
+
         builder.Navigation(j => j.Attachments)
             .HasField("_attachments")
             .UsePropertyAccessMode(PropertyAccessMode.Field);
