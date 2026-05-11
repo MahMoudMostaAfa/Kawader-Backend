@@ -18,6 +18,9 @@ public interface IRecommendationService
   /// <summary>Insert multiple users into the recommendation engine.</summary>
   Task<Result<Success>> InsertUsersAsync(IEnumerable<RecommendationUser> users, CancellationToken ct = default);
 
+  /// <summary>Update an existing user's labels and comment in the recommendation engine (PATCH semantics).</summary>
+  Task<Result<Success>> UpdateUserAsync(Guid userId, object? labels = null, string? comment = null, CancellationToken ct = default);
+
   /// <summary>Get a user by ID.</summary>
   Task<Result<RecommendationUser>> GetUserAsync(Guid userId, CancellationToken ct = default);
 
@@ -55,9 +58,22 @@ public interface IRecommendationService
   Task<Result<PaginatedList<Guid>>> GetRecommendationsAsync(Guid userId, int pageNumber, int pageSize, CancellationToken ct = default);
 
   /// <summary>
+  /// Get raw recommendations as string item IDs (no GUID parsing).
+  /// </summary>
+  Task<Result<string[]>> GetRecommendationsRawAsync(Guid userId, CancellationToken ct = default);
+
+  /// <summary>
   /// Get similar users (neighbors) for a given user.
   /// </summary>
   Task<Result<List<ScoredItem>>> GetUserNeighborsAsync(Guid userId, int count = 10, CancellationToken ct = default);
+
+  // ─── Administration ───────────────────────────
+
+  /// <summary>
+  /// Reset the entire recommendation engine by deleting all users, items, and feedback.
+  /// WARNING: This is destructive and intended for dev/testing only.
+  /// </summary>
+  Task<Result<Success>> ResetAsync(CancellationToken ct = default);
 }
 
 

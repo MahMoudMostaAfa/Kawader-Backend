@@ -70,6 +70,25 @@ public class GorseRecommendationService : IRecommendationService
     catch (Exception ex) { return HandleUnexpected(ex, "InsertUsers"); }
   }
 
+  public async Task<Domain.Common.Results.Result<Domain.Common.Results.Success>> UpdateUserAsync(Guid userId, object? labels = null, string? comment = null, CancellationToken ct = default)
+  {
+    try
+    {
+      var userIdValue = userId.ToString();
+      await _client.UpdateUserAsync(userIdValue, new User
+      {
+        UserId = userIdValue,
+        Labels = labels,
+        Comment = comment ?? ""
+      });
+
+      _logger.LogInformation("Updated user {UserId} in Gorse", userIdValue);
+      return DomainResult.Success;
+    }
+    catch (GorseException ex) { return HandleException(ex, "UpdateUser"); }
+    catch (Exception ex) { return HandleUnexpected(ex, "UpdateUser"); }
+  }
+
   public async Task<Domain.Common.Results.Result<RecommendationUser>> GetUserAsync(Guid userId, CancellationToken ct = default)
   {
     try
@@ -226,6 +245,17 @@ public class GorseRecommendationService : IRecommendationService
     catch (Exception ex) { return HandleUnexpected(ex, "GetRecommendations"); }
   }
 
+  public async Task<Domain.Common.Results.Result<string[]>> GetRecommendationsRawAsync(Guid userId, CancellationToken ct = default)
+  {
+    try
+    {
+      var result = await _client.GetRecommendAsync(userId.ToString());
+      return result ?? Array.Empty<string>();
+    }
+    catch (GorseException ex) { return HandleException(ex, "GetRecommendationsRaw"); }
+    catch (Exception ex) { return HandleUnexpected(ex, "GetRecommendationsRaw"); }
+  }
+
   public async Task<Domain.Common.Results.Result<List<ScoredItem>>> GetUserNeighborsAsync(Guid userId, int count = 10, CancellationToken ct = default)
   {
     try
@@ -242,6 +272,54 @@ public class GorseRecommendationService : IRecommendationService
     }
     catch (GorseException ex) { return HandleException(ex, "GetUserNeighbors"); }
     catch (Exception ex) { return HandleUnexpected(ex, "GetUserNeighbors"); }
+  }
+
+  // ─── Administration ───────────────────────────
+
+  public async Task<Domain.Common.Results.Result<Domain.Common.Results.Success>> ResetAsync(CancellationToken ct = default)
+  {
+    try
+    {
+      var deletedUsers = 0;
+      var deletedItems = 0;
+
+      // Delete all users (cursor-based pagination)
+      var userCursor = "";
+      do
+      {
+        var usersResponse = await _client.GetUsersAsync(100, userCursor);
+        if (usersResponse.Users == null || usersResponse.Users.Count == 0) break;
+
+        foreach (var user in usersResponse.Users)
+        {
+          await _client.DeleteUserAsync(user.UserId);
+          deletedUsers++;
+        }
+
+        userCursor = usersResponse.Cursor;
+      } while (!string.IsNullOrEmpty(userCursor));
+
+      // Delete all items (cursor-based pagination)
+      var itemCursor = "";
+      do
+      {
+        var itemsResponse = await _client.GetItemsAsync(100, itemCursor);
+        if (itemsResponse.Items == null || itemsResponse.Items.Count == 0) break;
+
+        foreach (var item in itemsResponse.Items)
+        {
+          await _client.DeleteItemAsync(item.ItemId);
+          deletedItems++;
+        }
+
+        itemCursor = itemsResponse.Cursor;
+      } while (!string.IsNullOrEmpty(itemCursor));
+
+      _logger.LogWarning("Gorse RESET complete. Deleted {Users} users and {Items} items.", deletedUsers, deletedItems);
+      return DomainResult.Success;
+    }
+    catch (GorseException ex) { return HandleException(ex, "Reset"); }
+    catch (Exception ex) { return HandleUnexpected(ex, "Reset"); }
   }
 
   // ─── Error Handling ──────────────────────────

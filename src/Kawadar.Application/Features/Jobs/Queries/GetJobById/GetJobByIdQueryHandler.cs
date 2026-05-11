@@ -73,9 +73,10 @@ public class GetJobByIdQueryHandler : IRequestHandler<GetJobByIdQuery, Result<Jo
           await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
 
-        var feedback = new RecommendationFeedback("star", userProfile.Id, job.Id.ToString());
+        var viewFeedback = new RecommendationFeedback("view", viewerProfile.Id, job.Id.ToString());
+        var likeFeedback = new RecommendationFeedback("like", viewerProfile.Id, job.Id.ToString());
 
-        await _recommendationService.InsertFeedbackAsync(new[] { feedback }, cancellationToken);
+        await _recommendationService.InsertFeedbackAsync(new[] { viewFeedback, likeFeedback }, cancellationToken);
 
       }
 
