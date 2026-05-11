@@ -38,21 +38,22 @@ public class CreateProposalCommandHandler : IRequestHandler<CreateProposalComman
     if (UserProfileResult.IsError) return UserProfileResult.Errors;
     var userProfile = UserProfileResult.Value;
 
-        var subscriptionResult = await _subscribtionRepository.GetActiveUserSubscription(userProfile.Id);
-        var proposalsThisMonth = await _proposalsRepository.GetUserProposalsThisMonth(userProfile.Id);
-        if (proposalsThisMonth.IsError) return proposalsThisMonth.Errors;
 
-        if (subscriptionResult.IsSuccess)
-        {
-            var userSubscription = subscriptionResult.Value;
-            var subscriptionPlan = await _subscribtionRepository.GetSubscriptionPlanById(userSubscription.SubscriptionPlanId);
-            if (subscriptionPlan.IsError) return subscriptionPlan.Errors;
-            if (subscriptionPlan.Value.Features.ProposalsPerMonth <= proposalsThisMonth.Value) return Error.Forbidden("You exceeded the number of proposals for this month");
-        }
+    var subscriptionResult = await _subscribtionRepository.GetActiveUserSubscription(userProfile.Id);
+    var proposalsThisMonth = await _proposalsRepository.GetUserProposalsThisMonth(userProfile.Id);
+    if (proposalsThisMonth.IsError) return proposalsThisMonth.Errors;
 
-        if(FreePlanFeatures.ProposalsPerMont <= proposalsThisMonth.Value) return Error.Forbidden("You exceeded the number of proposals for this month");
+    if (subscriptionResult.IsSuccess)
+    {
+      var userSubscription = subscriptionResult.Value;
+      var subscriptionPlan = await _subscribtionRepository.GetSubscriptionPlanById(userSubscription.SubscriptionPlanId);
+      if (subscriptionPlan.IsError) return subscriptionPlan.Errors;
+      if (subscriptionPlan.Value.Features.ProposalsPerMonth <= proposalsThisMonth.Value) return Error.Forbidden("You exceeded the number of proposals for this month");
+    }
 
-        var jobResult = await _jobsRepository.GetJobsAsync(request.JobId);
+    if (FreePlanFeatures.ProposalsPerMont <= proposalsThisMonth.Value) return Error.Forbidden("You exceeded the number of proposals for this month");
+
+    var jobResult = await _jobsRepository.GetJobsAsync(request.JobId);
 
     if (jobResult.IsError) return jobResult.Errors;
 
@@ -61,6 +62,9 @@ public class CreateProposalCommandHandler : IRequestHandler<CreateProposalComman
     if (job.PostedById == userProfile.Id)
       return Error.Forbidden(description: "You cannot submit a proposal to your own job.");
 
+    // check if the job is private and if the user is allowed to see it
+    if (job.IsPrivate && job.PrivateToUserId != userProfile.Id) return ApplicationErrors.UnauthorizedAccess;
+
     if (job.JobType == Domain.Jobs.Enums.JobType.FixedPrice && (request.JobProposalType == Domain.Proposals.Enums.JobProposalType.Hourly))
 
       return Error.Validation(description: "Hourly proposals are not allowed for fixed price jobs.");
@@ -68,6 +72,10 @@ public class CreateProposalCommandHandler : IRequestHandler<CreateProposalComman
     if (job.JobType == Domain.Jobs.Enums.JobType.Hourly && (request.JobProposalType == Domain.Proposals.Enums.JobProposalType.MilestoneBased || request.JobProposalType == Domain.Proposals.Enums.JobProposalType.OneTime))
 
       return Error.Validation(description: "Fixed price proposals are not allowed for hourly jobs.");
+
+    var existsResult = await _proposalsRepository.ProposalExistsForJobAndFreelancerAsync(request.JobId, userProfile.Id, cancellationToken);
+    if (existsResult.IsError) return existsResult.Errors;
+    if (existsResult.Value) return JobProposalErrors.ProposalAlreadyExistsForJob;
 
     var jobQuestions = job.Questions.ToHashSet();
     var questionIds = jobQuestions.Select(q => q.Id).ToHashSet();

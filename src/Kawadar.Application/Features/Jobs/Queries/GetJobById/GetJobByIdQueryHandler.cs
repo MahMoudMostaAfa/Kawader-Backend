@@ -1,5 +1,6 @@
 using AutoMapper;
 using Kawadar.Application.Common.Errors;
+using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Application.Features.Jobs.DTOs;
@@ -18,6 +19,7 @@ public class GetJobByIdQueryHandler : IRequestHandler<GetJobByIdQuery, Result<Jo
   private readonly IUser _user;
   private readonly IUsersRepository _usersRepository;
   private readonly IUnitOfWork _unitOfWork;
+  private readonly IRecommendationService _recommendationService;
 
   public GetJobByIdQueryHandler(
  IJobsRepository jobsRepository,
@@ -26,7 +28,7 @@ public class GetJobByIdQueryHandler : IRequestHandler<GetJobByIdQuery, Result<Jo
     IIdentityService identityService,
     IUser user,
     IUsersRepository usersRepository,
-    IUnitOfWork unitOfWork
+    IUnitOfWork unitOfWork, IRecommendationService recommendationService
   )
   {
     _jobsRepository = jobsRepository;
@@ -36,6 +38,7 @@ public class GetJobByIdQueryHandler : IRequestHandler<GetJobByIdQuery, Result<Jo
     _user = user;
     _usersRepository = usersRepository;
     _unitOfWork = unitOfWork;
+    _recommendationService = recommendationService;
   }
   public async Task<Result<JobDetailsDto>> Handle(GetJobByIdQuery request, CancellationToken cancellationToken)
   {
@@ -69,7 +72,15 @@ public class GetJobByIdQueryHandler : IRequestHandler<GetJobByIdQuery, Result<Jo
           await _jobViewRepository.AddAsync(jobViewResult.Value);
           await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
+
+        var viewFeedback = new RecommendationFeedback("view", viewerProfile.Id, job.Id.ToString());
+        var likeFeedback = new RecommendationFeedback("like", viewerProfile.Id, job.Id.ToString());
+
+        await _recommendationService.InsertFeedbackAsync(new[] { viewFeedback, likeFeedback }, cancellationToken);
+
       }
+
+
     }
 
     var jobDetailsDto = _mapper.Map<JobDetailsDto>((job, posterIdentity, userProfile));

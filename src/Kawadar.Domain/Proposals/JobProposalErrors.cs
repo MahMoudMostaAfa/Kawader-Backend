@@ -10,6 +10,8 @@ public static class JobProposalErrors
   public static Error AmountRequiredForOneTime => Error.Validation("amount", "Amount is required for one-time proposals.");
 
   public static Error EstimatedHoursRequiredForHourly => Error.Validation("estimatedHours", "Estimated hours are required for hourly proposals.");
+
+  public static Error ProposalAlreadyExistsForJob => Error.Conflict("Proposal.Duplicate", "You already submitted a proposal for this job.");
 }
 
 

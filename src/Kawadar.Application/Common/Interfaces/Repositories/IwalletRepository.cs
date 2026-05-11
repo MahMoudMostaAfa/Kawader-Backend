@@ -35,4 +35,6 @@ public interface IWalletRepository
     Task<decimal> GetTotalProfit();
     Task<Dictionary<WalletTransactionStatus, int>> GetTransactionStatusDistribution();
     Task<Dictionary<string, decimal>> GetMoneyTransactionDistributionBasedOnCurrency();
+  void Add(Wallet wallet);
+
 }

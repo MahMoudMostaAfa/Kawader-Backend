@@ -32,6 +32,12 @@ public class InMemoryProposalsRepository : IProposalsRepository
             : Error.NotFound("Proposal.NotFound", $"Proposal '{proposalId}' not found."));
     }
 
+    public Task<Result<bool>> ProposalExistsForJobAndFreelancerAsync(Guid jobId, Guid freelancerId, CancellationToken cancellationToken = default)
+    {
+        var exists = Proposals.Any(p => p.JobId == jobId && p.FreelancerId == freelancerId);
+        return Task.FromResult<Result<bool>>(exists);
+    }
+
     public Task<Result<PaginatedList<JobProposal>>> GetProposalsAsync(
         Guid jobId,
         JobProposalType? Type,
@@ -51,7 +57,7 @@ public class InMemoryProposalsRepository : IProposalsRepository
         var ordered = DatesortBy?.ToLowerInvariant() switch
         {
             "oldest" => query.OrderBy(p => p.CreatedAt),
-            _        => query.OrderByDescending(p => p.CreatedAt)
+            _ => query.OrderByDescending(p => p.CreatedAt)
         };
 
         var all = ordered.ToList();
@@ -72,7 +78,7 @@ public class InMemoryProposalsRepository : IProposalsRepository
         var ordered = SortBy?.ToLowerInvariant() switch
         {
             "oldest" => query.OrderBy(p => p.CreatedAt),
-            _        => query.OrderByDescending(p => p.CreatedAt)
+            _ => query.OrderByDescending(p => p.CreatedAt)
         };
 
         var all = ordered.ToList();

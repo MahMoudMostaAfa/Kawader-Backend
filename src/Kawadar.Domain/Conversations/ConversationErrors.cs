@@ -10,4 +10,6 @@ public static class ConversationErrors
 
 
   public static Error MessageDoesNotBelongToConversation => Error.Conflict("MessageDoesNotBelongToConversation", "The message does not belong to this conversation.");
+
+  public static Error ProposalConversationAlreadyExists => Error.Conflict("Conversation.ProposalAlreadyHasConversation", "A conversation already exists for this proposal.");
 }

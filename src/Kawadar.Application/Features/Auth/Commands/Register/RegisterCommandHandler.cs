@@ -1,4 +1,5 @@
 
+using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Domain.Common.Constants;
@@ -6,6 +7,7 @@ using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.UserProfiles;
 using Kawadar.Domain.UserProfiles.Enums;
 using Kawadar.Domain.UserProfiles.Events;
+using Kawadar.Domain.WalletAndPayments;
 using MediatR;
 
 namespace Kawadar.Application.Features.Auth.Commands.Register;
@@ -16,14 +18,17 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Su
   private readonly IUsersRepository _usersRepository;
   private readonly IIdentityService _identityService;
 
+  private readonly IWalletRepository _walletRepository;
+  private readonly IRecommendationService _recommendationService;
 
 
-  public RegisterCommandHandler(IUnitOfWork unitOfWork, IUsersRepository usersRepository, IIdentityService identityService)
+  public RegisterCommandHandler(IUnitOfWork unitOfWork, IUsersRepository usersRepository, IIdentityService identityService, IWalletRepository walletRepository, IRecommendationService recommendationService)
   {
     _unitOfWork = unitOfWork;
     _usersRepository = usersRepository;
     _identityService = identityService;
-
+    _walletRepository = walletRepository;
+    _recommendationService = recommendationService;
   }
   public async Task<Result<Success>> Handle(RegisterCommand request, CancellationToken cancellationToken)
   {
@@ -60,6 +65,23 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Su
     }
 
     var userProfile = userProfileResult.Value;
+
+    // create wallet for the user
+    var walletResult = Wallet.Create(userProfile.Id);
+    if (walletResult.IsError) return walletResult.Errors;
+    var wallet = walletResult.Value;
+    _walletRepository.Add(wallet);
+
+
+
+
+    // Insert user into Gorse recommendation engine
+    await _recommendationService.InsertUserAsync(
+      userProfile.Id,
+      labels: new[] { userProfile.ProfileType.ToString().ToLower() },
+      comment: $"{request.FirstName} {request.LastName}",
+      ct: cancellationToken);
+
     userProfile.AddDomainEvent(new CreatedUserEvent(userId, request.Email, request.FirstName));
 
     await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -68,4 +90,4 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Su
 
 
   }
-}
+}

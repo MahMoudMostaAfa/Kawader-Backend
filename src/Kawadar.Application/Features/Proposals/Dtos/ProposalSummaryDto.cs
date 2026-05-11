@@ -13,6 +13,8 @@ public class ProposalSummaryDto
   public string CoverLetter { get; set; } = string.Empty;
 
   public JobProposalType ProposalType { get; set; }
+
+  public JobProposalStatus Status { get; set; }
   public decimal ProposedPrice { get; set; }
   public int? EstimatedTimeInDays { get; set; }
   public int? EstimatedTimeInHours { get; set; }

@@ -291,6 +291,12 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.Property<Guid?>("LastMessageId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("ProposalId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ProposalId1")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("ReceiverUserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -309,6 +315,10 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.HasIndex("JobId");
 
                     b.HasIndex("LastMessageId");
+
+                    b.HasIndex("ProposalId");
+
+                    b.HasIndex("ProposalId1");
 
                     b.HasIndex("ReceiverUserId");
 
@@ -409,6 +419,9 @@ namespace Kawadar.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsPrivate")
+                        .HasColumnType("bit");
+
                     b.Property<string>("JobSlug")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -423,6 +436,9 @@ namespace Kawadar.Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("PostedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("PrivateToUserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("SpecilizationId")
@@ -442,6 +458,8 @@ namespace Kawadar.Infrastructure.Data.Migrations
                         .IsUnique();
 
                     b.HasIndex("PostedById");
+
+                    b.HasIndex("PrivateToUserId");
 
                     b.HasIndex("SpecilizationId");
 
@@ -1478,7 +1496,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
 
                     b.HasIndex("PaymentTransactionId");
 
-                    b.ToTable("PaymentEventHook");
+                    b.ToTable("PaymentEventHooks");
                 });
 
             modelBuilder.Entity("Kawadar.Domain.WalletAndPayments.Payments.PaymentTransaction", b =>
@@ -1544,7 +1562,7 @@ namespace Kawadar.Infrastructure.Data.Migrations
                         .IsUnique()
                         .HasFilter("[WalletTransactionId] IS NOT NULL");
 
-                    b.ToTable("PaymentTransaction");
+                    b.ToTable("PaymentTransactions");
                 });
 
             modelBuilder.Entity("Kawadar.Domain.WalletAndPayments.Payouts.UserPayoutAccount", b =>
@@ -2042,6 +2060,15 @@ namespace Kawadar.Infrastructure.Data.Migrations
                         .HasForeignKey("LastMessageId")
                         .OnDelete(DeleteBehavior.NoAction);
 
+                    b.HasOne("Kawadar.Domain.Proposals.JobProposal", null)
+                        .WithMany()
+                        .HasForeignKey("ProposalId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Kawadar.Domain.Proposals.JobProposal", "Proposal")
+                        .WithMany()
+                        .HasForeignKey("ProposalId1");
+
                     b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", null)
                         .WithMany()
                         .HasForeignKey("ReceiverUserId")
@@ -2057,6 +2084,8 @@ namespace Kawadar.Infrastructure.Data.Migrations
                     b.Navigation("Job");
 
                     b.Navigation("LastMessage");
+
+                    b.Navigation("Proposal");
                 });
 
             modelBuilder.Entity("Kawadar.Domain.Conversations.Messages.Message", b =>
@@ -2130,6 +2159,11 @@ namespace Kawadar.Infrastructure.Data.Migrations
                         .HasForeignKey("PostedById")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Kawadar.Domain.UserProfiles.UserProfile", null)
+                        .WithMany()
+                        .HasForeignKey("PrivateToUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Kawadar.Domain.Specilizations.Specilization", "Specilization")
                         .WithMany()

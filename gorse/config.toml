@@ -7,22 +7,36 @@ cache_store = "postgres://gorse:gorsepass@gorse-postgres:5432/gorse?sslmode=disa
 
 [master]
 # REST API settings (used by gorse-in-one)
-api_key = "change-me"
+http_host = "0.0.0.0"
 http_port = 8088
+n_jobs = 1
+dashboard_user_name = "admin"
+dashboard_password = "admin"
 
-[dashboard]
-# Optional admin UI
-user_name = "admin"
-password = "admin"
-http_port = 8088
+[server]
+api_key = "change-me"
 
 [recommend]
-# How often to retrain the model (default: 60m)
-fit_period = "10m"
-# How often to collect/process new data (default: 60m)  
-data_collection_period = "1m"
-# Default recommendation count
-n_recommend = 10
+cache_size = 100
+
+[recommend.data_source]
+positive_feedback_types = ["star", "like"]
+read_feedback_types = ["view"]
+positive_feedback_ttl = 0
+item_ttl = 0
+
+[recommend.collaborative]
+# Enable matrix factorization
+type = "mf"
+# Train every 2 minutes (for testing; use 60m in production)
+fit_period = "2m"
+fit_epoch = 100
+
+[recommend.ranker]
+fit_period = "2m"
+
+[recommend.replacement]
+enable_replacement = false
 
 [monitor]
 # Prometheus metrics endpoint (optional)

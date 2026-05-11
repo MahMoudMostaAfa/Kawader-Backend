@@ -106,7 +106,7 @@ public class ApproveContractMilestoneCommandHandler : IRequestHandler<ApproveCon
     var freelancerTransaction = freelancerEscrowTransaction.Value;
     _walletRepository.AddEscrowTransaction(freelancerTransaction);
 
-    _escrowReleaseScheduler.ScheduleEscrowRelease(freelancerTransaction.Id, TimeSpan.FromMinutes(2));
+    _escrowReleaseScheduler.ScheduleEscrowRelease(freelancerTransaction.Id, PlatformPolicy.EscrowReleaseDelay);
 
     if (contract.ContractMilestones.All(m => m.Status == ContractMilestoneStatus.Approved))
     {

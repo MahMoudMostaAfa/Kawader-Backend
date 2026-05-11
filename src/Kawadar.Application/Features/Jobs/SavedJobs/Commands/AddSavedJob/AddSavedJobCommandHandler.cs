@@ -1,4 +1,5 @@
 using Kawadar.Application.Common.Errors;
+using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Domain.Common.Results;
@@ -22,8 +23,9 @@ public class AddSavedJobCommandHandler : IRequestHandler<AddSavedJobCommand, Res
   private readonly IUnitOfWork _unitOfWork;
   private readonly IUser _user;
   private readonly IJobsRepository _jobsRepository;
+  private readonly IRecommendationService _recommendationService;
 
-  public AddSavedJobCommandHandler(ILogger<AddSavedJobCommandHandler> logger, ISavedJobsRepository savedJobsRepository, IUnitOfWork unitOfWork, IUser user, IUsersRepository usersRepository, IJobsRepository jobsRepository)
+  public AddSavedJobCommandHandler(ILogger<AddSavedJobCommandHandler> logger, ISavedJobsRepository savedJobsRepository, IUnitOfWork unitOfWork, IUser user, IUsersRepository usersRepository, IJobsRepository jobsRepository, IRecommendationService recommendationService)
   {
     _logger = logger;
     _savedJobsRepository = savedJobsRepository;
@@ -31,7 +33,7 @@ public class AddSavedJobCommandHandler : IRequestHandler<AddSavedJobCommand, Res
     _user = user;
     _usersRepository = usersRepository;
     _jobsRepository = jobsRepository;
-
+    _recommendationService = recommendationService;
 
   }
   public async Task<Result<Created>> Handle(AddSavedJobCommand request, CancellationToken cancellationToken)
@@ -63,10 +65,13 @@ public class AddSavedJobCommandHandler : IRequestHandler<AddSavedJobCommand, Res
 
     _logger.LogInformation("User {userId} saved job {jobId} successfully.", userId, job.Id);
 
+    // Insert "star" feedback into Gorse — saving a job is a strong positive signal
+    var feedback = new RecommendationFeedback("star", userProfile.Id, job.Id.ToString());
+    await _recommendationService.InsertFeedbackAsync(new[] { feedback }, cancellationToken);
 
     return Result.Created;
 
 
 
   }
-}
+}

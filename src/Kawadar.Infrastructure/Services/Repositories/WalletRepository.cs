@@ -202,4 +202,8 @@ public class WalletRepository : IWalletRepository
         var subscriptionProfit = await _context.WalletTransactions.Where(x => x.Type == TransactionType.SubscriptionCharge).SumAsync(x => x.Amount);
         return FeeProfit + subscriptionProfit;
     }
+  public void Add(Wallet wallet)
+  {
+    _context.Wallets.Add(wallet);
+  }
 }

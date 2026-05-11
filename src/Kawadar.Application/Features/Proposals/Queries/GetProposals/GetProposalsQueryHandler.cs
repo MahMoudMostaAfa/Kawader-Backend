@@ -71,6 +71,8 @@ public class GetProposalsQueryHandler : IRequestHandler<GetProposalsQuery, Resul
         FreelancerProfilePictureUrl = profile?.ProfilePictureUrl!,
         FreelancerUsername = user?.UserName!,
         ProposalType = p.ProposalType,
+        Status = p.Status
+        ,
         ProposedPrice = p.ProposalType switch
         {
           Domain.Proposals.Enums.JobProposalType.OneTime => (decimal)p.Amount!,

@@ -17,6 +17,10 @@ public class Job : AuditableEntity
 
   public Guid SpecilizationId { get; private set; }
 
+  public bool IsPrivate { get; private set; } = false;
+
+  public Guid? PrivateToUserId { get; private set; }
+
   public Specilization Specilization { get; private set; } = null!;
 
   public string Title { get; private set; } = "";
@@ -54,7 +58,7 @@ public class Job : AuditableEntity
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
   private Job() { }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-  private Job(Guid postedById, Guid specilizationId, string title, string description, JobType jobType, BudgetRange budgetRange, HourlyRateRange hourlyRateRange, int durationInDays, string jobSlug, JobExperienceLevel experienceLevel, List<JobQuestion> questions, List<Skill> skills, List<JobFile> attachments) : base(Guid.NewGuid())
+  private Job(Guid postedById, Guid specilizationId, string title, string description, JobType jobType, BudgetRange budgetRange, HourlyRateRange hourlyRateRange, int durationInDays, string jobSlug, JobExperienceLevel experienceLevel, List<JobQuestion> questions, List<Skill> skills, List<JobFile> attachments, bool isPrivate, Guid? privateToUserId) : base(Guid.NewGuid())
   {
     PostedById = postedById;
     SpecilizationId = specilizationId;
@@ -69,13 +73,15 @@ public class Job : AuditableEntity
     _questions = questions;
     _skills = skills;
     _attachments = attachments;
+    IsPrivate = isPrivate;
+    PrivateToUserId = privateToUserId;
   }
 
 
-  public static Result<Job> Create(Guid postedById, Guid specilizationId, string title, string description, JobType jobType, BudgetRange budgetRange, HourlyRateRange hourlyRateRange, int durationInDays, JobExperienceLevel jobExperienceLevel, string jobSlug, List<JobQuestion> questions, List<Skill> skills, List<JobFile> attachments)
+  public static Result<Job> Create(Guid postedById, Guid specilizationId, string title, string description, JobType jobType, BudgetRange budgetRange, HourlyRateRange hourlyRateRange, int durationInDays, JobExperienceLevel jobExperienceLevel, string jobSlug, List<JobQuestion> questions, List<Skill> skills, List<JobFile> attachments, bool isPrivate = false, Guid? privateToUserId = null)
   {
 
-    return new Job(postedById, specilizationId, title, description, jobType, budgetRange, hourlyRateRange, durationInDays, jobSlug, jobExperienceLevel, questions, skills, attachments);
+    return new Job(postedById, specilizationId, title, description, jobType, budgetRange, hourlyRateRange, durationInDays, jobSlug, jobExperienceLevel, questions, skills, attachments, isPrivate, privateToUserId);
   }
 
   public Result<Updated> Update(string? title, string? description, JobType? jobType, BudgetRange? budgetRange, HourlyRateRange? hourlyRateRange, int? durationInDays, JobExperienceLevel? experienceLevel, Guid? specilizationId)

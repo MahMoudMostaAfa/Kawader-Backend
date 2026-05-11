@@ -32,6 +32,7 @@ using Kawadar.Domain.Subscriptions;
 using Kawadar.Domain.Contracts.Disbutes;
 using Kawadar.Domain.Violations;
 using Kawadar.Domain.WalletAndPayments;
+using Kawadar.Domain.WalletAndPayments.Payments;
 using Kawadar.Domain.WalletAndPayments.Payouts;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
@@ -90,6 +91,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IMediator medi
   public DbSet<WithdrawalRequest> WithdrawalRequests => Set<WithdrawalRequest>();
 
   public DbSet<UserPayoutAccount> UserPayoutAccounts => Set<UserPayoutAccount>();
+
+  public DbSet<PaymentTransaction> PaymentTransactions => Set<PaymentTransaction>();
+  public DbSet<PaymentEventHook> PaymentEventHooks => Set<PaymentEventHook>();
 
 
 

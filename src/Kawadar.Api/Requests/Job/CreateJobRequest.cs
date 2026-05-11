@@ -7,6 +7,8 @@ public class CreateJobRequest
   public string Title { get; set; } = "";
   public string Description { get; set; } = "";
   public Guid SpecilizationId { get; set; }
+  public bool IsPrivate { get; set; } = false;
+  public Guid? PrivateToUserId { get; set; }
 
   /// <summary>0 = FullTime, 1 = PartTime, 2 = Contract (send as integer)</summary>
   public int JobType { get; set; }
