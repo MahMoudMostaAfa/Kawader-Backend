@@ -14,6 +14,7 @@ public class ProposalDetailsDto
   public string? ProposalByFullName { get; set; }
   public string? ProposalByPhoto { set; get; }
   public decimal? Amount { get; set; }
+  public JobProposalStatus Status { get; set; }
 
   public int? EstimatedDays { get; set; }
 
