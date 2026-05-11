@@ -79,15 +79,18 @@ namespace Kawadar.Application.Features.Portfolios.Commands.CreateProject
             foreach (var skill in request.skills)
             {
                 var skillExistsResult = await skillRepository.getByIdAsync(skill);
-                if (skillExistsResult.IsError) return skillExistsResult.Errors;
+                if (skillExistsResult.IsError)
+                {
+                    var blobDeletionResult = await storageClient.DeleteFileAsync(resultProject.Value.ProjectImageUrl!, Containers.PortfolioProjects);
+                    return skillExistsResult.Errors;
+                }
 
                 var projectSkillResult = PortfolioProjectSkill.Create(resultProject.Value.Id, skillExistsResult.Value.Id);
                 if (projectSkillResult.IsError) return projectSkillResult.Errors;
                 projectSkills.Add(projectSkillResult.Value);
             }
 
-            var addResult = await skillRepository.addSkillToProject(projectSkills);
-            if (addResult.IsError) return addResult.Errors;
+            await skillRepository.addSkillToProject(projectSkills);
             var projectDTO = mapper.Map<ProjectDTO>(resultProject.Value);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 

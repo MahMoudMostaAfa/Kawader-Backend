@@ -6,6 +6,7 @@ using Kawadar.Application.Features.Admins.Commands.CreateAdmin;
 using Kawadar.Application.Features.Admins.Commands.DeleteUser;
 using Kawadar.Application.Features.Admins.Dtos;
 using Kawadar.Application.Features.Admins.Queries.GetAdmins;
+using Kawadar.Application.Features.Admins.Queries.GetFinancialStatistics;
 using Kawadar.Application.Features.Admins.Queries.GetJobsStatistics;
 using Kawadar.Application.Features.Admins.Queries.GetProposalsStatistics;
 using Kawadar.Application.Features.Admins.Queries.GetReviewsStatistics;
@@ -160,6 +161,25 @@ namespace Kawadar.Api.Controllers.V1
         public async Task<IActionResult> GetProposalsStatistics(CancellationToken ct = default)
         {
             var query = new GetProposalStatisticsQuery();
+            var result = await _sender.Send(query, ct);
+
+            return result.Match(
+                Statistics => Ok(Statistics)
+                , errors => Problem(errors));
+
+        }
+
+        [HttpGet("Dashboard/Financial")]
+        [Authorize(Policy = Permissions.ViewStatistics)]
+        [ProducesResponseType(typeof(FinancialStatisticsDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [EndpointName("GetFinancialStatistics")]
+        [EndpointSummary("Gets the financial statistics")]
+        [EndpointDescription("Gets the financial statistics so the admins can monitor the platform")]
+        public async Task<IActionResult> GetFinancialStatistics(CancellationToken ct = default)
+        {
+            var query = new GetFinancialStatisticsQuery();
             var result = await _sender.Send(query, ct);
 
             return result.Match(

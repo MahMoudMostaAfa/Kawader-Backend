@@ -1,6 +1,7 @@
 using Kawadar.Application.Common.Models;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.WalletAndPayments;
+using Kawadar.Domain.WalletAndPayments.Enums;
 
 namespace Kawadar.Application.Common.Interfaces.Repositories;
 
@@ -26,6 +27,14 @@ public interface IWalletRepository
 
   void AddWalletTransaction(WalletTransaction transaction);
 
+    Task<PaginatedList<WalletTransaction>> GetAllTransactionsByWalletId(Guid walletId, TransactionType? type, WalletTransactionStatus? status, WalletTransactionReferenceType? reference,
+        int page, int pageSize, string sortBy, CancellationToken cancellationToken);
+    Task<PaginatedList<WalletTransaction>> GetAllTransactions(TransactionType? type, WalletTransactionStatus? status, WalletTransactionReferenceType? reference,
+        int page, int pageSize, string sortBy, CancellationToken cancellationToken);
+
+    Task<decimal> GetTotalProfit();
+    Task<Dictionary<WalletTransactionStatus, int>> GetTransactionStatusDistribution();
+    Task<Dictionary<string, decimal>> GetMoneyTransactionDistributionBasedOnCurrency();
   void Add(Wallet wallet);
 
 }
