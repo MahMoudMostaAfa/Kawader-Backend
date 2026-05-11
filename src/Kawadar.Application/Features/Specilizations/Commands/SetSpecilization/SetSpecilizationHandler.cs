@@ -1,4 +1,5 @@
-﻿using Kawadar.Application.Common.Errors;
+using Kawadar.Application.Common.Errors;
+using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Domain.Common.Results;
@@ -7,7 +8,7 @@ using MediatR;
 namespace Kawadar.Application.Features.Specilizations.Commands.SetSpecilization
 {
     public class SetSpecilizationHandler(IUser user, ISpecilizationRepository specilizationRepository
-        , IUsersRepository usersRepository, IUnitOfWork unitOfWork) : IRequestHandler<SetSpecilizationCommand, Result<Updated>>
+        , IUsersRepository usersRepository, IUnitOfWork unitOfWork, IRecommendationService recommendationService, ISkillRepository skillRepository) : IRequestHandler<SetSpecilizationCommand, Result<Updated>>
     {
         public async Task<Result<Updated>> Handle(SetSpecilizationCommand request, CancellationToken cancellationToken)
         {
@@ -24,6 +25,19 @@ namespace Kawadar.Application.Features.Specilizations.Commands.SetSpecilization
 
             userProfile.updateSpecilization(specilizationResult.Value.Id);
             await unitOfWork.SaveChangesAsync();
+
+            // Update user labels in Gorse with new specialization
+            var skills = await skillRepository.GetFreelancerSkillsByUserProfileId(userProfile.Id);
+            var labels = skills
+                .Concat(new[] { specilizationResult.Value.Name.ToLower(), userProfile.ExperienceYear.ToString().ToLower(), userProfile.ProfileType.ToString().ToLower() })
+                .ToArray();
+
+            await recommendationService.UpdateUserAsync(
+                userProfile.Id,
+                labels: labels,
+                comment: userProfile.FullName,
+                ct: cancellationToken);
+
             return Result.Updated;
         }
     }

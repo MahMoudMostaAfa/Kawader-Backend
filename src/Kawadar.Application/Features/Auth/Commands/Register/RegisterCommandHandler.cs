@@ -1,4 +1,5 @@
 
+using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Domain.Common.Constants;
@@ -18,16 +19,16 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Su
   private readonly IIdentityService _identityService;
 
   private readonly IWalletRepository _walletRepository;
+  private readonly IRecommendationService _recommendationService;
 
 
-
-  public RegisterCommandHandler(IUnitOfWork unitOfWork, IUsersRepository usersRepository, IIdentityService identityService, IWalletRepository walletRepository)
+  public RegisterCommandHandler(IUnitOfWork unitOfWork, IUsersRepository usersRepository, IIdentityService identityService, IWalletRepository walletRepository, IRecommendationService recommendationService)
   {
     _unitOfWork = unitOfWork;
     _usersRepository = usersRepository;
     _identityService = identityService;
     _walletRepository = walletRepository;
-
+    _recommendationService = recommendationService;
   }
   public async Task<Result<Success>> Handle(RegisterCommand request, CancellationToken cancellationToken)
   {
@@ -74,7 +75,12 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Su
 
 
 
-
+    // Insert user into Gorse recommendation engine
+    await _recommendationService.InsertUserAsync(
+      userProfile.Id,
+      labels: new[] { userProfile.ProfileType.ToString().ToLower() },
+      comment: $"{request.FirstName} {request.LastName}",
+      ct: cancellationToken);
 
     userProfile.AddDomainEvent(new CreatedUserEvent(userId, request.Email, request.FirstName));
 
@@ -84,4 +90,4 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Su
 
 
   }
-}
+}

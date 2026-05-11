@@ -57,7 +57,7 @@ public class CreateJobViewCommandHandler : IRequestHandler<CreateJobViewCommand,
     await _jobViewRepository.AddAsync(jobViewResult.Value);
     await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-    var feedback = new RecommendationFeedback("star", userProfile.Id, job.Id.ToString());
+    var feedback = new RecommendationFeedback("view", userProfile.Id, job.Id.ToString());
 
     await _recommendationService.InsertFeedbackAsync(new[] { feedback }, cancellationToken);
 

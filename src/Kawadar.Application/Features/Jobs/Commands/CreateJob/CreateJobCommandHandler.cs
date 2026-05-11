@@ -169,15 +169,16 @@ public class CreateJobCommandHandler : IRequestHandler<CreateJobCommand, Result<
 
 
     // Add the new job to the recommendation engine as an item
+    var labels = job.Skills.Select(s => s.Name.ToLower())
+      .Concat(new[] { job.JobType.ToString().ToLower(), job.ExperienceLevel.ToString().ToLower() })
+      .ToArray();
+
     var recommendationItemResult = await _recommendationService.InsertItemAsync(
-      jobResult.Value.Id.ToString(),
-      new[]
-      {
-        job.Specilization.Name
-      },
-      new { Skills = string.Join(", ", job.Skills.Select(s => s.Name)), JobType = jobResult.Value.JobType.ToString(), ExperienceLevel = jobResult.Value.ExperienceLevel.ToString() },
-      jobResult.Value.Description,
-      cancellationToken);
+      job.Id.ToString(),
+      categories: new[] { job.Specilization.Name },
+      labels: labels,
+      comment: job.Title,
+      ct: cancellationToken);
 
 
 

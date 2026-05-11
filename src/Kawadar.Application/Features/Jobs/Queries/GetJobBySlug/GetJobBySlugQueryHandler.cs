@@ -1,5 +1,6 @@
 using AutoMapper;
 using Kawadar.Application.Common.Errors;
+using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Application.Features.Jobs.DTOs;
@@ -18,6 +19,7 @@ public class GetJobBySlugQueryHandler : IRequestHandler<GetJobBySlugQuery, Resul
   private readonly IUser _user;
   private readonly IUsersRepository _usersRepository;
   private readonly IUnitOfWork _unitOfWork;
+  private readonly IRecommendationService _recommendationService;
 
   public GetJobBySlugQueryHandler(
     IJobsRepository jobsRepository,
@@ -26,7 +28,8 @@ public class GetJobBySlugQueryHandler : IRequestHandler<GetJobBySlugQuery, Resul
     IIdentityService identityService,
     IUser user,
     IUsersRepository usersRepository,
-    IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork,
+    IRecommendationService recommendationService)
   {
     _jobsRepository = jobsRepository;
     _jobViewRepository = jobViewRepository;
@@ -35,6 +38,7 @@ public class GetJobBySlugQueryHandler : IRequestHandler<GetJobBySlugQuery, Resul
     _user = user;
     _usersRepository = usersRepository;
     _unitOfWork = unitOfWork;
+    _recommendationService = recommendationService;
   }
   public async Task<Result<JobDetailsDto>> Handle(GetJobBySlugQuery request, CancellationToken cancellationToken)
   {
@@ -68,6 +72,10 @@ public class GetJobBySlugQueryHandler : IRequestHandler<GetJobBySlugQuery, Resul
           await _jobViewRepository.AddAsync(jobViewResult.Value);
           await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
+
+        var viewFeedback = new RecommendationFeedback("view", viewerProfile.Id, job.Id.ToString());
+        var likeFeedback = new RecommendationFeedback("like", viewerProfile.Id, job.Id.ToString());
+        await _recommendationService.InsertFeedbackAsync(new[] { viewFeedback, likeFeedback }, cancellationToken);
       }
     }
 
@@ -76,4 +84,4 @@ public class GetJobBySlugQueryHandler : IRequestHandler<GetJobBySlugQuery, Resul
     return jobDetailsDto;
 
   }
-}
+}
