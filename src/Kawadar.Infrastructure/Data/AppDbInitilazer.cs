@@ -135,10 +135,13 @@ public class ApplicationDbContextInitialiser(
         if (result.Succeeded)
         {
             await _userManager.AddToRoleAsync(coAdmin2, DefaultRoles.Admin);
+            var Profile = UserProfile.create(coAdmin2.Id, "Omar", "Tamer", ProfileType.Admin);
+            await _context.UserProfiles.AddAsync(Profile.Value);
             foreach (var permission in Permissions.GetAllPermissions())
             {
                 await _userManager.AddClaimAsync(coAdmin2, new Claim("Permission", permission));
             }
+            await _context.SaveChangesAsync();
         }
     }
 

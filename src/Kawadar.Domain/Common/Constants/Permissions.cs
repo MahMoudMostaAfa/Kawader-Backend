@@ -47,7 +47,9 @@ public static class Permissions
 
   public const string ViewDisbutes = "Permissions.Disbutes.View";
   public const string SolveDisbutes = "Permissions.Disbuted.Solve";
+  public const string ViewConversations = "Permissions.Conversations.View";
 
+  public const string ViewTransactions = "Permissions.Transactions.View";
 
 
   public static List<string> GetAllPermissions()

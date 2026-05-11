@@ -2,6 +2,7 @@ using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Application.Common.Models;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.WalletAndPayments;
+using Kawadar.Domain.WalletAndPayments.Enums;
 using Kawadar.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -91,7 +92,77 @@ public class WalletRepository : IWalletRepository
     return new PaginatedList<Wallet>(items, totalCount, page, pageSize);
   }
 
-  public async Task<Result<EscrowTransaction>> GetEscrowTransactionByContractId(Guid contractId, CancellationToken cancellationToken)
+    public async Task<PaginatedList<WalletTransaction>> GetAllTransactions(TransactionType? type, WalletTransactionStatus? status, WalletTransactionReferenceType? reference,
+        int page, int pageSize, string sortBy, CancellationToken cancellationToken)
+    {
+        var query = _context.WalletTransactions.AsQueryable();
+
+        if (type.HasValue)
+        {
+            query = query.Where(x => x.Type == type);
+        }
+
+        if (status.HasValue)
+        {
+            query = query.Where(x => x.Status == status);
+        }
+
+        if (reference.HasValue)
+        {
+            query = query.Where(x => x.ReferenceType == reference);
+        }
+
+        query = sortBy == "oldest"
+            ? query.OrderBy(w => w.CreatedAt)
+            : query.OrderByDescending(w => w.CreatedAt);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return new PaginatedList<WalletTransaction>(items, totalCount, page, pageSize);
+    }
+
+    public async Task<PaginatedList<WalletTransaction>> GetAllTransactionsByWalletId(Guid walletId, TransactionType? type, WalletTransactionStatus? status, WalletTransactionReferenceType? reference,
+        int page, int pageSize, string sortBy, CancellationToken cancellationToken)
+    {
+        var query = _context.WalletTransactions.AsQueryable();
+
+        query = query.Where(x => x.WalletId == walletId);
+
+        if (type.HasValue)
+        {
+            query = query.Where(x => x.Type == type);
+        }
+
+        if (status.HasValue)
+        {
+            query = query.Where(x => x.Status == status);
+        }
+
+        if (reference.HasValue)
+        {
+            query = query.Where(x => x.ReferenceType == reference);
+        }
+
+        query = sortBy == "oldest"
+            ? query.OrderBy(w => w.CreatedAt)
+            : query.OrderByDescending(w => w.CreatedAt);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return new PaginatedList<WalletTransaction>(items, totalCount, page, pageSize);
+    }
+
+    public async Task<Result<EscrowTransaction>> GetEscrowTransactionByContractId(Guid contractId, CancellationToken cancellationToken)
   {
     var transaction = await _context.EscrowTransactions.FirstOrDefaultAsync(et => et.ContractId == contractId);
     if (transaction is null) return Error.NotFound();
@@ -112,4 +183,23 @@ public class WalletRepository : IWalletRepository
     if (transaction is null) return Error.NotFound();
     return transaction;
   }
+
+    public async Task<Dictionary<string, decimal>> GetMoneyTransactionDistributionBasedOnCurrency()
+    {
+        var distribution = await _context.WalletTransactions.GroupBy(x => x.Currency).ToDictionaryAsync(x => x.Key, x => x.Select(x => x.Amount).Sum());
+        return distribution;
+    }
+
+    public async Task<Dictionary<WalletTransactionStatus, int>> GetTransactionStatusDistribution()
+    {
+        var distribution = await _context.WalletTransactions.GroupBy(x => x.Status).ToDictionaryAsync(x => x.Key, x => x.Count());
+        return distribution;
+    }
+
+    public async Task<decimal> GetTotalProfit()
+    {
+        var FeeProfit = await _context.EscrowTransactions.Where(x => x.Type == EcrowTransactionType.PlatformFeeDeducted).SumAsync(x => x.Amount);
+        var subscriptionProfit = await _context.WalletTransactions.Where(x => x.Type == TransactionType.SubscriptionCharge).SumAsync(x => x.Amount);
+        return FeeProfit + subscriptionProfit;
+    }
 }

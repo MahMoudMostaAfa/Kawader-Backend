@@ -5,6 +5,7 @@ using Kawadar.Application.Common.Models;
 using Kawadar.Application.Features.ConversastionsAndMessages.DTOs;
 using Kawadar.Domain.Common.Constants;
 using Kawadar.Domain.Common.Results;
+using Kawadar.Domain.UserProfiles.Enums;
 using MediatR;
 
 namespace Kawadar.Application.Features.ConversastionsAndMessages.Queries.GetConversationMessages;
@@ -43,11 +44,16 @@ public class GetConversationMessagesQueryHandler : IRequestHandler<GetConversati
     if (conversationResult.IsError) return conversationResult.Errors;
     var conversation = conversationResult.Value;
 
+    var userClaimsResult = await _identityService.GetUserClaimsAsync(userId);
+    if (userClaimsResult.IsError) return userClaimsResult.Errors;
+
+    var hasAccessToConversation = userClaimsResult.Value.Select(x => x.Value).Contains(Permissions.ViewConversations);
 
     // CHECK THAT USER IS A PARTICIPANT IN THE CONVERSATION
-    if (conversation.ReceiverUserId != userProfile.Id && conversation.SenderUserId != userProfile.Id)
+    if (!hasAccessToConversation)
     {
-      return ApplicationErrors.UnauthorizedAccess;
+        if((conversation.ReceiverUserId != userProfile.Id && conversation.SenderUserId != userProfile.Id))
+            return ApplicationErrors.UnauthorizedAccess;
     }
     // get messages for the conversation
     var messagesResult = await _conversationsRepository.GetMessagesForConversationAsync(request.conversationId, request.PageNumber, request.PageSize, cancellationToken);
