@@ -13,6 +13,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Docker
       ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Redis: "redis:6379,abortConnect=false"
     volumes:
       - api_logs:/app/Logs
     depends_on:
@@ -22,6 +23,8 @@ services:
         condition: service_started
       gorse:
         condition: service_started
+      redis:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - kawadar-network
@@ -152,6 +155,43 @@ services:
     networks:
       - kawadar-network
 
+  ## ───────────────────────────────────────────────
+  # Redis (for caching)
+  ## ───────────────────────────────────────────────
+  redis:
+    container_name: "redis"
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes # persist data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - kawadar-network
+
+    # ───────────────────────────────────────────────
+
+  # RedisInsight (Redis Dashboard)
+  # ───────────────────────────────────────────────
+  redisinsight:
+    container_name: "redisinsight"
+    image: redis/redisinsight:latest
+    ports:
+      - "5540:5540" # UI (http://localhost:5540)
+    volumes:
+      - redisinsight_data:/data
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - kawadar-network
 networks:
   kawadar-network:
     driver: bridge
@@ -163,3 +203,5 @@ volumes:
   loki_data:
   api_logs:
   gorse_pg_data:
+  redis_data:
+  redisinsight_data:

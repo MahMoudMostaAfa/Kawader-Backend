@@ -168,6 +168,9 @@ public static class DependencyInjection
     service.Configure<GorseSettings>(configuration.GetSection(GorseSettings.SectionName));
     service.AddSingleton<IRecommendationService, GorseRecommendationService>();
 
+    // add caching services
+    service.AddCachingConfig(configuration);
+
     // repositories and unit of work
     service.AddScoped<IUsersRepository, UsersRepository>();
     service.AddScoped<IStorageClient, AzureStorageClient>();
@@ -377,5 +380,35 @@ public static class DependencyInjection
     return services;
 
 
+  }
+
+
+  public static IServiceCollection AddCachingConfig(this IServiceCollection services, IConfiguration configuration)
+  {
+    // add hybrid caching with Redis and in-memory cache
+    services.AddHybridCache(options =>
+    {
+      options.DefaultEntryOptions = new()
+      {
+        // L2 cache (Redis) expiration
+        Expiration = TimeSpan.FromMinutes(30),
+        // L1 cache (in-memory) expiration
+        LocalCacheExpiration = TimeSpan.FromSeconds(40),
+      };
+    });
+
+    // Redis configuration
+
+    var redisConnectionString = configuration.GetConnectionString("Redis");
+    ArgumentException.ThrowIfNullOrEmpty(redisConnectionString, "Connection string 'Redis' not found.");
+
+    services.AddStackExchangeRedisCache(options =>
+    {
+      options.Configuration = redisConnectionString;
+      options.InstanceName = "KawadarRedisCache";
+    });
+
+
+    return services;
   }
 }

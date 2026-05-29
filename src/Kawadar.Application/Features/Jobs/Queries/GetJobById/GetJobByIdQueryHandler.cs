@@ -7,6 +7,7 @@ using Kawadar.Application.Features.Jobs.DTOs;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Jobs.JobViews;
 using MediatR;
+using Microsoft.Extensions.Caching.Hybrid;
 
 namespace Kawadar.Application.Features.Jobs.Queries.GetJobById;
 
@@ -20,6 +21,7 @@ public class GetJobByIdQueryHandler : IRequestHandler<GetJobByIdQuery, Result<Jo
   private readonly IUsersRepository _usersRepository;
   private readonly IUnitOfWork _unitOfWork;
   private readonly IRecommendationService _recommendationService;
+
 
   public GetJobByIdQueryHandler(
  IJobsRepository jobsRepository,
@@ -39,12 +41,13 @@ public class GetJobByIdQueryHandler : IRequestHandler<GetJobByIdQuery, Result<Jo
     _usersRepository = usersRepository;
     _unitOfWork = unitOfWork;
     _recommendationService = recommendationService;
+
   }
   public async Task<Result<JobDetailsDto>> Handle(GetJobByIdQuery request, CancellationToken cancellationToken)
   {
+
     var userId = _user.Id;
     if (userId is null) return ApplicationErrors.UserIsNotAuthenticated;
-
     var jobResult = await _jobsRepository.GetJobByIdAsync(request.JobId);
     if (jobResult.IsError) return jobResult.Errors;
 

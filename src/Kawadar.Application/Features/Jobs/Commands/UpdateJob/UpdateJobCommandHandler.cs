@@ -6,6 +6,7 @@ using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Jobs;
 using Kawadar.Domain.Jobs.Enums;
 using MediatR;
+using Microsoft.Extensions.Caching.Hybrid;
 
 public class UpdateJobCommandHandler : IRequestHandler<UpdateJobCommand, Result<Updated>>
 {
@@ -18,14 +19,16 @@ public class UpdateJobCommandHandler : IRequestHandler<UpdateJobCommand, Result<
   private readonly IUser _user;
 
   private readonly IUsersRepository _usersRepository;
-  public UpdateJobCommandHandler(IJobsRepository jobRepository, IUnitOfWork unitOfWork, IIdentityService identityService, IUser user, IUsersRepository usersRepository)
+
+  private readonly HybridCache _cache;
+  public UpdateJobCommandHandler(IJobsRepository jobRepository, IUnitOfWork unitOfWork, IIdentityService identityService, IUser user, IUsersRepository usersRepository, HybridCache cache)
   {
     _jobRepository = jobRepository;
     _unitOfWork = unitOfWork;
     _identityService = identityService;
     _user = user;
     _usersRepository = usersRepository;
-
+    _cache = cache;
 
   }
   public async Task<Result<Updated>> Handle(UpdateJobCommand request, CancellationToken cancellationToken)
@@ -53,6 +56,8 @@ public class UpdateJobCommandHandler : IRequestHandler<UpdateJobCommand, Result<
     if (JobUpdateResult.IsError) return JobUpdateResult.Errors;
 
     await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+    await _cache.RemoveAsync($"GetJobByIdQuery:{job.Id:N}", cancellationToken);
 
     return Result.Updated;
   }
