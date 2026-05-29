@@ -81,7 +81,7 @@ try
     Authorization = [new HangfireAuthorizationFilter()]
   });
 
-  app.MapControllers();
+  app.MapControllers().RequireRateLimiting("SlidingWindow");
 
   // Prometheus metrics endpoint
   app.MapMetrics();
