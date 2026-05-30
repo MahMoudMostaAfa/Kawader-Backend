@@ -36,6 +36,11 @@ using Kawadar.Infrastructure.Services.HubServices;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Kawadar.Application.Features.ConversastionsAndMessages.EventHandlers;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.Embeddings;
+using Microsoft.Extensions.AI;
+using Qdrant.Client;
+using Kawadar.Infrastructure.Services.RAGServices;
 
 public static class DependencyInjection
 {
@@ -205,6 +210,13 @@ public static class DependencyInjection
     // Account deletion scheduler
     service.AddScoped<IAccountDeletionScheduler, HangfireAccountDeletionScheduler>();
     service.AddScoped<IEscrowReleaseScheduler, HangfireEscrowReleaseScheduler>();
+
+    // add semantic kernel configuration
+    service.AddSemanticKernelConfig(configuration);
+    service.AddScoped<IEmbeddingService, SkEmbeddingService>();
+
+    // add qdrant client configuration
+    service.AddQdrantClientConfig(configuration);
 
     return service;
   }
@@ -409,6 +421,33 @@ public static class DependencyInjection
     });
 
 
+    return services;
+  }
+
+  public static IServiceCollection AddSemanticKernelConfig(this IServiceCollection services, IConfiguration configuration)
+  {
+    var builder = Kernel.CreateBuilder();
+    builder.AddOllamaEmbeddingGenerator(
+      modelId: configuration["Ollama:EmbeddingModel"]!,
+      endpoint: new Uri(configuration["Ollama:BaseUrl"]!)
+    );
+
+    // builder.AddOllamaChatCompletion(
+    //     modelId: configuration["Ollama:ChatModel"]!,
+    //     endpoint: new Uri(configuration["Ollama:BaseUrl"]!)
+    // );
+    services.AddSingleton(builder.Build());
+    services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(sp =>
+        sp.GetRequiredService<Kernel>()
+          .GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>());
+    return services;
+  }
+
+  public static IServiceCollection AddQdrantClientConfig(this IServiceCollection services, IConfiguration configuration)
+  {
+    services.AddSingleton(_ => new QdrantClient(
+        host: configuration["Qdrant:Host"]!,   // "localhost" or "qdrant" in Docker
+        port: int.Parse(configuration["Qdrant:Port"]!)));  // 6334
     return services;
   }
 }

@@ -18,6 +18,7 @@ public class TestController : ApiController
   private readonly IUsersRepository _usersRepository;
   private readonly ISkillRepository _skillRepository;
   private readonly ISpecilizationRepository _specilizationRepository;
+  private readonly IEmbeddingService _embeddingService;
 
   public TestController(
     IRecommendationService recommendation,
@@ -26,7 +27,9 @@ public class TestController : ApiController
     IIdentityService identityService,
     IUsersRepository usersRepository,
     ISkillRepository skillRepository,
-    ISpecilizationRepository specilizationRepository)
+    ISpecilizationRepository specilizationRepository,
+    IEmbeddingService embeddingService
+    )
   {
     _unitOfWork = unitOfWork;
     _walletRepository = walletRepository;
@@ -35,6 +38,16 @@ public class TestController : ApiController
     _usersRepository = usersRepository;
     _skillRepository = skillRepository;
     _specilizationRepository = specilizationRepository;
+    _embeddingService = embeddingService;
+  }
+
+
+  /// test semantic kernel embedding generation
+  [HttpPost("embedding")]
+  public async Task<IActionResult> GenerateEmbedding([FromBody] GenerateEmbeddingRequest request, CancellationToken ct)
+  {
+    var embedding = await _embeddingService.GenerateAsync(request.Text, ct);
+    return Ok(new { embedding });
   }
 
   // ──────────────────────────────────────────────
@@ -500,6 +513,11 @@ public class TestController : ApiController
 
     return Ok();
   }
+}
+
+public class GenerateEmbeddingRequest
+{
+  public string Text { get; set; } = string.Empty;
 }
 
 // ──────────────────────────────────────────────

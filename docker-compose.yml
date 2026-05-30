@@ -14,6 +14,9 @@ services:
       ASPNETCORE_ENVIRONMENT: Docker
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__Redis: "redis:6379,abortConnect=false"
+      Ollama__BaseUrl: "http://ollama:11434"
+      Qdrant__Host: "qdrant"
+      Qdrant__Port: "6334"
     volumes:
       - api_logs:/app/Logs
     depends_on:
@@ -25,6 +28,10 @@ services:
         condition: service_started
       redis:
         condition: service_healthy
+      qdrant:
+        condition: service_started
+      ollama:
+        condition: service_started
     restart: unless-stopped
     networks:
       - kawadar-network
@@ -192,6 +199,54 @@ services:
     restart: unless-stopped
     networks:
       - kawadar-network
+  # ───────────────────────────────────────────────
+  # Qdrant (Vector Store for RAG)
+  # ───────────────────────────────────────────────
+  qdrant:
+    container_name: "qdrant"
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333" # REST API (http://localhost:6333)
+      - "6334:6334" # gRPC
+    volumes:
+      - qdrant_data:/qdrant/storage
+    restart: unless-stopped
+    networks:
+      - kawadar-network
+
+  # ───────────────────────────────────────────────
+  # Ollama (Local AI — embeddings + LLM)
+  # ───────────────────────────────────────────────
+  ollama:
+    container_name: "ollama"
+    image: alpine/ollama
+    ports:
+      - "11434:11434" # Ollama API (http://localhost:11434)
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    networks:
+      - kawadar-network
+
+  # ───────────────────────────────────────────────
+  # Ollama model puller (runs once, then exits)
+  # pulls: nomic-embed-text + llama3.2
+  # ───────────────────────────────────────────────
+  ollama-init:
+    container_name: "ollama-init"
+    image: alpine/ollama
+    entrypoint: >
+      /bin/sh -c "
+        sleep 10 &&
+        ollama pull nomic-embed-text
+      "
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    depends_on:
+      - ollama
+    networks:
+      - kawadar-network
+
 networks:
   kawadar-network:
     driver: bridge
@@ -205,3 +260,5 @@ volumes:
   gorse_pg_data:
   redis_data:
   redisinsight_data:
+  qdrant_data:
+  ollama_data:
