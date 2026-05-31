@@ -219,26 +219,33 @@ services:
   # ───────────────────────────────────────────────
   ollama:
     container_name: "ollama"
-    image: alpine/ollama
+    image: ollama/ollama
     ports:
       - "11434:11434" # Ollama API (http://localhost:11434)
     volumes:
       - ollama_data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     restart: unless-stopped
     networks:
       - kawadar-network
 
   # ───────────────────────────────────────────────
   # Ollama model puller (runs once, then exits)
-  # pulls: nomic-embed-text + llama3.2
+  # pulls: bge-m3 + qwen3.5:0.8b
   # ───────────────────────────────────────────────
   ollama-init:
     container_name: "ollama-init"
-    image: alpine/ollama
+    image: ollama/ollama
     entrypoint: >
       /bin/sh -c "
         sleep 10 &&
-        ollama pull nomic-embed-text
+        ollama pull bge-m3 && ollama pull qwen3.5:0.8b
       "
     environment:
       OLLAMA_HOST: http://ollama:11434

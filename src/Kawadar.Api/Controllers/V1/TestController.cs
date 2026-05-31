@@ -3,6 +3,9 @@ using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.Ollama;
 
 namespace Kawadar.Api.Controllers.V1;
 
@@ -19,6 +22,7 @@ public class TestController : ApiController
   private readonly ISkillRepository _skillRepository;
   private readonly ISpecilizationRepository _specilizationRepository;
   private readonly IEmbeddingService _embeddingService;
+  private readonly IChatCompletionService _chatCompletionService;
 
   public TestController(
     IRecommendationService recommendation,
@@ -28,7 +32,8 @@ public class TestController : ApiController
     IUsersRepository usersRepository,
     ISkillRepository skillRepository,
     ISpecilizationRepository specilizationRepository,
-    IEmbeddingService embeddingService
+    IEmbeddingService embeddingService,
+    IChatCompletionService chatCompletionService
     )
   {
     _unitOfWork = unitOfWork;
@@ -39,8 +44,115 @@ public class TestController : ApiController
     _skillRepository = skillRepository;
     _specilizationRepository = specilizationRepository;
     _embeddingService = embeddingService;
+    _chatCompletionService = chatCompletionService;
   }
+  private const string SystemPrompt = """
+    You are a moderator for a freelancing platform where clients and freelancers 
+    discuss work, projects, prices, deadlines, and deliverables.
+    
+    You will receive a single chat message. Analyze it and determine if it violates 
+    platform rules.
+    
+    Violations are LIMITED to these 2 things ONLY:
+    
+    === VIOLATION 1: Sharing contact information ===
+    The message contains or asks for:
+    
+    Phone numbers in ANY of these formats:
+    - Numeric: 01012345678 / 010-123-45678 / +20 101 234 5678 / (010) 12345678
+    - With country code: 00201012345678 / +201012345678
+    - Spelled out in English: "zero one zero one two three four five"
+    - Spelled out in Arabic: "صفر واحد صفر" / "زيرو واحد زيرو"
+    - Written in Arabic digits: ٠١٠١٢٣٤٥٦٧٨
+    - Partially hidden: "010 *** 5678" / "010xxxx678" / "my number starts with 010"
+    - Arabizi: "rakamy 010" / "nemrty 010" / "raqami zero one"
 
+    Email addresses in ANY of these formats:
+    - Standard: ahmed@gmail.com / ahmed.ali@company.com
+    - Dot/at tricks: "ahmed dot ali at gmail dot com"
+    - Arabic tricks: "ايميلي ahmed تاء gmail نقطة com"
+    - Spaces: "ahmed @ gmail . com"
+    - Arabizi: "emaili howa ahmed at gmail"
+    - Any variation of writing @ as "at" or "عند" or "آت"
+
+    Social media and messaging:
+    - Usernames: @ahmed_dev / "username is ahmed_dev" / "اسمي على انستا ahmed"
+    - Facebook / Instagram / Twitter / TikTok / LinkedIn profiles
+    - WhatsApp / واتساب / Telegram / تيليجرام / Signal / Viber / Skype
+      WITH a number, username, or clear intent to move conversation outside
+    - Arabizi: "wa5udny 3la whatsapp" / "kalmny 3la telegram"
+
+    NOT a violation:
+    - Mentioning WhatsApp/Telegram without sharing a number or username
+    - Asking to share work files, designs, documents, or project links
+    - Any work-related discussion (prices, deadlines, offers, feedback, questions)
+    
+    === VIOLATION 2: Offensive or inappropriate language ===
+    The message contains insults, threats, or sexual content.
+    
+    Egyptian Arabic (flag these):
+    يلعن / يلعن ابوك / يلعن امك / يلعن دينك / كس / كس امك / كس اختك /
+    متناك / ابن متناكة / ابن الشرموطة / ابن الكلب / ابن الوسخة /
+    احا / اتنيك / انيكك / نيك / هنيك / هنيك امك /
+    كلب / حيوان / خنزير / قرد / شرموط / شرموطة / عرص / معرص / خول /
+    وسخ / قذر / زبالة / حقير / تافه /
+    هضربك / هكسرك / هعمل فيك حاجة / هاخد حقي منك / دمك هيتسال /
+    روح متناك / نيك امك / اللي خلفك / عيل متناك
+
+    Arabic formal (flag these):
+    ابن العاهرة / ابن القحبة / عاهرة / قحبة / زانية / زاني /
+    لعين / ملعون / يلعنك / يلعن والديك /
+    سأقتلك / سأضربك / سأؤذيك / سأنتقم منك /
+    كافر / ابن الحرام / حرامي / لص / نصاب
+
+    English (flag these):
+    fuck / fucking / fucker / bitch / asshole / bastard / motherfucker /
+    son of a bitch / piece of shit / dickhead / cunt / whore / slut /
+    idiot / moron / retard / stupid (when used as insult) /
+    i will kill you / i will hurt you / i will find you /
+    kill yourself / go to hell / i know where you live
+    
+    NOT a violation:
+    - Formal or informal work conversation in any language or dialect
+    - Expressing frustration about work without insults ("الشغل ده صعب" / "I'm frustrated")
+    - Negotiating, complaining, or disagreeing professionally
+    - Using the word "hell" or "damn" casually without targeting someone
+    
+    === IMPORTANT ===
+    - When in doubt → the message is clean
+    - Short messages with no clear violation = clean
+    - Polite Arabic or Egyptian dialect = ALWAYS clean
+    - Discussing offers, prices, work, deadlines = ALWAYS clean
+    - A violation must be CLEAR and OBVIOUS, not assumed
+    
+    Respond ONLY with this exact JSON format, no extra text:
+    {
+      "detectedType": "contact_info" | "offensive_language" | "clean",
+      "severity": "low" | "medium" | "high"
+    }
+    """;
+
+  // test semantic kernel chat completion
+  [HttpPost("chat")]
+  public async Task<IActionResult> ChatCompletion([FromBody] GenerateEmbeddingRequest request, CancellationToken ct)
+  {
+    var history = new ChatHistory();
+    history.AddSystemMessage(SystemPrompt);
+    history.AddUserMessage(request.Text);
+
+    var settings = new OllamaPromptExecutionSettings
+    {
+
+      ExtensionData = new Dictionary<string, object> { { "think", false } }
+    };
+
+    var response = await _chatCompletionService.GetChatMessageContentAsync(
+      history,
+      executionSettings: settings,
+      cancellationToken: ct);
+
+    return Ok(new { content = response.Content, metadata = response.Metadata });
+  }
 
   /// test semantic kernel embedding generation
   [HttpPost("embedding")]

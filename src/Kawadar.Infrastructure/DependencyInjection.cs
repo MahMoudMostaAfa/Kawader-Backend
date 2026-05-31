@@ -37,10 +37,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Kawadar.Application.Features.ConversastionsAndMessages.EventHandlers;
 using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.Embeddings;
 using Microsoft.Extensions.AI;
 using Qdrant.Client;
 using Kawadar.Infrastructure.Services.RAGServices;
+using Microsoft.SemanticKernel.ChatCompletion;
 
 public static class DependencyInjection
 {
@@ -432,14 +432,20 @@ public static class DependencyInjection
       endpoint: new Uri(configuration["Ollama:BaseUrl"]!)
     );
 
-    // builder.AddOllamaChatCompletion(
-    //     modelId: configuration["Ollama:ChatModel"]!,
-    //     endpoint: new Uri(configuration["Ollama:BaseUrl"]!)
-    // );
+    builder.AddOllamaChatCompletion(
+        modelId: configuration["Ollama:ChatModel"]!,
+        endpoint: new Uri(configuration["Ollama:BaseUrl"]!)
+    );
     services.AddSingleton(builder.Build());
+
     services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(sp =>
         sp.GetRequiredService<Kernel>()
           .GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>());
+
+    services.AddSingleton<IChatCompletionService>(sp =>
+       sp.GetRequiredService<Kernel>()
+        .GetRequiredService<IChatCompletionService>());
+
     return services;
   }
 
