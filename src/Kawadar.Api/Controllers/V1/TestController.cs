@@ -2,8 +2,10 @@
 using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
+using Kawadar.Domain.Conversations.Messages;
+using Kawadar.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.SemanticKernel;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.Ollama;
 
@@ -20,6 +22,7 @@ public class TestController : ApiController
   private readonly IIdentityService _identityService;
   private readonly IUsersRepository _usersRepository;
   private readonly ISkillRepository _skillRepository;
+  private readonly AppDbContext _dbContext;
   private readonly ISpecilizationRepository _specilizationRepository;
   private readonly IEmbeddingService _embeddingService;
   private readonly IChatCompletionService _chatCompletionService;
@@ -31,6 +34,7 @@ public class TestController : ApiController
     IIdentityService identityService,
     IUsersRepository usersRepository,
     ISkillRepository skillRepository,
+    AppDbContext dbContext,
     ISpecilizationRepository specilizationRepository,
     IEmbeddingService embeddingService,
     IChatCompletionService chatCompletionService
@@ -45,6 +49,7 @@ public class TestController : ApiController
     _specilizationRepository = specilizationRepository;
     _embeddingService = embeddingService;
     _chatCompletionService = chatCompletionService;
+    _dbContext = dbContext;
   }
   private const string SystemPrompt = """
     You are a moderator for a freelancing platform where clients and freelancers 
@@ -90,7 +95,7 @@ public class TestController : ApiController
     === VIOLATION 2: Offensive or inappropriate language ===
     The message contains insults, threats, or sexual content.
     
-    Egyptian Arabic (flag these):
+    Egyptian Examples Arabic (flag these):
     يلعن / يلعن ابوك / يلعن امك / يلعن دينك / كس / كس امك / كس اختك /
     متناك / ابن متناكة / ابن الشرموطة / ابن الكلب / ابن الوسخة /
     احا / اتنيك / انيكك / نيك / هنيك / هنيك امك /
@@ -99,13 +104,14 @@ public class TestController : ApiController
     هضربك / هكسرك / هعمل فيك حاجة / هاخد حقي منك / دمك هيتسال /
     روح متناك / نيك امك / اللي خلفك / عيل متناك
 
-    Arabic formal (flag these):
+
+    Arabic  Examples formal (flag these):
     ابن العاهرة / ابن القحبة / عاهرة / قحبة / زانية / زاني /
     لعين / ملعون / يلعنك / يلعن والديك /
     سأقتلك / سأضربك / سأؤذيك / سأنتقم منك /
     كافر / ابن الحرام / حرامي / لص / نصاب
 
-    English (flag these):
+    English Examples (flag these):
     fuck / fucking / fucker / bitch / asshole / bastard / motherfucker /
     son of a bitch / piece of shit / dickhead / cunt / whore / slut /
     idiot / moron / retard / stupid (when used as insult) /
@@ -129,8 +135,61 @@ public class TestController : ApiController
     {
       "detectedType": "contact_info" | "offensive_language" | "clean",
       "severity": "low" | "medium" | "high"
+      "reason": "string"
+      "isViolation": true | false
     }
     """;
+
+
+  // add mocking message for testing
+  [HttpPost("mock-message")]
+  public async Task<IActionResult> PostMockMessages(CancellationToken ct)
+  {
+    var conversationId = Guid.Parse("233032C4-1B45-4B45-B068-70DFD7B57896");
+    var senderId = Guid.Parse("DA0E58F5-E9E0-4369-8C91-1388BF9C7966");
+    var receiverId = Guid.Parse("456E78BD-0A16-4355-B7EC-7370BCD4DC8B");
+
+    var conversationExists = await _dbContext.Conversations
+      .AnyAsync(c => c.Id == conversationId, ct);
+
+    if (!conversationExists)
+    {
+      return Problem(
+        title: "Conversation not found",
+        detail: $"Conversation {conversationId} does not exist.");
+    }
+
+    var mockContents = new[]
+    {
+      "ممكن نتواصل على واتساب؟ رقمي 01012345678.",
+      "إيميلك ايه؟ ابعته على ahmed@gmail.com عشان نكمل.",
+      "الشغل ده صعب شوية، محتاج وقت زيادة.",
+      "أنت نصاب ومش هسيب حقي."
+    };
+
+    var messages = new List<Message>(mockContents.Length);
+    foreach (var content in mockContents)
+    {
+      var messageResult = Message.Create(conversationId, senderId, content, replayToMessageId: null);
+      if (messageResult.IsError)
+      {
+        return Problem(title: "Message creation failed", detail: messageResult.Errors[0].Description);
+      }
+
+      messages.Add(messageResult.Value);
+    }
+
+    _dbContext.Messages.AddRange(messages);
+    await _unitOfWork.SaveChangesAsync(ct);
+
+    return Ok(new
+    {
+      conversationId,
+      senderId,
+      receiverId,
+      inserted = messages.Count
+    });
+  }
 
   // test semantic kernel chat completion
   [HttpPost("chat")]
@@ -150,6 +209,8 @@ public class TestController : ApiController
       history,
       executionSettings: settings,
       cancellationToken: ct);
+
+
 
     return Ok(new { content = response.Content, metadata = response.Metadata });
   }

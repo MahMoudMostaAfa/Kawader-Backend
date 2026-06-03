@@ -211,6 +211,9 @@ public static class DependencyInjection
     service.AddScoped<IAccountDeletionScheduler, HangfireAccountDeletionScheduler>();
     service.AddScoped<IEscrowReleaseScheduler, HangfireEscrowReleaseScheduler>();
 
+    // add policy violation service
+    service.AddScoped<IPolicyViolationService, PolicyViolationService>();
+
     // add semantic kernel configuration
     service.AddSemanticKernelConfig(configuration);
     service.AddScoped<IEmbeddingService, SkEmbeddingService>();
@@ -457,3 +460,4 @@ public static class DependencyInjection
     return services;
   }
 }
+

@@ -8,7 +8,7 @@ namespace Kawadar.Application.Features.Violations.Dtos
         public string UserName { get; set; } = "";
         public string ViolationEvidence { get; set; } = "";
         public ViolationType ViolationType { get; set; }
-        public float severityScore { get; set; }
+
         public string ReferenceType { get; set; } = "";
         public string? RedirectUrl { get; set; }
         public ViolationStatus ViolationStatus { get; set; }
