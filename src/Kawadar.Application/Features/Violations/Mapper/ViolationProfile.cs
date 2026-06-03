@@ -14,14 +14,13 @@ namespace Kawadar.Application.Features.Violations.Mapper
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.violation.Id))
                 .ForMember(dest => dest.violationStatus, opt => opt.MapFrom(src => src.violation.ViolationStatus))
                 .ForMember(dest => dest.violationType, opt => opt.MapFrom(src => src.violation.ViolationType))
-                .ForMember(dest => dest.severityScore, opt => opt.MapFrom(src => src.violation.severityScore))
                 .ForMember(dest => dest.RefernceType, opt => opt.MapFrom(src => src.violation.ReferenceType));
 
             CreateMap<(Violation violation, UserDto user), FullViolationDto>()
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.user.UserName))
                 .ForMember(dest => dest.ViolationStatus, opt => opt.MapFrom(src => src.violation.ViolationStatus))
                 .ForMember(dest => dest.ViolationType, opt => opt.MapFrom(src => src.violation.ViolationType))
-                .ForMember(dest => dest.severityScore, opt => opt.MapFrom(src => src.violation.severityScore))
+
                 .ForMember(dest => dest.ReferenceType, opt => opt.MapFrom(src => src.violation.ReferenceType))
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.violation.Id))
                 .ForMember(dest => dest.ViolationEvidence, opt => opt.MapFrom(src => src.violation.ViolationEvidence))

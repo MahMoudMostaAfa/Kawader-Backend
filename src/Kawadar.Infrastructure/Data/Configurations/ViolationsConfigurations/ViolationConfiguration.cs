@@ -10,8 +10,7 @@ namespace Kawadar.Infrastructure.Data.Configurations.ViolationsConfigurations
         public void Configure(EntityTypeBuilder<Violation> builder)
         {
             builder.HasKey(x => x.Id);
-            builder.Property(x => x.ViolationEvidence).IsRequired().HasMaxLength(500);
-            builder.Property(x => x.severityScore).IsRequired();
+            builder.Property(x => x.ViolationEvidence).HasMaxLength(500);
             builder.Property(x => x.ViolationStatus).IsRequired().HasConversion<string>();
             builder.Property(x => x.ViolationType).IsRequired().HasConversion<string>();
             builder.Property(x => x.ReferenceId).IsRequired();
