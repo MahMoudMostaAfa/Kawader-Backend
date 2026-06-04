@@ -220,6 +220,8 @@ public static class DependencyInjection
 
     // add qdrant client configuration
     service.AddQdrantClientConfig(configuration);
+    // add qdrant vector store for freelancers
+    service.AddScoped<IFreelancerVectorStore, QdrantFreelancerVectorStore>();
 
     return service;
   }

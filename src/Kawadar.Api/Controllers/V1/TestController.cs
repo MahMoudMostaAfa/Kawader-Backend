@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.Ollama;
+using Qdrant.Client;
+using Qdrant.Client.Grpc;
 
 namespace Kawadar.Api.Controllers.V1;
 
@@ -26,7 +28,7 @@ public class TestController : ApiController
   private readonly ISpecilizationRepository _specilizationRepository;
   private readonly IEmbeddingService _embeddingService;
   private readonly IChatCompletionService _chatCompletionService;
-
+  private readonly QdrantClient _qdrantClient;
   public TestController(
     IRecommendationService recommendation,
     IUnitOfWork unitOfWork,
@@ -37,7 +39,8 @@ public class TestController : ApiController
     AppDbContext dbContext,
     ISpecilizationRepository specilizationRepository,
     IEmbeddingService embeddingService,
-    IChatCompletionService chatCompletionService
+    IChatCompletionService chatCompletionService,
+    QdrantClient qdrantClient
     )
   {
     _unitOfWork = unitOfWork;
@@ -50,6 +53,7 @@ public class TestController : ApiController
     _embeddingService = embeddingService;
     _chatCompletionService = chatCompletionService;
     _dbContext = dbContext;
+    _qdrantClient = qdrantClient;
   }
   private const string SystemPrompt = """
     You are a moderator for a freelancing platform where clients and freelancers 
@@ -140,6 +144,40 @@ public class TestController : ApiController
     }
     """;
 
+  // test qdrant client connection and embedding storage
+  [HttpPost("qdrant/test")]
+  public async Task<IActionResult> TestQdrant(CancellationToken ct)
+  {
+    var collectionName = "freelance-messages";
+    // Ensure collection exists
+    var collectionExists = await _qdrantClient.CollectionExistsAsync(collectionName, ct);
+    if (!collectionExists)
+    {
+      await _qdrantClient.CreateCollectionAsync(collectionName,
+        new Qdrant.Client.Grpc.VectorParams { Size = 1024, Distance = Distance.Cosine });
+    }
+
+    var embedding = await _embeddingService.GenerateAsync("Test message for Qdrant embedding", ct);
+
+    var testPoint = new PointStruct
+    {
+      Id = Guid.NewGuid(),
+      Vectors = embedding
+      ,
+      Payload =
+      {
+            ["name"]   = "Test Freelancer",
+            ["skills"] = "C#, ASP.NET Core, SQL",
+            ["bio"]    = "Test freelancer bio",
+            ["rate"]   = 50.0,
+            ["rating"] = 4.5
+      }
+    };
+
+    await _qdrantClient.UpsertAsync(collectionName, [testPoint]);
+
+    return Ok(new { message = "Qdrant connection successful and collection ready." });
+  }
 
   // add mocking message for testing
   [HttpPost("mock-message")]

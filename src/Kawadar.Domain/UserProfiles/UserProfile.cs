@@ -1,5 +1,7 @@
 using Kawadar.Domain.Common;
 using Kawadar.Domain.Common.Results;
+using Kawadar.Domain.Reviews;
+using Kawadar.Domain.Skills;
 using Kawadar.Domain.Specilizations;
 using Kawadar.Domain.UserProfiles.Enums;
 
@@ -74,7 +76,19 @@ public class UserProfile : AuditableEntity
   // Foreign Keys
   public string UserId { get; private set; } = "";
 
+  public IReadOnlyCollection<Skill> Skills { get; private set; } = [];
+  public IReadOnlyCollection<Review> Reviews { get; private set; } = [];
+
   public string FullName => $"{FirstName} {LastName}";
+
+  public string TextToEmbed => String.Join("", new[]
+  {
+    "Bio: ", Bio, "\n",
+    "Title: ", Title, "\n",
+    "Experience Year: ", ExperienceYear.ToString(), "\n",
+    "Specialization: ", Specialization?.Name ?? "N/A", "\n",
+    "Skills: ", Skills != null && Skills.Any() ? string.Join(", ", Skills.Select(s => s.Name)) : "N/A", "\n",
+  });
   private UserProfile() { }
 
   private UserProfile(string userId, string firstName, string lastName, ProfileType profileType)
