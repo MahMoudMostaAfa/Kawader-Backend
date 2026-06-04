@@ -12,32 +12,36 @@ namespace Kawadar.Infrastructure.Services.Repositories;
 
 public class UsersRepository(AppDbContext appDbContext) : IUsersRepository
 {
-  public async Task<Result<Success>> CreateUserProfileAsync(UserProfile userProfile)
-  {
+    public async Task<Result<Success>> CreateUserProfileAsync(UserProfile userProfile)
+    {
 
-    await appDbContext.UserProfiles.AddAsync(userProfile);
+        await appDbContext.UserProfiles.AddAsync(userProfile);
 
-    return Result.Success;
-  }
+        return Result.Success;
+    }
 
-  public async Task<Result<UserProfile>> GetUserProfileByUserIdAsync(string userId)
-  {
-    var userProfile = await appDbContext.UserProfiles.FirstOrDefaultAsync(up => up.UserId == userId);
+    public async Task<Result<UserProfile>> GetUserProfileByUserIdAsync(string userId)
+    {
+        var userProfile = await appDbContext.UserProfiles.FirstOrDefaultAsync(up => up.UserId == userId);
 
-    if (userProfile == null) return Error.NotFound("UserProfile.NotFound", "User profile not found");
+        if (userProfile == null) return Error.NotFound("UserProfile.NotFound", "User profile not found");
 
-    return userProfile;
+        return userProfile;
 
-  }
+    }
 
-  public async Task<Result<UserProfile>> GetUserProfileByIdAsync(Guid id)
-  {
-    var userProfile = await appDbContext.UserProfiles.FirstOrDefaultAsync(up => up.Id == id);
+    public async Task<Result<UserProfile>> GetUserProfileByIdAsync(Guid id)
+    {
+        var userProfile = await appDbContext.UserProfiles
+        .Include(up => up.Specialization)
+        .Include(up => up.Skills)
+        .Include(up => up.Reviews)
+        .FirstOrDefaultAsync(up => up.Id == id);
 
-    if (userProfile == null) return Error.NotFound("UserProfile.NotFound", "User profile not found");
+        if (userProfile == null) return Error.NotFound("UserProfile.NotFound", "User profile not found");
 
-    return userProfile;
-  }
+        return userProfile;
+    }
 
     public async Task<PaginatedList<UserProfile>> GetUsers(
         bool? IsDeleted,
@@ -119,9 +123,13 @@ public class UsersRepository(AppDbContext appDbContext) : IUsersRepository
     public async Task<Result<IEnumerable<UserProfile>>> GetUsersbyIds(IEnumerable<Guid> Ids)
     {
         List<UserProfile> users = new();
-        foreach(var id in Ids)
+        foreach (var id in Ids)
         {
-            var user = await appDbContext.UserProfiles.FirstOrDefaultAsync(x => x.Id == id);
+            var user = await appDbContext.UserProfiles
+            .Include(up => up.Specialization)
+            .Include(up => up.Skills)
+            .Include(up => up.Reviews)
+            .FirstOrDefaultAsync(x => x.Id == id);
             if (user is null) return Error.NotFound("User Profile not found");
             users.Add(user);
         }

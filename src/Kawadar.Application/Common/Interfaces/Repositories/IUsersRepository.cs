@@ -10,11 +10,11 @@ namespace Kawadar.Application.Common.Interfaces.Repositories;
 public interface IUsersRepository
 {
 
-  Task<Result<Success>> CreateUserProfileAsync(UserProfile userProfile);
+    Task<Result<Success>> CreateUserProfileAsync(UserProfile userProfile);
 
-  Task<Result<UserProfile>> GetUserProfileByUserIdAsync(string userId);
+    Task<Result<UserProfile>> GetUserProfileByUserIdAsync(string userId);
 
-  Task<Result<UserProfile>> GetUserProfileByIdAsync(Guid id);
+    Task<Result<UserProfile>> GetUserProfileByIdAsync(Guid id);
 
     Task<PaginatedList<UserProfile>> GetUsers(
         bool? IsDeleted,
