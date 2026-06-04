@@ -22,7 +22,7 @@ public class UsersRepository(AppDbContext appDbContext) : IUsersRepository
 
     public async Task<Result<UserProfile>> GetUserProfileByUserIdAsync(string userId)
     {
-        var userProfile = await appDbContext.UserProfiles.FirstOrDefaultAsync(up => up.UserId == userId);
+        var userProfile = await appDbContext.UserProfiles.Include(x => x.Reviews).FirstOrDefaultAsync(up => up.UserId == userId);
 
         if (userProfile == null) return Error.NotFound("UserProfile.NotFound", "User profile not found");
 
@@ -52,7 +52,7 @@ public class UsersRepository(AppDbContext appDbContext) : IUsersRepository
         int pageSize,
         string sortBy)
     {
-        var query = appDbContext.UserProfiles.Where(x => x.ProfileType != ProfileType.Admin).AsQueryable();
+        var query = appDbContext.UserProfiles.Include(x => x.Reviews).Where(x => x.ProfileType != ProfileType.Admin).AsQueryable();
         if (IsDeleted.HasValue)
         {
             query = query.Where(u => u.IsDeleted == IsDeleted);
@@ -71,6 +71,51 @@ public class UsersRepository(AppDbContext appDbContext) : IUsersRepository
         if (specilizationId.HasValue)
         {
             query = query.Where(u => u.SpecializationId == specilizationId);
+        }
+
+        query = sortBy == "oldest"
+            ? query.OrderBy(j => j.CreatedAt)
+            : query.OrderByDescending(j => j.CreatedAt);
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+          .Skip((page - 1) * pageSize)
+          .Take(pageSize)
+          .ToListAsync();
+
+        return new PaginatedList<UserProfile>(items, totalCount, page, pageSize);
+    }
+
+    public async Task<PaginatedList<UserProfile>> GetFreelancers(
+        string? search,
+        ExperienceYear? ExperienceYear,
+        Guid? specilizationId,
+        float? minumumRating,
+        int page,
+        int pageSize,
+        string sortBy)
+    {
+        var query = appDbContext.UserProfiles.Include(x => x.Reviews).Where(x => x.ProfileType == ProfileType.Freelancer && x.IsBanned == false && x.IsDeleted == false).AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(x => x.Specialization.Name.Contains(search) || x.Title.Contains(search) || x.FullName.Contains(search));
+        }
+
+        if (ExperienceYear.HasValue)
+        {
+            query = query.Where(u => u.ExperienceYear == ExperienceYear);
+        }
+
+        if (specilizationId.HasValue)
+        {
+            query = query.Where(u => u.SpecializationId == specilizationId);
+        }
+
+        if (minumumRating.HasValue)
+        {
+            query = query.Where(u => u.Reviews.Select(x => x.Rating).DefaultIfEmpty(0).Average() >= minumumRating);
         }
 
         query = sortBy == "oldest"
