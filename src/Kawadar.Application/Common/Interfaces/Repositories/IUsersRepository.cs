@@ -38,4 +38,12 @@ public interface IUsersRepository
     Task<PaginatedList<UserReport>> GetUserReports(ReportType? reportType, ReportStatus? reportStatus, int page, int pageSize, string sortBy);
     Task<PaginatedList<UserReport>> GetUserReportsByUserId(Guid Id, ReportStatus? reportstatus, ReportType? reportType, int page, int pageSize, string sortBy);
     Task<Result<UserReport>> GetUserReportById(Guid Id);
+    Task<PaginatedList<UserProfile>> GetFreelancers(
+        string? search,
+        ExperienceYear? ExperienceYear,
+        Guid? specilizationId,
+        float? minumumRating,
+        int page,
+        int pageSize,
+        string sortBy)
 }

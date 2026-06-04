@@ -2,6 +2,7 @@ using Kawadar.Domain.UserProfiles.Enums;
 
 public class UserProfileDto
 {
+    public Guid Id { get; set; }
   public string FirstName { get; set; } = string.Empty;
   public string LastName { get; set; } = string.Empty;
 
@@ -42,6 +43,9 @@ public class UserProfileDto
 
   public ProfileType ProfileType { get; set; }
     public List<string> skills { get; set; } = new List<string>();
+
+    public int reviewsCount { get; set; }
+    public float rating { get; set; }
 
 
 

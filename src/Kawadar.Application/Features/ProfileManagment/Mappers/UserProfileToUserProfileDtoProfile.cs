@@ -1,5 +1,7 @@
 using AutoMapper;
 using Kawadar.Application.Common.Models;
+using Kawadar.Application.Features.ProfileManagment.DTOs;
+using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.UserProfiles;
 
 namespace Kawadar.Application.Features.ProfileManagment.Mappers;
@@ -10,6 +12,7 @@ class UserProfileToUserProfileDtoProfile : Profile
   {
 
     CreateMap<(UserProfile userProfile, UserDto user), UserProfileDto>()
+    .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.userProfile.Id))
     .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.userProfile.FirstName))
     .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.userProfile.LastName))
     .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.userProfile.Title))
@@ -30,7 +33,17 @@ class UserProfileToUserProfileDtoProfile : Profile
     .ForMember(dest => dest.specilizationId, opt => opt.MapFrom(src => src.userProfile.SpecializationId))
     .ForMember(dest => dest.IsBanned, opt => opt.MapFrom(src => src.userProfile.IsBanned))
     .ForMember(dest => dest.BannedUntil, opt => opt.MapFrom(src => src.userProfile.BannedUntil))
-    .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => src.userProfile.IsDeleted));
+    .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => src.userProfile.IsDeleted))
+    .ForMember(dest => dest.rating, opt => opt.MapFrom(src => src.userProfile.Reviews.Select(x => x.Rating).DefaultIfEmpty(0.0f).Average()))
+    .ForMember(dest => dest.reviewsCount, opt => opt.MapFrom(src => src.userProfile.Reviews.Count()));
+
+        CreateMap<(UserProfile userProfile, UserDto user), BriefFreelancerDto>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.userProfile.Id))
+            .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(src => src.userProfile.ProfilePictureUrl))
+            .ForMember(dest => dest.fullName, opt => opt.MapFrom(src => src.userProfile.FullName))
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.user.UserName))
+            .ForMember(dest => dest.IsOnline, opt => opt.MapFrom(src => src.userProfile.IsOnline))
+            .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => src.userProfile.Reviews.Select(x => x.Rating).DefaultIfEmpty(0.0f).Average()));
 
   }
 }
