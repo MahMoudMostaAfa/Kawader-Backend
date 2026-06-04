@@ -29,6 +29,7 @@ public class TestController : ApiController
   private readonly IEmbeddingService _embeddingService;
   private readonly IChatCompletionService _chatCompletionService;
   private readonly QdrantClient _qdrantClient;
+  private readonly IFreelancerVectorStore _freelancerVectorStore;
   public TestController(
     IRecommendationService recommendation,
     IUnitOfWork unitOfWork,
@@ -40,7 +41,8 @@ public class TestController : ApiController
     ISpecilizationRepository specilizationRepository,
     IEmbeddingService embeddingService,
     IChatCompletionService chatCompletionService,
-    QdrantClient qdrantClient
+    QdrantClient qdrantClient,
+    IFreelancerVectorStore freelancerVectorStore
     )
   {
     _unitOfWork = unitOfWork;
@@ -54,6 +56,7 @@ public class TestController : ApiController
     _chatCompletionService = chatCompletionService;
     _dbContext = dbContext;
     _qdrantClient = qdrantClient;
+    _freelancerVectorStore = freelancerVectorStore;
   }
   private const string SystemPrompt = """
     You are a moderator for a freelancing platform where clients and freelancers 
@@ -143,6 +146,24 @@ public class TestController : ApiController
       "isViolation": true | false
     }
     """;
+
+  // test freelancer vector store by adding a sample freelancer profile
+  [HttpPost("freelancer-vector-store/test")]
+  public async Task<IActionResult> TestFreelancerVectorStore(CancellationToken ct)
+  {
+    // var userProfileReuslt = await _usersRepository.GetUserProfileByIdAsync(Guid.Parse("456E78BD-0A16-4355-B7EC-7370BCD4DC8B"));
+    // var sampleFreelancer = userProfileReuslt.Value;
+    // await _freelancerVectorStore.AddFreelancerAsync(sampleFreelancer);
+    // // await _freelancerVectorStore.RemoveFreelancerAsync(Guid.Parse("456E78BD-0A16-4355-B7EC-7370BCD4DC8B"));
+    // // return Ok(new
+    // // {
+    // //   message = "deleted"
+    // // });
+
+    var searchResult = await _freelancerVectorStore.SearchFreelancersIdsAsync("I need a engineer that can build frontend websites ", topK: 5);
+    var freelancers = searchResult.Value;
+    return Ok(new { freelancers });
+  }
 
   // test qdrant client connection and embedding storage
   [HttpPost("qdrant/test")]
