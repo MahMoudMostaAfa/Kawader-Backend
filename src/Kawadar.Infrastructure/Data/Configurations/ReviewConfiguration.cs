@@ -23,7 +23,7 @@ namespace Kawadar.Infrastructure.Data.Configurations
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne<UserProfile>()
-                .WithMany()
+                .WithMany(u => u.Reviews)
                 .HasForeignKey(x => x.RevieweeId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
