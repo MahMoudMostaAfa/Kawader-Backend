@@ -45,5 +45,5 @@ public interface IUsersRepository
         float? minumumRating,
         int page,
         int pageSize,
-        string sortBy)
+        string sortBy);
 }

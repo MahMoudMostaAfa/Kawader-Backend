@@ -55,7 +55,7 @@ public class InMemoryUsersRepository : IUsersRepository
         query = sortBy?.ToLowerInvariant() switch
         {
             "oldest" => query.OrderBy(u => u.CreatedAt),
-            _        => query.OrderByDescending(u => u.CreatedAt)
+            _ => query.OrderByDescending(u => u.CreatedAt)
         };
 
         var all = query.ToList();
@@ -79,7 +79,7 @@ public class InMemoryUsersRepository : IUsersRepository
         var ordered = sortBy?.ToLowerInvariant() switch
         {
             "oldest" => query.OrderBy(u => u.CreatedAt),
-            _        => query.OrderByDescending(u => u.CreatedAt)
+            _ => query.OrderByDescending(u => u.CreatedAt)
         };
 
         var all = ordered.ToList();
@@ -135,7 +135,7 @@ public class InMemoryUsersRepository : IUsersRepository
         query = sortBy?.ToLowerInvariant() switch
         {
             "oldest" => query.OrderBy(r => r.CreatedAt),
-            _        => query.OrderByDescending(r => r.CreatedAt)
+            _ => query.OrderByDescending(r => r.CreatedAt)
         };
 
         var all = query.ToList();
@@ -153,7 +153,7 @@ public class InMemoryUsersRepository : IUsersRepository
         var ordered = sortBy?.ToLowerInvariant() switch
         {
             "oldest" => query.OrderBy(r => r.CreatedAt),
-            _        => query.OrderByDescending(r => r.CreatedAt)
+            _ => query.OrderByDescending(r => r.CreatedAt)
         };
 
         var all = ordered.ToList();
@@ -173,5 +173,10 @@ public class InMemoryUsersRepository : IUsersRepository
     {
         Users.Clear();
         UserReports.Clear();
+    }
+
+    public Task<PaginatedList<UserProfile>> GetFreelancers(string? search, ExperienceYear? ExperienceYear, Guid? specilizationId, float? minumumRating, int page, int pageSize, string sortBy)
+    {
+        throw new NotImplementedException();
     }
 }

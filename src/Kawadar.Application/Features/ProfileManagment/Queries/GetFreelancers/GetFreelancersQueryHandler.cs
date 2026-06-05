@@ -18,6 +18,7 @@ namespace Kawadar.Application.Features.ProfileManagment.Queries.GetFreelancers
             if (userId is null) return ApplicationErrors.UserIsNotAuthenticated;
 
             var userProfiles = await usersRepository.GetFreelancers(
+                null,
                 request.ExperienceYear,
                 request.specilizationId,
                 request.averageRating,

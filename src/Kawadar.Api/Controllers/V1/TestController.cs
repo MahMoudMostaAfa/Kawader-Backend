@@ -262,6 +262,8 @@ public class TestController : ApiController
     {
 
       ExtensionData = new Dictionary<string, object> { { "think", false } }
+    ,
+      Temperature = 0.0f
     };
 
     var response = await _chatCompletionService.GetChatMessageContentAsync(

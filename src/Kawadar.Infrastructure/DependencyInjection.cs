@@ -59,7 +59,8 @@ public static class DependencyInjection
     service.AddDbContext<AppDbContext>((sp, options) =>
     {
       var auditInterceptor = sp.GetRequiredService<AuditInterceptor>();
-      options.UseSqlServer(connectionString)
+      options.UseSqlServer(connectionString, sqlOptions =>
+        sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
         .AddInterceptors(auditInterceptor)
         .EnableSensitiveDataLogging()
         .EnableDetailedErrors();
@@ -168,6 +169,7 @@ public static class DependencyInjection
     service.AddSingleton<IEmailTemplateService, EmailTemplateService>();
     // AI services
     service.AddScoped<IAIService, GeminiApiService>();
+    service.AddScoped<IAIChatService, OllamaChatService>();
 
     // Recommendation engine (Gorse)
     service.Configure<GorseSettings>(configuration.GetSection(GorseSettings.SectionName));
