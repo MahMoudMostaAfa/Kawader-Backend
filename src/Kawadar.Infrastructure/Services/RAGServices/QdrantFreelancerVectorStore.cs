@@ -100,7 +100,7 @@ public class QdrantFreelancerVectorStore : IFreelancerVectorStore
     var orderedFreelancers = freelancers.OrderByDescending(f =>
     {
       var score = idswithscores.ContainsKey(f.Id) ? idswithscores[f.Id] : 0;
-      var ratingBoost = f.Reviews != null && f.Reviews.Count > 0 ? f.Reviews.Average(r => r.Rating) / 5 : 0;
+      var ratingBoost = f.Reviews != null && f.Reviews.Count > 0 ? f.Reviews.Average(r => r.Rating) : 0;
       return 0.7f * score + 0.3f * ratingBoost;
     }).ToList();
 
