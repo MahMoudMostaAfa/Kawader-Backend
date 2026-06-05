@@ -11,7 +11,7 @@ namespace Kawadar.Application.Features.ProfileManagment.Commands.UpdateProfile;
 public class UpdateProfileCommandHandler : IRequestHandler<UpdateProfileCommand, Result<Updated>>
 {
   private readonly IUser _user;
-
+  private readonly IFreelancerVectorStore _freelancerVectorStore;
   private readonly IIdentityService _identityService;
 
   private readonly IUsersRepository _usersRepository;
@@ -20,7 +20,9 @@ public class UpdateProfileCommandHandler : IRequestHandler<UpdateProfileCommand,
   private readonly ISkillRepository _skillRepository;
   private readonly ISpecilizationRepository _specilizationRepository;
 
-  public UpdateProfileCommandHandler(IUser user, IIdentityService identityService, IUsersRepository usersRepository, IUnitOfWork unitOfWork, IRecommendationService recommendationService, ISkillRepository skillRepository, ISpecilizationRepository specilizationRepository)
+  public UpdateProfileCommandHandler(IUser user, IIdentityService identityService, IUsersRepository usersRepository, IUnitOfWork unitOfWork, IRecommendationService recommendationService, ISkillRepository skillRepository, ISpecilizationRepository specilizationRepository,
+    IFreelancerVectorStore freelancerVectorStore
+  )
   {
     _user = user;
     _identityService = identityService;
@@ -29,6 +31,7 @@ public class UpdateProfileCommandHandler : IRequestHandler<UpdateProfileCommand,
     _recommendationService = recommendationService;
     _skillRepository = skillRepository;
     _specilizationRepository = specilizationRepository;
+    _freelancerVectorStore = freelancerVectorStore;
   }
   public async Task<Result<Updated>> Handle(UpdateProfileCommand request, CancellationToken cancellationToken)
   {
@@ -69,6 +72,8 @@ public class UpdateProfileCommandHandler : IRequestHandler<UpdateProfileCommand,
       labels: labels.ToArray(),
       comment: userProfile.FullName,
       ct: cancellationToken);
+
+    await _freelancerVectorStore.UpdateFreelancerAsync(userProfile);
 
     return Result.Updated;
 
