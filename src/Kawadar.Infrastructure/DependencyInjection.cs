@@ -241,6 +241,7 @@ public static class DependencyInjection
       x.AddConsumer<UpdateProfileImageConsumer>();
       x.AddConsumer<UploadIdentityConsumer>();
       x.AddConsumer<ProcessingIdentityDataConsumer>();
+      x.AddConsumer<JobToCandidatesConsumer>();
 
 
       // rabbitMQ cfg
@@ -312,6 +313,25 @@ public static class DependencyInjection
           e.ConfigureConsumer<ProcessingIdentityDataConsumer>(context);
         });
 
+        //  job to candidates queue configuration
+        cfg.ReceiveEndpoint("job-to-candidates-queue", e =>
+        {
+          e.PrefetchCount = 5;
+
+          // Retry policy: 3 times with exponential backoff
+          e.UseMessageRetry(r => r.Exponential(
+                      retryLimit: 3,
+                      minInterval: TimeSpan.FromSeconds(5),
+                      maxInterval: TimeSpan.FromMinutes(2),
+                      intervalDelta: TimeSpan.FromSeconds(10)));
+
+          // Dead letter queue after all retries fail
+          e.SetQueueArgument("x-dead-letter-exchange", "job-to-candidates-dlx");
+          e.SetQueueArgument("x-dead-letter-routing-key", "job-to-candidates-dlq");
+          e.ConfigureConsumer<JobToCandidatesConsumer>(context);
+        });
+
+
         // Declare DLX and bind DLQ for llm processing queue
         cfg.ReceiveEndpoint("llm-processing-dlq", dlq =>
         {
@@ -342,12 +362,21 @@ public static class DependencyInjection
           });
         });
 
+        // Declare DLX and bind DLQ for job to candidates queue  
 
+        cfg.ReceiveEndpoint("job-to-candidates-dlq", dlq =>
+        {
+          dlq.Bind("job-to-candidates-dlx", s =>
+          {
+            s.RoutingKey = "job-to-candidates-dlq";
+            s.ExchangeType = "direct";
+          });
+
+
+        });
 
 
       });
-
-
     });
     return services;
   }

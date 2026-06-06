@@ -16,6 +16,9 @@ using Kawadar.Domain.Notifications;
 using MediatR;
 using Kawadar.Domain.Notifications.Enums;
 using Kawadar.Application.Features.ConversastionsAndMessages.DTOs;
+using Kawadar.Domain.Jobs.Events;
+using Kawadar.Application.Common.Messaging;
+using Kawadar.Application.Common.Messaging.Messages;
 
 public class CreateJobCommandHandler : IRequestHandler<CreateJobCommand, Result<Created>>
 {
@@ -30,10 +33,12 @@ public class CreateJobCommandHandler : IRequestHandler<CreateJobCommand, Result<
   private readonly INotificationsHubService _notificationsHubService;
 
   private readonly IRecommendationService _recommendationService;
+  private readonly IEventBus _eventBus;
   private readonly IUnitOfWork _unitOfWork;
 
   public CreateJobCommandHandler(IUser user, IIdentityService identityService, IUsersRepository usersRepository, ISpecilizationRepository specilizationRepository, ISkillRepository skillRepository, IJobsRepository jobsRepository, IStorageClient storageClient, IUnitOfWork unitOfWork
-  , INotificationsRepository notificationsRepository, INotificationsHubService notificationsHubService, IRecommendationService recommendationService)
+  , INotificationsRepository notificationsRepository, INotificationsHubService notificationsHubService, IRecommendationService recommendationService
+  , IEventBus eventBus)
   {
     _user = user;
     _identityService = identityService;
@@ -46,6 +51,7 @@ public class CreateJobCommandHandler : IRequestHandler<CreateJobCommand, Result<
     _notificationsRepository = notificationsRepository;
     _notificationsHubService = notificationsHubService;
     _recommendationService = recommendationService;
+    _eventBus = eventBus;
   }
   public async Task<Result<Created>> Handle(CreateJobCommand request, CancellationToken cancellationToken)
   {
@@ -182,7 +188,12 @@ public class CreateJobCommandHandler : IRequestHandler<CreateJobCommand, Result<
 
 
 
+    if (job.IsPrivate is false)
+    {
+      // Publish a message to notify candidates about the new job
+      await _eventBus.PublishAsync(new JobToCandidatesMessage { JobId = job.Id }, cancellationToken);
 
+    }
 
 
     return Result.Created;

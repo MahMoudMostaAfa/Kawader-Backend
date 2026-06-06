@@ -9,4 +9,6 @@ public enum NotificationCategory
   Other = 5
   ,
   Contract = 6
+  ,
+  JobRecommendation = 7
 }
