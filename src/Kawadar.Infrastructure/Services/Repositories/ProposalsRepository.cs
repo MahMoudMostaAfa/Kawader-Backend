@@ -44,6 +44,12 @@ public class ProposalsRepository : IProposalsRepository
 
   }
 
+  public async Task<Result<bool>> ProposalExistsForJobAndFreelancerAsync(Guid jobId, Guid freelancerId, CancellationToken cancellationToken = default)
+  {
+    var exists = await _context.JobProposals.AnyAsync(p => p.JobId == jobId && p.FreelancerId == freelancerId, cancellationToken);
+    return exists;
+  }
+
   public async Task<Result<PaginatedList<JobProposal>>> GetFreelancerProposals(Guid FreelancerId, int Page = 1,
   int PageSize = 10, string SortBy = "newest")
   {
@@ -64,7 +70,7 @@ public class ProposalsRepository : IProposalsRepository
 
   public async Task<Result<PaginatedList<JobProposal>>> GetProposalsAsync(Guid jobId, JobProposalType? Type, JobProposalStatus? Status, int Page = 1, int PageSize = 10, string DatesortBy = "newest", string? PriceSortBy = null, string? EstimatedTimeSortBy = null)
   {
-    var query = _context.JobProposals.Where(jp => jp.JobId == jobId).AsQueryable();
+    var query = _context.JobProposals.Where(jp => jp.JobId == jobId && jp.Status != JobProposalStatus.Withdrawn).AsQueryable();
 
     if (Type.HasValue) query = query.Where(jp => jp.ProposalType == Type.Value);
 
@@ -103,4 +109,46 @@ public class ProposalsRepository : IProposalsRepository
 
     return new PaginatedList<JobProposal>(items, totalCount, Page, PageSize);
   }
+
+    public async Task<Result<int>> GetUserProposalsThisMonth(Guid UserProfileId)
+    {
+        var userProfile = await _context.UserProfiles.Where(x => x.Id == UserProfileId).FirstOrDefaultAsync();
+        if (userProfile is null) return Error.NotFound();
+
+        var userJoinedAt = userProfile.CreatedAt;
+        var now = DateTime.UtcNow;
+        var monthsSinceJoin = ((now.Year - userJoinedAt.Year) * 12) + now.Month - userJoinedAt.Month;
+        var currentCycleStart = userJoinedAt.AddMonths(monthsSinceJoin);
+        var currentCycleEnd = currentCycleStart.AddMonths(1);
+
+        var currentProposalsCount = await _context.JobProposals
+            .Where(x => x.FreelancerId == UserProfileId
+                && x.CreatedAt >= currentCycleStart
+                && x.CreatedAt < currentCycleEnd) 
+            .CountAsync();
+
+        return currentProposalsCount;
+    }
+
+  public async Task<int> GetProposalsCount()
+  {
+    return await _context.JobProposals.CountAsync();
+  }
+
+  public async Task<int> GetNumberOfProposalsThisMonth()
+  {
+    var now = DateTime.UtcNow;
+    var currentMonthStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+    var NextMonthStart = currentMonthStart.AddMonths(1);
+
+    var proposals = await _context.JobProposals.Where(x => x.CreatedAt >= currentMonthStart && x.CreatedAt < NextMonthStart).CountAsync();
+    return proposals;
+  }
+
+  public async Task<Dictionary<JobProposalStatus, int>> GetDistributionBasedOnStatus()
+  {
+    var distribution = await _context.JobProposals.GroupBy(x => x.Status).ToDictionaryAsync(x => x.Key, x => x.Count());
+    return distribution;
+  }
+
 }

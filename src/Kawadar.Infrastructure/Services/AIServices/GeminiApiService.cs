@@ -13,7 +13,8 @@ public class GeminiApiService : IAIService
 {
   private readonly Client _client;
   private readonly ILogger<GeminiApiService> _logger;
-  private const string MODEL_NAME = "gemini-3-flash-preview";
+
+  private const string MODEL_NAME = "gemini-3.1-flash-lite";
 
   private static readonly JsonSerializerOptions _jsonOptions = new()
   {

@@ -1,12 +1,16 @@
 
-using System.Security.Claims;
+using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Domain.Common.Constants;
 using Kawadar.Domain.Common.Results;
+using Kawadar.Domain.UserProfiles;
+using Kawadar.Domain.UserProfiles.Enums;
 using Kawadar.Infrastructure.Identity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Security.Claims;
+using static MassTransit.ValidationResultExtensions;
 namespace Kawadar.Infrastructure.Data;
 
 
@@ -115,27 +119,66 @@ public class ApplicationDbContextInitialiser(
         {
           await _userManager.AddClaimAsync(coAdmin, new Claim("Permission", permission));
         }
-
-        if (await _userManager.FindByEmailAsync("Omartamer2445@gmail.com") == null)
-        {
-            var coAdmin2 = new AppUser
-            {
-                UserName = "Omar24455",
-                Email = "Omartamer2445@gmail.com",
-                EmailConfirmed = true,
-            };
-
-            var result2 = await _userManager.CreateAsync(coAdmin2, "Omar@123");
-            if (result.Succeeded)
-            {
-                await _userManager.AddToRoleAsync(coAdmin, DefaultRoles.Admin);
-                foreach (var permission in Permissions.GetAllPermissions())
-                {
-                    await _userManager.AddClaimAsync(coAdmin, new Claim("Permission", permission));
-                }
-            }
-        }
       }
+    }
+
+    if (await _userManager.FindByEmailAsync("Omartamer2445@gmail.com") == null)
+    {
+        var coAdmin2 = new AppUser
+        {
+            UserName = "Omar24455",
+            Email = "Omartamer2445@gmail.com",
+            EmailConfirmed = true,
+        };
+
+        var result = await _userManager.CreateAsync(coAdmin2, "Omar@123");
+        if (result.Succeeded)
+        {
+            await _userManager.AddToRoleAsync(coAdmin2, DefaultRoles.Admin);
+            var Profile = UserProfile.create(coAdmin2.Id, "Omar", "Tamer", ProfileType.Admin);
+            await _context.UserProfiles.AddAsync(Profile.Value);
+            foreach (var permission in Permissions.GetAllPermissions())
+            {
+                await _userManager.AddClaimAsync(coAdmin2, new Claim("Permission", permission));
+            }
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    if(await _userManager.FindByEmailAsync("Ahmed12345@gmail.com") == null)
+    {
+        var client = new AppUser
+        {
+            UserName = "Ahmed123",
+            Email = "Ahmed12345@gmail.com",
+            EmailConfirmed = true
+        };
+        var result = await _userManager.CreateAsync(client, "Ahmed@123");
+        if (result.Succeeded)
+        {
+            await _userManager.AddToRoleAsync(client, DefaultRoles.User);
+            var Profile = UserProfile.create(client.Id, "Ahmed", "Tarek", ProfileType.Client);
+            await _context.UserProfiles.AddAsync(Profile.Value);
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    if (await _userManager.FindByEmailAsync("Youssef123@gmail.com") == null)
+    {
+        var client = new AppUser
+        {
+            UserName = "Youssef123",
+            Email = "Youssef123@gmail.com",
+            EmailConfirmed = true
+        };
+        var result = await _userManager.CreateAsync(client, "Youssef@123");
+        if (result.Succeeded)
+        {
+            await _userManager.AddToRoleAsync(client, DefaultRoles.User);
+            var Profile = UserProfile.create(client.Id, "Youssef", "Amin", ProfileType.Client);
+            await _context.UserProfiles.AddAsync(Profile.Value);
+            await _context.SaveChangesAsync();
+        }
     }
   }
 }

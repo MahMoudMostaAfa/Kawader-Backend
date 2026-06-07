@@ -1,13 +1,15 @@
 using Kawadar.Api.Requests.Proposals;
+using Kawadar.Application.Common.Models;
 using Kawadar.Application.Features.Proposals.Commands.CreateProposal;
 using Kawadar.Application.Features.Proposals.Commands.DeleteProposal;
+using Kawadar.Application.Features.Proposals.Commands.GenerateProposal;
 using Kawadar.Application.Features.Proposals.Commands.UpdateProposal;
 using Kawadar.Application.Features.Proposals.Commands.UpdateProposalStatus;
+using Kawadar.Application.Features.Proposals.Dtos;
 using Kawadar.Application.Features.Proposals.Queries.GetProposalById;
 using Kawadar.Application.Features.Proposals.Queries.GetProposals;
 using Kawadar.Application.Features.Proposals.Queries.GetUserProposals;
 using Kawadar.Domain.Proposals.Enums;
-using MassTransit.Futures.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +27,41 @@ public class ProposalsController : ApiController
   {
     _sender = sender;
   }
+
+  [HttpPost("jobs/{jobId:guid}/generate-proposal")]
+  [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
+  [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [EndpointName(nameof(GenerateProposal))]
+  [EndpointSummary("Generates a proposal for a job.")]
+  [EndpointDescription("Generates a new proposal for the specified job using the submitted cover letter, pricing, answers, and milestone details.")]
+  public async Task<IActionResult> GenerateProposal([FromRoute
+        ] Guid jobId)
+  {
+    var query = new GenerateProposalCommand(jobId
+    );
+
+    var result = await _sender.Send(query);
+
+    return result.Match(
+        proposalText => Ok(new
+        {
+          Proposal = proposalText,
+        }),
+        errors => Problem(errors));
+
+  }
+
+
+
+
   [HttpPost("jobs/{jobId:guid}/proposals")]
+  [ProducesResponseType(typeof(void), StatusCodes.Status201Created)]
+  [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [EndpointName(nameof(AddProposal))]
+  [EndpointSummary("Submits a proposal for a job.")]
+  [EndpointDescription("Creates a new proposal for the specified job using the submitted cover letter, pricing, answers, and milestone details.")]
   public async Task<IActionResult> AddProposal([FromRoute] Guid jobId, [FromBody] CreateProposalRequest request)
   {
     var command = new CreateProposalCommand(jobId, request.CoverLetter, request.JobProposalType, request.Amount, request.EstimatedDays, request.HourlyRate, request.EstimatedHours, request.QuestionAnswerDtos, request.MilestoneDtos);
@@ -38,6 +74,12 @@ public class ProposalsController : ApiController
   }
 
   [HttpGet("jobs/{jobId:guid}/proposals")]
+  [ProducesResponseType(typeof(PaginatedList<ProposalSummaryDto>), StatusCodes.Status200OK)]
+  [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [EndpointName(nameof(GetProposals))]
+  [EndpointSummary("Gets proposals for a job.")]
+  [EndpointDescription("Returns a paginated and sortable list of proposals for the specified job, with optional filters for proposal type and status.")]
 
   public async Task<IActionResult> GetProposals(
   [FromRoute] Guid jobId,
@@ -65,6 +107,12 @@ public class ProposalsController : ApiController
 
 
   [HttpPut("proposals/{proposalId:guid}")]
+  [ProducesResponseType(StatusCodes.Status204NoContent)]
+  [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [EndpointName(nameof(UpdateProposal))]
+  [EndpointSummary("Updates a proposal.")]
+  [EndpointDescription("Updates an existing proposal with the provided cover letter, answers, milestones, and pricing details.")]
   public async Task<IActionResult> UpdateProposal([FromRoute] Guid proposalId, [FromBody] UpdateProposalRequest updateProposalRequest)
   {
     var command = new UpdateProposalCommand(
@@ -85,6 +133,12 @@ public class ProposalsController : ApiController
   }
 
   [HttpGet("proposals/{proposalId:guid}")]
+  [ProducesResponseType(typeof(ProposalDetailsDto), StatusCodes.Status200OK)]
+  [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [EndpointName(nameof(GetProposalById))]
+  [EndpointSummary("Gets a proposal by its identifier.")]
+  [EndpointDescription("Returns the full details of a proposal using its unique identifier.")]
   public async Task<IActionResult> GetProposalById([FromRoute] Guid proposalId)
   {
     var result = await _sender.Send(new GetProposalByIdQuery(proposalId));
@@ -94,6 +148,12 @@ public class ProposalsController : ApiController
 
 
   [HttpPut("proposals/{proposalId:guid}/change-status")]
+  [ProducesResponseType(StatusCodes.Status204NoContent)]
+  [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [EndpointName(nameof(ChangeProposalStatus))]
+  [EndpointSummary("Changes the status of a proposal.")]
+  [EndpointDescription("Updates the status of a proposal using the provided status value.")]
   public async Task<IActionResult> ChangeProposalStatus([FromRoute] Guid proposalId, [FromBody]
   UpdateProposalStatusRequest request)
   {
@@ -106,6 +166,12 @@ public class ProposalsController : ApiController
 
 
   [HttpDelete("proposals/{proposalId:guid}")]
+  [ProducesResponseType(StatusCodes.Status204NoContent)]
+  [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [EndpointName(nameof(DeleteProposal))]
+  [EndpointSummary("Deletes a proposal.")]
+  [EndpointDescription("Deletes a proposal using its unique identifier.")]
 
   public async Task<IActionResult> DeleteProposal([FromRoute] Guid proposalId)
   {
@@ -117,6 +183,12 @@ public class ProposalsController : ApiController
 
 
   [HttpGet("proposals/my-proposals")]
+  [ProducesResponseType(typeof(PaginatedList<ProposalSummaryDto>), StatusCodes.Status200OK)]
+  [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [EndpointName(nameof(GetMyProposals))]
+  [EndpointSummary("Gets the authenticated user's proposals.")]
+  [EndpointDescription("Returns a paginated and sortable list of proposals created by the currently authenticated user.")]
   public async Task<IActionResult> GetMyProposals(
     [FromQuery] string sortBy = "newest",
     [FromQuery] int page = 1,

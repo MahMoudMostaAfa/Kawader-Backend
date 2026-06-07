@@ -61,7 +61,7 @@ public class AuthController : ApiController
   {
     var result = await _sender.Send(command, ct);
     return result.Match(
-      token => Ok(new { Token = token }),
+      LoginDto => Ok(new { Token = LoginDto.token, Permissions = LoginDto.permissions, Role = LoginDto.role}),
       Problem
     );
   }

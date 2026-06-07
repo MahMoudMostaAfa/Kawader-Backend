@@ -22,12 +22,25 @@ using Azure.Storage.Blobs;
 using Azure.Identity;
 using Kawadar.Infrastructure.Services.CloudServices;
 using Kawadar.Infrastructure.Services.AIServices;
+using Kawadar.Infrastructure.Services.RecommendationServices;
+using Kawadar.Infrastructure.Settings;
+using Kawadar.Infrastructure.Services.PaymentServices;
 using Kawadar.Application.Common.Messaging;
 using Kawadar.Infrastructure.Messaging;
 using MassTransit;
 using Kawadar.Infrastructure.Messaging.Consumers;
 using Hangfire;
 using Hangfire.SqlServer;
+using Kawadar.Application.Common.Hubs;
+using Kawadar.Infrastructure.Services.HubServices;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+using Kawadar.Application.Features.ConversastionsAndMessages.EventHandlers;
+using Microsoft.SemanticKernel;
+using Microsoft.Extensions.AI;
+using Qdrant.Client;
+using Kawadar.Infrastructure.Services.RAGServices;
+using Microsoft.SemanticKernel.ChatCompletion;
 
 public static class DependencyInjection
 {
@@ -46,9 +59,14 @@ public static class DependencyInjection
     service.AddDbContext<AppDbContext>((sp, options) =>
     {
       var auditInterceptor = sp.GetRequiredService<AuditInterceptor>();
-      options.UseSqlServer(connectionString).AddInterceptors(auditInterceptor);
-
+      options.UseSqlServer(connectionString, sqlOptions =>
+        sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
+        .AddInterceptors(auditInterceptor)
+        .EnableSensitiveDataLogging()
+        .EnableDetailedErrors();
     });
+
+
     service.AddAuthentication(options =>
     {
       options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -67,6 +85,26 @@ public static class DependencyInjection
         ValidIssuer = jwtSettings["Issuer"],
         ValidAudience = jwtSettings["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Secret"]!))
+      };
+
+      //!  SignalR sends the token in the query string <IMPORTANT>
+      options.Events = new JwtBearerEvents
+      {
+        OnMessageReceived = context =>
+        {
+          var accessToken = context.Request.Query["access_token"];
+          var path = context.HttpContext.Request.Path;
+
+          if (!string.IsNullOrEmpty(accessToken) &&
+                  (path.StartsWithSegments("/hubs/messaging") ||
+                   path.StartsWithSegments("/hubs/notifications") ||
+                   path.StartsWithSegments("/hubs/persistance")))
+          {
+            context.Token = accessToken;
+          }
+
+          return Task.CompletedTask;
+        }
       };
 
     });
@@ -93,6 +131,9 @@ public static class DependencyInjection
 
     // add Hangfire services
     service.AddHangfireCfg(configuration);
+
+    // add signalR services
+    service.AddSignalRConfig();
 
     //Adding Azure Blob Storage
     service.AddSingleton(provider =>
@@ -128,6 +169,14 @@ public static class DependencyInjection
     service.AddSingleton<IEmailTemplateService, EmailTemplateService>();
     // AI services
     service.AddScoped<IAIService, GeminiApiService>();
+    service.AddScoped<IAIChatService, OllamaChatService>();
+
+    // Recommendation engine (Gorse)
+    service.Configure<GorseSettings>(configuration.GetSection(GorseSettings.SectionName));
+    service.AddSingleton<IRecommendationService, GorseRecommendationService>();
+
+    // add caching services
+    service.AddCachingConfig(configuration);
 
     // repositories and unit of work
     service.AddScoped<IUsersRepository, UsersRepository>();
@@ -139,15 +188,42 @@ public static class DependencyInjection
     service.AddScoped<ISkillRepository, SkillRepository>();
     service.AddScoped<IJobsRepository, JobsRepository>();
     service.AddScoped<IReviewRepository, ReviewRepository>();
-
+    service.AddScoped<ISavedJobsRepository, SavedJobsRepository>();
+    service.AddScoped<IViolationRepository, ViolationRepository>();
+    service.AddScoped<IDisbuteRepository, DisbuteRepository>();
+    service.AddScoped<IConversationsRepository, ConversationsRepository>();
+    service.AddScoped<INotificationsRepository, NotificationsRepository>();
     service.AddScoped<IJobViewRepository, JobViewRepository>();
     service.AddScoped<IProposalsRepository, ProposalsRepository>();
+    service.AddScoped<IWalletRepository, WalletRepository>();
+    service.AddScoped<IContractsRepository, ContractsRepository>();
+    service.AddScoped<IUserPayoutAccountRepository, UserPayoutAccountRepository>();
+    service.AddScoped<IWithdrawalRequestRepository, WithdrawalRequestRepository>();
     service.AddScoped<IUnitOfWork, UnitOfWork>();
+    service.AddScoped<IPaymentRepository, PaymentRepository>();
     service.AddTransient<IIdentityService, IdentityService>();
+    service.AddScoped<ISubscriptionsRepository, SubscriptionRepository>();
+
+    // Paymob payment gateway
+    service.Configure<PaymobSettings>(configuration.GetSection(PaymobSettings.SectionName));
+    service.AddHttpClient<IPaymobService, PaymobService>();
 
 
     // Account deletion scheduler
     service.AddScoped<IAccountDeletionScheduler, HangfireAccountDeletionScheduler>();
+    service.AddScoped<IEscrowReleaseScheduler, HangfireEscrowReleaseScheduler>();
+
+    // add policy violation service
+    service.AddScoped<IPolicyViolationService, PolicyViolationService>();
+
+    // add semantic kernel configuration
+    service.AddSemanticKernelConfig(configuration);
+    service.AddScoped<IEmbeddingService, SkEmbeddingService>();
+
+    // add qdrant client configuration
+    service.AddQdrantClientConfig(configuration);
+    // add qdrant vector store for freelancers
+    service.AddScoped<IFreelancerVectorStore, QdrantFreelancerVectorStore>();
 
     return service;
   }
@@ -165,6 +241,7 @@ public static class DependencyInjection
       x.AddConsumer<UpdateProfileImageConsumer>();
       x.AddConsumer<UploadIdentityConsumer>();
       x.AddConsumer<ProcessingIdentityDataConsumer>();
+      x.AddConsumer<JobToCandidatesConsumer>();
 
 
       // rabbitMQ cfg
@@ -236,7 +313,26 @@ public static class DependencyInjection
           e.ConfigureConsumer<ProcessingIdentityDataConsumer>(context);
         });
 
-        // Declare DLX and bind DLQ for llm processing queue
+        //  job to candidates queue configuration
+        cfg.ReceiveEndpoint("job-to-candidates-queue", e =>
+        {
+          e.PrefetchCount = 5;
+
+          // Retry policy: 3 times with exponential backoff
+          e.UseMessageRetry(r => r.Exponential(
+                      retryLimit: 3,
+                      minInterval: TimeSpan.FromSeconds(5),
+                      maxInterval: TimeSpan.FromMinutes(2),
+                      intervalDelta: TimeSpan.FromSeconds(10)));
+
+          // Dead letter queue after all retries fail
+          e.SetQueueArgument("x-dead-letter-exchange", "job-to-candidates-dlx");
+          e.SetQueueArgument("x-dead-letter-routing-key", "job-to-candidates-dlq");
+          e.ConfigureConsumer<JobToCandidatesConsumer>(context);
+        });
+
+
+        // Declare DLX(Dead Letter Exchange) and bind DLQ(Dead Letter Queue) for llm processing queue
         cfg.ReceiveEndpoint("llm-processing-dlq", dlq =>
         {
           dlq.Bind("llm-processing-dlx", s =>
@@ -266,12 +362,21 @@ public static class DependencyInjection
           });
         });
 
+        // Declare DLX and bind DLQ for job to candidates queue  
 
+        cfg.ReceiveEndpoint("job-to-candidates-dlq", dlq =>
+        {
+          dlq.Bind("job-to-candidates-dlx", s =>
+          {
+            s.RoutingKey = "job-to-candidates-dlq";
+            s.ExchangeType = "direct";
+          });
+
+
+        });
 
 
       });
-
-
     });
     return services;
   }
@@ -301,4 +406,91 @@ public static class DependencyInjection
 
     return services;
   }
+
+
+  public static IServiceCollection AddSignalRConfig(this IServiceCollection services)
+  {
+
+    services.AddSignalR(
+       opt =>
+       {
+         opt.EnableDetailedErrors = services.BuildServiceProvider().GetRequiredService<IWebHostEnvironment>().IsDevelopment();
+         opt.KeepAliveInterval = TimeSpan.FromSeconds(15);
+         opt.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+       }
+   );
+
+    // online status tracking service
+    services.AddSingleton<IPersistanceService, PersistanceService>();
+    services.AddScoped<INotificationsHubService, NotificationsHubService>();
+    services.AddScoped<IConversationsHubService, ConversationsHubService>();
+
+    return services;
+
+
+  }
+
+
+  public static IServiceCollection AddCachingConfig(this IServiceCollection services, IConfiguration configuration)
+  {
+    // add hybrid caching with Redis and in-memory cache
+    services.AddHybridCache(options =>
+    {
+      options.DefaultEntryOptions = new()
+      {
+        // L2 cache (Redis) expiration
+        Expiration = TimeSpan.FromMinutes(30),
+        // L1 cache (in-memory) expiration
+        LocalCacheExpiration = TimeSpan.FromSeconds(40),
+      };
+    });
+
+    // Redis configuration
+
+    var redisConnectionString = configuration.GetConnectionString("Redis");
+    ArgumentException.ThrowIfNullOrEmpty(redisConnectionString, "Connection string 'Redis' not found.");
+
+    services.AddStackExchangeRedisCache(options =>
+    {
+      options.Configuration = redisConnectionString;
+      options.InstanceName = "KawadarRedisCache";
+    });
+
+
+    return services;
+  }
+
+  public static IServiceCollection AddSemanticKernelConfig(this IServiceCollection services, IConfiguration configuration)
+  {
+    var builder = Kernel.CreateBuilder();
+    builder.AddOllamaEmbeddingGenerator(
+      modelId: configuration["Ollama:EmbeddingModel"]!,
+      endpoint: new Uri(configuration["Ollama:BaseUrl"]!)
+    );
+
+    builder.AddOllamaChatCompletion(
+        modelId: configuration["Ollama:ChatModel"]!,
+        endpoint: new Uri(configuration["Ollama:BaseUrl"]!)
+    );
+    services.AddSingleton(builder.Build());
+
+    services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(sp =>
+        sp.GetRequiredService<Kernel>()
+          .GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>());
+
+    services.AddSingleton<IChatCompletionService>(sp =>
+       sp.GetRequiredService<Kernel>()
+        .GetRequiredService<IChatCompletionService>());
+
+    return services;
+  }
+
+  public static IServiceCollection AddQdrantClientConfig(this IServiceCollection services, IConfiguration configuration)
+  {
+    services.AddSingleton(_ => new QdrantClient(
+        host: configuration["Qdrant:Host"]!,   // "localhost" or "qdrant" in Docker
+        port: int.Parse(configuration["Qdrant:Port"]!)));  // 6334
+    return services;
+  }
 }
+

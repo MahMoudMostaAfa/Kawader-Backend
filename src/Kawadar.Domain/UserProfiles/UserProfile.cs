@@ -1,5 +1,8 @@
+using System.IO.Pipelines;
 using Kawadar.Domain.Common;
 using Kawadar.Domain.Common.Results;
+using Kawadar.Domain.Reviews;
+using Kawadar.Domain.Skills;
 using Kawadar.Domain.Specilizations;
 using Kawadar.Domain.UserProfiles.Enums;
 
@@ -74,7 +77,19 @@ public class UserProfile : AuditableEntity
   // Foreign Keys
   public string UserId { get; private set; } = "";
 
+  public IReadOnlyCollection<Skill> Skills { get; private set; } = [];
+  public IReadOnlyCollection<Review> Reviews { get; private set; } = [];
+
   public string FullName => $"{FirstName} {LastName}";
+
+  public string TextToEmbed => String.Join("", new[]
+  {
+    "Bio: ", Bio, "\n",
+    "Title: ", Title, "\n",
+    "Experience Year: ", ExperienceYear.ToString(), "\n",
+    "Specialization: ", Specialization?.Name ?? "N/A", "\n",
+    "Skills: ", Skills != null && Skills.Any() ? string.Join(", ", Skills.Select(s => s.Name)) : "N/A", "\n",
+  });
   private UserProfile() { }
 
   private UserProfile(string userId, string firstName, string lastName, ProfileType profileType)
@@ -203,17 +218,17 @@ public class UserProfile : AuditableEntity
   }
 
   public Result<Deleted> Delete()
-    {
-        IsDeleted = true;
-        return Result.Deleted;
-    }
+  {
+    IsDeleted = true;
+    return Result.Deleted;
+  }
 
   public Result<Success> Ban(DateTime bannedUntil)
-    {
-        IsBanned = true;
-        BannedUntil = bannedUntil;
-        return Result.Success;
-    }
+  {
+    IsBanned = true;
+    BannedUntil = bannedUntil;
+    return Result.Success;
+  }
 
   public Result<Updated> UpdateProfilePicture(string profilePictureUrl)
   {
@@ -269,5 +284,26 @@ public class UserProfile : AuditableEntity
     ScheduledDeletionAt = null;
     return Result.Updated;
   }
+
+
+  public Result<Updated> UpdateOnlineStatus(bool isOnline, DateTime? lastOnlineAt = null)
+  {
+
+    IsOnline = isOnline;
+    LastOnlineAt = lastOnlineAt ?? DateTime.UtcNow;
+    return Result.Updated;
+  }
+    
+ public Result<bool> IsProfileEgibleToApplyAndPost()
+    {
+        if (IsBanned) return Error.Conflict("UserProfile.Banned", "UserProfile is banned");
+
+        if(!IsActivated) return Error.Conflict("UserProfile.NotActivated", "UserProfile is not activated");
+
+         if(IsDeleted) return Error.Conflict("UserProfile.Deleted", "UserProfile is deleted");
+
+        return false; 
+
+    }
 
 }

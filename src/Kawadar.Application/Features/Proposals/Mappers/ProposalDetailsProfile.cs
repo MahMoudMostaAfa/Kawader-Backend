@@ -29,6 +29,8 @@ public class ProposalDetailsProfile : Profile
     .ForMember(dest => dest.ProposalByUserName, opt => opt.MapFrom(src => src.u.UserName))
     .ForMember(dest => dest.Milestones, opt => opt.MapFrom(src => src.jp.Milestones))
     .ForMember(dest => dest.QuestionsWithAnswer, opt => opt.MapFrom(src => src.jp.QuestionAnswers))
+      .ForMember(dest => dest.SubmittedAt, opt => opt.MapFrom(src => src.jp.CreatedAt))
+      .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.jp.Status))
     ;
 
     CreateMap<ProposalMilestone, MilestoneDto>().

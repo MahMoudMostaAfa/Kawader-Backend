@@ -16,7 +16,7 @@ namespace Kawadar.Infrastructure.Data.Configurations
             builder.Property(s => s.IsActive).IsRequired();
 
             builder.HasOne<UserProfile>()
-                .WithMany()
+                .WithMany(u => u.Skills)
                 .HasForeignKey(s => s.CreatedBy)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);

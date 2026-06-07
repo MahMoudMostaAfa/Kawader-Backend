@@ -18,6 +18,8 @@ JobExperienceLevel ExperienceLevel,
 List<CreateQuestionDto> QuestionDtos,
 List<Guid> SkillIds,
 List<IFormFile>? AttachmentFiles,
-List<string>? AttachmentLinks
+List<string>? AttachmentLinks,
+bool IsPrivate = false,
+Guid? PrivateToUserId = null
 
 ) : IRequest<Result<Created>>;

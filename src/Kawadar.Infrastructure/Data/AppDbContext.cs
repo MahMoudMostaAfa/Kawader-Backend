@@ -22,6 +22,20 @@ using Kawadar.Infrastructure.Identity;
 using MediatR;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Kawadar.Domain.Jobs.SavedJobs;
+using Kawadar.Domain.Conversations.Messages;
+using Kawadar.Domain.Notifications;
+using Kawadar.Domain.Conversations;
+using Kawadar.Domain.UserProfiles.UserReports;
+using Kawadar.Domain.Contracts;
+using Kawadar.Domain.Subscriptions;
+using Kawadar.Domain.Contracts.Disbutes;
+using Kawadar.Domain.Violations;
+using Kawadar.Domain.WalletAndPayments;
+using Kawadar.Domain.WalletAndPayments.Payments;
+using Kawadar.Domain.WalletAndPayments.Payouts;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.Logging;
 
 namespace Kawadar.Infrastructure.Data;
 
@@ -42,22 +56,71 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IMediator medi
   public DbSet<JobQuestion> JobQuestions => Set<JobQuestion>();
   public DbSet<JobFile> JobFiles => Set<JobFile>();
   public DbSet<JobReport> JobReports => Set<JobReport>();
+  public DbSet<UserReport> UserReports => Set<UserReport>();
   public DbSet<Review> Reviews => Set<Review>();
   public DbSet<JobView> JobViews => Set<JobView>();
 
   public DbSet<JobProposal> JobProposals => Set<JobProposal>();
+
+  public DbSet<SavedJob> SavedJobs => Set<SavedJob>();
 
   public DbSet<ProposalMilestone> ProposalMilestones => Set<ProposalMilestone>();
 
   public DbSet<ProposalQuestionAnswer> ProposalQuestionAnswers => Set<ProposalQuestionAnswer>();
 
 
+  public DbSet<Message> Messages => Set<Message>();
+  public DbSet<MessageFile> MessageFiles => Set<MessageFile>();
+
+  public DbSet<Notification> Notifications => Set<Notification>();
+
+  public DbSet<Conversation> Conversations => Set<Conversation>();
+  public DbSet<Contract> Contracts => Set<Contract>();
+  public DbSet<Disbute> Disbutes => Set<Disbute>();
+  public DbSet<Violation> Violations => Set<Violation>();
+  public DbSet<ContractMilestone> ContractMilestones => Set<ContractMilestone>();
+
+  public DbSet<UserSubscription> UserSubscriptions => Set<UserSubscription>();
+  public DbSet<SubscriptionPlan> SubscriptionPlans => Set<SubscriptionPlan>();
+
+  public DbSet<Wallet> Wallets => Set<Wallet>();
+  public DbSet<WalletTransaction> WalletTransactions => Set<WalletTransaction>();
+
+  public DbSet<EscrowTransaction> EscrowTransactions => Set<EscrowTransaction>();
+
+  public DbSet<WithdrawalRequest> WithdrawalRequests => Set<WithdrawalRequest>();
+
+  public DbSet<UserPayoutAccount> UserPayoutAccounts => Set<UserPayoutAccount>();
+
+  public DbSet<PaymentTransaction> PaymentTransactions => Set<PaymentTransaction>();
+  public DbSet<PaymentEventHook> PaymentEventHooks => Set<PaymentEventHook>();
+
 
 
   public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
   {
     await DispatchDomainEventsAsync(cancellationToken);
+
+    // for testing purpose
+
+    // TEMPORARY: Log all tracked entity states before saving
+
+    // foreach (var entry in ChangeTracker.Entries())
+    // {
+    //   if (entry.State == EntityState.Modified || entry.State == EntityState.Added)
+    //   {
+    //     var concurrencyProps = entry.Properties
+    //       .Where(p => p.Metadata.IsConcurrencyToken)
+    //       .Select(p => $"{p.Metadata.Name}={p.CurrentValue ?? "null"}(orig={p.OriginalValue ?? "null"})")
+    //       .ToList();
+
+    //     logger.LogWarning("[EF SAVE] {Entity} | State={State} | ConcurrencyTokens=[{Tokens}]",
+    //       entry.Entity.GetType().Name, entry.State, string.Join(", ", concurrencyProps));
+    //   }
+    // }
+
     return await base.SaveChangesAsync(cancellationToken);
+
   }
   protected override void OnModelCreating(ModelBuilder builder)
   {
@@ -77,15 +140,20 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IMediator medi
         .SelectMany(e => e.DomainEvents)
         .ToList();
 
+
+    // Fix: Clear the events FIRST before publishing them.
+    // This prevents the infinite loop if a handler calls SaveChangesAsync().
+    foreach (var entity in domainEntities)
+    {
+      entity.ClearDomainEvents();
+    }
+
     foreach (var domainEvent in domainEvents)
     {
       await mediator.Publish(domainEvent, cancellationToken);
     }
 
-    foreach (var entity in domainEntities)
-    {
-      entity.ClearDomainEvents();
-    }
+
   }
 
 }

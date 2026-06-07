@@ -4,7 +4,9 @@ using Kawadar.Api.Infrastructure;
 using Kawadar.Api.OpenApi.Transformer;
 using Kawadar.Api.Services;
 using Kawadar.Application.Common.Interfaces.Auth;
+using Kawadar.Infrastructure.Hubs;
 using Kawadar.Infrastructure.Settings;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Kawadar.Api;
 
@@ -19,10 +21,33 @@ public static class DependencyInjection
     .AddApiDocumentation()
     .AddApiVersioning()
     .AddConfiguredCors(configuration)
-    .AddIdentityServices();
+    .AddIdentityServices()
+    .AddAppRateLimiting();
+
     return services;
   }
 
+
+  public static IServiceCollection AddAppRateLimiting(this IServiceCollection services)
+  {
+    services.AddRateLimiter(options =>
+    {
+      options.AddSlidingWindowLimiter("SlidingWindow",
+          limiterOptions =>
+          {
+            limiterOptions.PermitLimit = 100;
+            limiterOptions.Window = TimeSpan.FromMinutes(1);
+            limiterOptions.SegmentsPerWindow = 6;
+            limiterOptions.QueueLimit = 10;
+            limiterOptions.QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst;
+            limiterOptions.AutoReplenishment = true;
+          });
+      options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    });
+
+    return services;
+  }
   public static IServiceCollection AddCustomProblemDetails(this IServiceCollection services)
   {
     services.AddProblemDetails(options => options.CustomizeProblemDetails = (context) =>
@@ -125,6 +150,8 @@ public static class DependencyInjection
     return services;
   }
 
+
+
   public static IApplicationBuilder UseCoreMiddleware(this IApplicationBuilder app, IConfiguration configuration)
   {
     // 1. Exception handling should be FIRST to catch all errors
@@ -140,7 +167,8 @@ public static class DependencyInjection
     // 5. CORS (before authentication/authorization)
     app.UseCors(configuration["AppSettings:CorsPolicyName"]!);
 
-
+    // 6 - Rate Limiting
+    app.UseRateLimiter();
 
     // 7. Authentication (must come before authorization)
     app.UseAuthentication();
@@ -152,5 +180,6 @@ public static class DependencyInjection
 
     return app;
   }
+
 
 }

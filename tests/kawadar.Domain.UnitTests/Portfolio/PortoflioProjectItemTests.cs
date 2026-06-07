@@ -42,7 +42,7 @@ namespace kawadar.Domain.UnitTests.Portfolio
             int displayOrder = 1;
             Guid projectId = Guid.NewGuid();
 
-            var result = PortfolioItem.Create(ItemType.Text, content, displayOrder, projectId);
+            var result = PortfolioItem.Create(ItemType.Text, content!, displayOrder, projectId);
             Assert.True(result.IsError);
             Assert.Equal(PortfolioItemErrors.ContentIsRequired.Code, result.TopError.Code);
             Assert.Equal(PortfolioItemErrors.ContentIsRequired.Description, result.TopError.Description);

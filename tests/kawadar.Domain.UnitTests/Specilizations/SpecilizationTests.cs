@@ -36,7 +36,7 @@ namespace kawadar.Domain.UnitTests.Specilizations
             string? name = null;
             var isActive = true;
 
-            var result = Specilization.Create(name, isActive);
+            var result = Specilization.Create(name!, isActive);
             Assert.True(result.IsError);
             Assert.Equal(SpecilizationErros.NameIsRequired.Code, result.TopError.Code);
             Assert.Equal(SpecilizationErros.NameIsRequired.Description, result.TopError.Description);

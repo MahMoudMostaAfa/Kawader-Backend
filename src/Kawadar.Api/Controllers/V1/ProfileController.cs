@@ -1,14 +1,18 @@
 
 using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Models;
+using Kawadar.Application.Features.Badges.Queries.GetFreelancerBadgesQuery;
 using Kawadar.Application.Features.ProfileManagment.Commands.UpdateProfile;
 using Kawadar.Application.Features.ProfileManagment.Commands.UpdateProfileImage;
 using Kawadar.Application.Features.ProfileManagment.Commands.UploadIdentity;
+using Kawadar.Application.Features.ProfileManagment.Queries.GetFreelancers;
+using Kawadar.Application.Features.ProfileManagment.Queries.GetFreelancersByAi;
 using Kawadar.Application.Features.ProfileManagment.Queries.GetUserProfile;
 using Kawadar.Application.Features.ProfileManagment.Queries.GetUserProfileByUserName;
 using Kawadar.Application.Features.Reviews.Dtos;
 using Kawadar.Application.Features.Reviews.Queries.GetReviewsByUserProfileId;
 using Kawadar.Application.Features.Reviews.Queries.GetReviewStatistics;
+using Kawadar.Domain.UserProfiles.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -51,6 +55,42 @@ public class ProfileController : ApiController
         errors => Problem(errors));
   }
 
+  [HttpGet("Freelancers")]
+  [EndpointName("GetFreelancers")]
+  [EndpointSummary("Gets the freelancers according to the sent paramaters")]
+  [EndpointDescription("Gets the freelancers according to the sent paramaters in a brief description.")]
+  [ProducesResponseType(typeof(UserProfileDto), StatusCodes.Status200OK)]
+  [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+  public async Task<IActionResult> GetFreelancers(
+      [FromQuery] float? AverageRating,
+      [FromQuery] ExperienceYear? ExperienceYear,
+      [FromQuery] Guid? specilizationId,
+      [FromQuery] int page = 1,
+      [FromQuery] int pageSize = 10,
+      [FromQuery] string sortBy = "newest",
+      CancellationToken ct = default
+      )
+  {
+    var query = new GetFreelancersQuery(ExperienceYear, specilizationId, AverageRating, page, pageSize, sortBy);
+    var profileResult = await _sender.Send(query, ct);
+
+    return profileResult.Match(
+        freelancers => Ok(freelancers),
+        errors => Problem(errors));
+  }
+
+
+  [HttpGet("ai-search")]
+  public async Task<IActionResult> GetFreelancersByAi([FromQuery] string query)
+  {
+    var querySender = new GetFreelancersByAiQuery(query);
+    var result = await _sender.Send(querySender);
+
+    return result.Match(
+        freelancers => Ok(freelancers),
+        errors => Problem(errors));
+  }
+
   [HttpGet("{username}")]
   [EndpointName("GetProfileByUsername")]
   [EndpointSummary("Gets the profile of a user by username")]
@@ -69,48 +109,48 @@ public class ProfileController : ApiController
 
   }
 
-    [HttpGet("{username}/reviews")]
-    [EndpointName("UserReviews")]
-    [EndpointSummary("Gets the reviews of a user by username")]
-    [EndpointDescription("Gets the reviews of a user by their username.")]
-    [ProducesResponseType(typeof(PaginatedList<ReviewDto>), StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetUserReviews([FromRoute]string username,
-        [FromQuery] float? rating,
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10,
-        [FromQuery] string sortBy = "highest")
-    {
+  [HttpGet("{username}/reviews")]
+  [EndpointName("UserReviews")]
+  [EndpointSummary("Gets the reviews of a user by username")]
+  [EndpointDescription("Gets the reviews of a user by their username.")]
+  [ProducesResponseType(typeof(PaginatedList<ReviewDto>), StatusCodes.Status204NoContent)]
+  [ProducesResponseType(StatusCodes.Status404NotFound)]
+  public async Task<IActionResult> GetUserReviews([FromRoute] string username,
+      [FromQuery] float? rating,
+      [FromQuery] int page = 1,
+      [FromQuery] int pageSize = 10,
+      [FromQuery] string sortBy = "highest")
+  {
 
-        var query = new GetReviewsByUserNameQuery(rating, page, pageSize, sortBy, username);
-        var result = await _sender.Send(query);
+    var query = new GetReviewsByUserNameQuery(rating, page, pageSize, sortBy, username);
+    var result = await _sender.Send(query);
 
-        return result.Match(
-            reviews => Ok(reviews),
-            errors => Problem(errors));
+    return result.Match(
+        reviews => Ok(reviews),
+        errors => Problem(errors));
 
-    }
+  }
 
 
-    [HttpGet("{username}/statistics")]
-    [EndpointName("UserStatistics")]
-    [EndpointSummary("Gets the review statistics of a user by username")]
-    [EndpointDescription("Gets the review statistics(The count and average rating) of a user by their username.")]
-    [ProducesResponseType(typeof(PaginatedList<ReviewDto>), StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetStatistics([FromRoute] string username)
-    {
+  [HttpGet("{username}/statistics")]
+  [EndpointName("UserStatistics")]
+  [EndpointSummary("Gets the review statistics of a user by username")]
+  [EndpointDescription("Gets the review statistics(The count and average rating) of a user by their username.")]
+  [ProducesResponseType(typeof(ReviewStatisticsDto), StatusCodes.Status200OK)]
+  [ProducesResponseType(StatusCodes.Status404NotFound)]
+  public async Task<IActionResult> GetStatistics([FromRoute] string username)
+  {
 
-        var query = new GetReviewStatisticsQuery(username);
-        var result = await _sender.Send(query);
+    var query = new GetReviewStatisticsQuery(username);
+    var result = await _sender.Send(query);
 
-        return result.Match(
-            statistics => Ok(statistics),
-            errors => Problem(errors));
+    return result.Match(
+        statistics => Ok(statistics),
+        errors => Problem(errors));
 
-    }
+  }
 
-    [HttpPut("me")]
+  [HttpPut("me")]
   [EndpointName("UpdateProfile")]
   [EndpointSummary("Updates the profile of the current user")]
   [EndpointDescription("Updates the profile of the current user with new information.")]

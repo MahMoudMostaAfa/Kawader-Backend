@@ -19,6 +19,8 @@ namespace Kawadar.Application.Features.Admins.Mapper
 
             CreateMap<(UserProfile userProfile, UserDto user), BriefUserProfileDto>()
                 .ForMember(dest => dest.fullName, opt => opt.MapFrom(src => src.userProfile.FullName))
+                .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(src => src.userProfile.ProfilePictureUrl))
+                .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => src.userProfile.Reviews.Select(x => x.Rating).DefaultIfEmpty(0).Average()))
                 .ForMember(dest => dest.IsOnline, opt => opt.MapFrom(src => src.userProfile.IsOnline))
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.user.UserName))
                 .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => src.userProfile.IsDeleted))

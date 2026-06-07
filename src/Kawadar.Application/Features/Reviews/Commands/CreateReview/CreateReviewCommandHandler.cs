@@ -1,4 +1,5 @@
 ﻿using Kawadar.Application.Common.Errors;
+using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Domain.Common.Results;
@@ -10,8 +11,8 @@ using MediatR;
 namespace Kawadar.Application.Features.Reviews.Commands.CreateReview
 {
     public class CreateReviewCommandHandler(IUser user, IUsersRepository usersRepository
-        ,IJobsRepository jobsRepository, IReviewRepository reviewRepository, IIdentityService identityService
-        ,IUnitOfWork unitOfWork) : IRequestHandler<CreateReviewCommand, Result<Success>>
+        , IJobsRepository jobsRepository, IReviewRepository reviewRepository, IIdentityService identityService
+        , IUnitOfWork unitOfWork, IFreelancerVectorStore freelancerVectorStore) : IRequestHandler<CreateReviewCommand, Result<Success>>
     {
         public async Task<Result<Success>> Handle(CreateReviewCommand request, CancellationToken cancellationToken)
         {
@@ -31,7 +32,7 @@ namespace Kawadar.Application.Features.Reviews.Commands.CreateReview
             if (RevieweeResult.IsError) return RevieweeResult.Errors;
 
             ReviewType reviewType;
-            if(RevieweerResult.Value.ProfileType == ProfileType.Client && RevieweeResult.Value.ProfileType == ProfileType.Freelancer)
+            if (RevieweerResult.Value.ProfileType == ProfileType.Client && RevieweeResult.Value.ProfileType == ProfileType.Freelancer)
             {
                 reviewType = ReviewType.ClientFreelancer;
             }
@@ -44,6 +45,9 @@ namespace Kawadar.Application.Features.Reviews.Commands.CreateReview
 
             await reviewRepository.AddReview(reviewResult.Value, cancellationToken);
             await unitOfWork.SaveChangesAsync(cancellationToken);
+
+            await freelancerVectorStore.UpdateFreelancerAsync(RevieweeResult.Value);
+
             return Result.Success;
         }
     }

@@ -1,18 +1,21 @@
 ﻿using AutoMapper;
 using Kawadar.Application.Common.Constants;
 using Kawadar.Application.Common.Errors;
+using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
-using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Features.Portfolios.DTOs;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Portfolios.Project;
+using Kawadar.Domain.Portfolios.ProjectSkill;
+using Kawadar.Domain.Specilizations;
 using MediatR;
 
 namespace Kawadar.Application.Features.Portfolios.Commands.CreateProject
 {
     public class CreateProjectCommandHandler(IUnitOfWork unitOfWork, IUser user, IPortfolioProjectRepository projectRepository
-        , IUsersRepository usersRepository, IStorageClient storageClient, IMapper mapper) : IRequestHandler<CreateProjectCommand, Result<ProjectDTO>>
+        , IUsersRepository usersRepository, ISpecilizationRepository specilizationRepository
+        , IStorageClient storageClient, ISubscriptionsRepository subscriptionsRepository, IMapper mapper, ISkillRepository skillRepository) : IRequestHandler<CreateProjectCommand, Result<ProjectDTO>>
     {
         public async Task<Result<ProjectDTO>> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
         {
@@ -27,6 +30,17 @@ namespace Kawadar.Application.Features.Portfolios.Commands.CreateProject
             var previousProjects = await projectRepository.GetAllByFreelancerId(freelancer.Id);
             var displayOrder = previousProjects.Count() + 1;
 
+            var UserSubscriptionResult = await subscriptionsRepository.GetActiveUserSubscription(result.Value.Id);
+            if (UserSubscriptionResult.IsSuccess)
+            {
+                var plan = await subscriptionsRepository.GetSubscriptionPlanById(UserSubscriptionResult.Value.SubscriptionPlanId);
+                if (plan.IsError) return plan.Errors;
+
+                if (plan.Value.Features.TotalProtfolioProjects < displayOrder)
+                    return Error.Conflict("You exceeded the number of portfolio projects for your subscription");
+            }
+            if (displayOrder > FreePlanFeatures.PortfolioProjects) return Error.Conflict();
+
             using var stream = request.ProjectImage.OpenReadStream();
             var uploadResult = await storageClient.UploadFileAsync(stream, request.ProjectImage.FileName,
                 Containers.PortfolioProjects, cancellationToken);
@@ -34,12 +48,49 @@ namespace Kawadar.Application.Features.Portfolios.Commands.CreateProject
             if (uploadResult.IsError) return uploadResult.Errors;
 
             var projectImageUrl = uploadResult.Value;
-            var resultProject = PortfolioProject.Create(request.Title, request.Description, request.Category, freelancer.Id,
+            var specilizationId = Guid.Empty;
+            var SpecilizationResult = await specilizationRepository.GetByName(request.specilization);
+            if (SpecilizationResult.IsError && SpecilizationResult.TopError.Type == ErrorKind.NotFound)
+            {
+                var newSpecilization = Specilization.Create(request.specilization, true);
+                if (newSpecilization.IsError) return newSpecilization.Errors;
+                var addSpeciliationResult = await specilizationRepository.AddAsync(newSpecilization.Value);
+                if (addSpeciliationResult.IsError) return addSpeciliationResult.Errors;
+                specilizationId = newSpecilization.Value.Id;
+            }
+            else if (SpecilizationResult.IsSuccess)
+            { 
+                specilizationId = SpecilizationResult.Value.Id;
+            }
+
+            else
+            {
+                return SpecilizationResult.Errors;
+            }
+
+            var resultProject = PortfolioProject.Create(request.Title, request.Description, specilizationId, freelancer.Id,
                 projectImageUrl, displayOrder, request.ProjectUrl);
 
             if (resultProject.IsError) return resultProject.Errors;
 
             await projectRepository.AddAsync(resultProject.Value);
+
+            List<PortfolioProjectSkill> projectSkills = new();
+            foreach (var skill in request.skills)
+            {
+                var skillExistsResult = await skillRepository.getByIdAsync(skill);
+                if (skillExistsResult.IsError)
+                {
+                    var blobDeletionResult = await storageClient.DeleteFileAsync(resultProject.Value.ProjectImageUrl!, Containers.PortfolioProjects);
+                    return skillExistsResult.Errors;
+                }
+
+                var projectSkillResult = PortfolioProjectSkill.Create(resultProject.Value.Id, skillExistsResult.Value.Id);
+                if (projectSkillResult.IsError) return projectSkillResult.Errors;
+                projectSkills.Add(projectSkillResult.Value);
+            }
+
+            await skillRepository.addSkillToProject(projectSkills);
             var projectDTO = mapper.Map<ProjectDTO>(resultProject.Value);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 

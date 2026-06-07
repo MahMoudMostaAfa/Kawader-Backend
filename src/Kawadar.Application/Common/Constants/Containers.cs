@@ -14,6 +14,7 @@
         public const string ProfileImages = "profile-pics";
 
         public const string JobAttachements = "public-attachments";
+        public const string MessageAttachements = "message-attachments";
 
     }
 }

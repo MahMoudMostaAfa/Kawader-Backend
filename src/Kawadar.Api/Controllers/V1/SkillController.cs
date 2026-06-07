@@ -3,6 +3,7 @@ using Kawadar.Application.Features.Skills.Commands.AddSkillsToFreelacner;
 using Kawadar.Application.Features.Skills.Commands.AddSkillsToProject;
 using Kawadar.Application.Features.Skills.Commands.CreateSkill;
 using Kawadar.Application.Features.Skills.Commands.DeleteSkill;
+using Kawadar.Application.Features.Skills.Commands.RemoveSkillFromFreelancer;
 using Kawadar.Application.Features.Skills.Queries.GetAllSkills;
 using Kawadar.Application.Features.Skills.Queries.GetSkillById;
 using Kawadar.Domain.Portfolios.ProjectSkill;
@@ -80,6 +81,22 @@ namespace Kawadar.Api.Controllers.V1
                 , errors => Problem(errors));
         }
 
+        [HttpDelete("~/api/v{version:apiVersion}/User/Skill")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [EndpointName("RemoveSkill")]
+        [EndpointSummary("Removes a skill from freelancer")]
+        [EndpointDescription("Removes a Skill from a freelancer using the skill name")]
+        public async Task<IActionResult> RemoveSkillFromFreelancer([FromBody] RemoveSkillFromFreelancerCommand command, CancellationToken ct)
+        {
+            var result = await _sender.Send(command, ct);
+
+            return result.Match(
+                 _ => NoContent()
+                , errors => Problem(errors));
+        }
+
 
         [HttpPost("~/api/v{version:apiVersion}/User/Project/Skill")]
         [ProducesResponseType(typeof(List<PortfolioProjectSkill>), StatusCodes.Status201Created)]
@@ -90,7 +107,7 @@ namespace Kawadar.Api.Controllers.V1
         [EndpointDescription("Adds Skills for project using skills ids")]
         public async Task<IActionResult> AddSkillsToProject([FromBody] AddSkillsToProjectRequest request, CancellationToken ct)
         {
-            var command = new AddSkillsToProjectCommand(request.projectId, request.skills);
+            var command = new AddSkillsToProjectCommand(request.projectId, request.skills!);
             var result = await _sender.Send(command, ct);
 
             return result.Match(

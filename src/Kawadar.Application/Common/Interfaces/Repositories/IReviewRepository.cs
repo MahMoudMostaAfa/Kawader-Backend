@@ -11,5 +11,9 @@ namespace Kawadar.Application.Common.Interfaces.Repositories
         public Task<PaginatedList<Review>> GetReviewsByUserProfileId(float? Rating, int page, int pageSize, string sortBy, Guid Id);
         public Task<Result<ReviewStatisticsDto>> GetReviewsStatistics(Guid UserProfileId);
         public Task<Result<Review>> GetReviewById(Guid Id);
+        public Task<Result<Dictionary<float, int>>> GetReviewDistribution();
+        public Task<Result<RatingStatisticsDto>> GetRatingStatistics();
+        public Task<float> GetAverageReviewScore();
+
     }
 }

@@ -10,7 +10,7 @@ public class QuestionAnswerDto
 
 public class QuestionAnswerUpdateDto
 {
-  public Guid QuestionAnswerId { set; get; }
+  public Guid QuestionAnswerId { set; get; }    
 
   public string QuestionAnswer { set; get; } = String.Empty;
 }

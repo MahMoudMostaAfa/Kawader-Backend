@@ -18,7 +18,9 @@ namespace Kawadar.Infrastructure.Services.Repositories
         public async Task<Result<ReviewStatisticsDto>> GetReviewsStatistics(Guid UserProfileId)
         {
             var count = await appDbContext.Reviews.Where(x => x.RevieweeId == UserProfileId).CountAsync();
-            var average = await appDbContext.Reviews.Where(x => x.RevieweeId == UserProfileId).Select(x => x.Rating).AverageAsync();
+            float average = 0;
+            var ratings = appDbContext.Reviews.Where(x => x.RevieweeId == UserProfileId).Select(x => x.Rating);
+            if (ratings.Count() != 0) average = await ratings.AverageAsync();
             return new ReviewStatisticsDto
             {
                 AverageRating = average,
@@ -36,6 +38,8 @@ namespace Kawadar.Infrastructure.Services.Repositories
         public async Task<PaginatedList<Review>> GetReviewsByUserProfileId(float? Rating, int page, int pageSize, string sortBy, Guid Id)
         {
             var query = appDbContext.Reviews.AsQueryable();
+            query = query.Where(x => x.RevieweeId == Id);
+
             if (Rating.HasValue)
             {
                 query = query.Where(x => x.Rating == Rating);
@@ -65,6 +69,42 @@ namespace Kawadar.Infrastructure.Services.Repositories
                   .ToListAsync();
 
             return new PaginatedList<Review>(items, totalCount, page, pageSize);
+        }
+
+        public async Task<Result<Dictionary<float, int>>> GetReviewDistribution()
+        {
+            var distribution = await appDbContext.Reviews.GroupBy(x => x.Rating).ToDictionaryAsync(x => x.Key, x => x.Count());
+            return distribution;
+        }
+
+        public async Task<float> GetAverageReviewScore()
+        {
+            var reviewsCount = await appDbContext.Reviews.CountAsync();
+            float averageRating = 0;
+            if (reviewsCount > 0) averageRating = await appDbContext.Reviews.Select(x => x.Rating).AverageAsync();
+            return averageRating;
+        }
+
+        public async Task<Result<RatingStatisticsDto>> GetRatingStatistics()
+        {
+            var reviewsCount = await appDbContext.Reviews.CountAsync();
+            float averageRating = 0;
+            if(reviewsCount > 0) averageRating = await appDbContext.Reviews.Select(x => x.Rating).AverageAsync();
+            var UserReviews = appDbContext.Reviews.GroupBy(x => x.RevieweeId).Select(x => x.Average(x => x.Rating));
+            float highestRating = 0;
+            float lowestRating = 0;
+            if(UserReviews.Count() > 0)
+            {
+                highestRating = await UserReviews.MaxAsync();
+                lowestRating = await UserReviews.MinAsync();
+            }
+            return new RatingStatisticsDto
+            {
+                averageRating = averageRating,
+                HighestRated = highestRating,
+                LowestRated = lowestRating
+            };
+            
         }
     }
 }

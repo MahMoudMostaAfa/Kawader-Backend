@@ -2,8 +2,10 @@ using Hangfire;
 using Kawadar.Api;
 using Kawadar.Api.Infrastructure;
 using Kawadar.Application;
+using Kawadar.Application.Common.Interfaces;
 using Kawadar.Infrastructure;
 using Kawadar.Infrastructure.Data;
+using Kawadar.Infrastructure.Hubs;
 using Prometheus;
 using Scalar.AspNetCore;
 using Serilog;
@@ -36,6 +38,9 @@ try
       .AddPresentation(builder.Configuration)
       .AddInfrastructure(builder.Configuration)
       .AddApplication();
+
+
+
 
   var app = builder.Build();
 
@@ -71,16 +76,30 @@ try
 
   app.UseCoreMiddleware(builder.Configuration);
 
+  // register recurring jobs
+  var recurringJobManager = app.Services.GetRequiredService<IRecurringJobManager>();
+#pragma warning disable CS0618 // Type or member is obsolete
+  recurringJobManager.AddOrUpdate<IPolicyViolationService>(
+    "ProcessPolicyViolations",
+    service => service.ProcessPolicyViolationAsync(),
+    Cron.MinuteInterval(3));
+#pragma warning restore CS0618 // Type or member is obsolete
+
   // Hangfire dashboard (development only for security)
   app.UseHangfireDashboard("/hangfire", new DashboardOptions
   {
     Authorization = [new HangfireAuthorizationFilter()]
   });
 
-  app.MapControllers();
+  app.MapControllers().RequireRateLimiting("SlidingWindow");
 
   // Prometheus metrics endpoint
   app.MapMetrics();
+
+  // signalR hubs
+  app.MapHub<PersistanceHub>("/hubs/persistance");
+  app.MapHub<NotificationHub>("/hubs/notifications");
+  app.MapHub<ConversationHub>("/hubs/conversations");
 
   app.Run();
 }
