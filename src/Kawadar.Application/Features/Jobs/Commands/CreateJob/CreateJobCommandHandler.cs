@@ -181,7 +181,7 @@ public class CreateJobCommandHandler : IRequestHandler<CreateJobCommand, Result<
 
     var recommendationItemResult = await _recommendationService.InsertItemAsync(
       job.Id.ToString(),
-      categories: new[] { job.Specilization.Name },
+      categories: new[] { SpecilizationResult.Value.Name },
       labels: labels,
       comment: job.Title,
       ct: cancellationToken);
