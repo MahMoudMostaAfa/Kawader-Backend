@@ -77,10 +77,13 @@ public class UserProfile : AuditableEntity
   // Foreign Keys
   public string UserId { get; private set; } = "";
 
-  public IReadOnlyCollection<Skill> Skills { get; private set; } = [];
-  public IReadOnlyCollection<Review> Reviews { get; private set; } = [];
+  private readonly List<Skill> _skills = [];
+  private readonly List<Review> _reviews = [];
 
-  public string FullName => $"{FirstName} {LastName}";
+  public IReadOnlyCollection<Skill> Skills => _skills.AsReadOnly();
+  public IReadOnlyCollection<Review> Reviews => _reviews.AsReadOnly();
+
+    public string FullName => $"{FirstName} {LastName}";
 
   public string TextToEmbed => String.Join("", new[]
   {
