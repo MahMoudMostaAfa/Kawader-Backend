@@ -53,7 +53,6 @@ public class InMemoryProposalsRepository : IProposalsRepository
         if (Type.HasValue) query = query.Where(p => p.ProposalType == Type.Value);
         if (Status.HasValue) query = query.Where(p => p.Status == Status.Value);
 
-        // Apply sort before pagination
         var ordered = DatesortBy?.ToLowerInvariant() switch
         {
             "oldest" => query.OrderBy(p => p.CreatedAt),
@@ -74,7 +73,6 @@ public class InMemoryProposalsRepository : IProposalsRepository
     {
         var query = Proposals.Where(p => p.FreelancerId == FreelancerId);
 
-        // Apply sort before pagination
         var ordered = SortBy?.ToLowerInvariant() switch
         {
             "oldest" => query.OrderBy(p => p.CreatedAt),
@@ -112,6 +110,9 @@ public class InMemoryProposalsRepository : IProposalsRepository
 
     public Task<Result<int>> GetUserProposalsThisMonth(Guid UserProfileId)
     {
-        throw new NotImplementedException();
+        var now = DateTime.UtcNow;
+        var startOfMonth = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+        var count = Proposals.Count(p => p.FreelancerId == UserProfileId && p.CreatedAt >= startOfMonth);
+        return Task.FromResult<Result<int>>(count);
     }
 }
