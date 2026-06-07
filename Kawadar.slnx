@@ -5,9 +5,7 @@
   <Folder Name="/src/kawadar.application/">
     <Project Path="src/kawadar.application/Kawadar.Application.csproj" />
   </Folder>
-  <Folder Name="/src/kawadar.domain/">
-    <Project Path="src/kawadar.domain/Kawadar.Domain.csproj" />
-  </Folder>
+  <Folder Name="/src/kawadar.domain/" />
   <Folder Name="/src/kawadar.infrastructure/">
     <Project Path="src/kawadar.infrastructure/Kawadar.Infrastructure.csproj" />
   </Folder>

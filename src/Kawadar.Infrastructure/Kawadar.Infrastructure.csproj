@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\Kawadar.Domain\Kawadar.Domain.csproj" />
     <ProjectReference Include="..\Kawadar.Application\Kawadar.Application.csproj" />
   </ItemGroup>
 
