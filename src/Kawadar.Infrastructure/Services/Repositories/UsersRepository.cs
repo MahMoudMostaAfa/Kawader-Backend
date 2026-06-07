@@ -100,7 +100,7 @@ public class UsersRepository(AppDbContext appDbContext) : IUsersRepository
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            query = query.Where(x => x.Specialization.Name.Contains(search) || x.Title.Contains(search) || x.FullName.Contains(search));
+            query = query.Where(x => (x.Specialization != null && x.Specialization.Name.Contains(search)) || (x.Title != null && x.Title.Contains(search))|| x.FullName.Contains(search));
         }
 
         if (ExperienceYear.HasValue)

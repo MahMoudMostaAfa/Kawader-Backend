@@ -47,14 +47,16 @@ public class GetProposalByIdQueryHandler : IRequestHandler<GetProposalByIdQuery,
     if (userProfileResult.IsError) return userProfileResult.Errors;
     var userProfile = userProfileResult.Value;
     if (proposal.FreelancerId != userProfile.Id && Job.PostedById != userProfile.Id) return Error.Unauthorized();
-    // get user identiy 
-    var userResult = await _identityService.GetUserByIdAsync(userId);
+        // get user identiy 
+    var submittedBy = await _usersRepository.GetUserProfileByIdAsync(proposal.FreelancerId);
+    if (submittedBy.IsError) return submittedBy.Errors;
+    var userResult = await _identityService.GetUserByIdAsync(submittedBy.Value.UserId);
 
     if (userResult.IsError) return userResult.Errors;
 
     var user = userResult.Value;
 
-    var proposalMappingResult = _mapper.Map<ProposalDetailsDto>((proposal, user, userProfile));
+    var proposalMappingResult = _mapper.Map<ProposalDetailsDto>((proposal, user, submittedBy.Value));
     if (proposal.FreelancerId == userProfile.Id)
     {
       proposalMappingResult.ProposalByUserName = null;
