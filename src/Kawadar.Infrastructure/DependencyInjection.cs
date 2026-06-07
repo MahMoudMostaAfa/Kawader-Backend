@@ -332,7 +332,7 @@ public static class DependencyInjection
         });
 
 
-        // Declare DLX and bind DLQ for llm processing queue
+        // Declare DLX(Dead Letter Exchange) and bind DLQ(Dead Letter Queue) for llm processing queue
         cfg.ReceiveEndpoint("llm-processing-dlq", dlq =>
         {
           dlq.Bind("llm-processing-dlx", s =>
