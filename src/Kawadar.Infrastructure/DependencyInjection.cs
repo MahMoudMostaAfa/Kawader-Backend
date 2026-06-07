@@ -225,6 +225,8 @@ public static class DependencyInjection
     // add qdrant vector store for freelancers
     service.AddScoped<IFreelancerVectorStore, QdrantFreelancerVectorStore>();
 
+    // add pdf service
+    service.AddScoped<IPDFService, PDFService>();
     return service;
   }
 

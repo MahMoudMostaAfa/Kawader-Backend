@@ -15,6 +15,14 @@ public static class SchemaGenerator
 
   private static Schema BuildSchema(System.Type type)
   {
+    var underlyingType = Nullable.GetUnderlyingType(type);
+    if (underlyingType != null)
+    {
+      var schema = BuildSchema(underlyingType);
+      schema.Nullable = true;
+      return schema;
+    }
+
     if (type == typeof(string)) return new Schema { Type = Google.GenAI.Types.Type.String };
     if (type == typeof(int) || type == typeof(long)) return new Schema { Type = Google.GenAI.Types.Type.Integer };
     if (type == typeof(float) || type == typeof(double) || type == typeof(decimal)) return new Schema { Type = Google.GenAI.Types.Type.Number };

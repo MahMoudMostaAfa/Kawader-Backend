@@ -4,7 +4,9 @@ using Kawadar.Application.Common.Models;
 using Kawadar.Application.Features.Badges.Queries.GetFreelancerBadgesQuery;
 using Kawadar.Application.Features.ProfileManagment.Commands.UpdateProfile;
 using Kawadar.Application.Features.ProfileManagment.Commands.UpdateProfileImage;
+using Kawadar.Application.Features.ProfileManagment.Commands.UploadAndAutoFill;
 using Kawadar.Application.Features.ProfileManagment.Commands.UploadIdentity;
+using Kawadar.Application.Features.ProfileManagment.DTOs;
 using Kawadar.Application.Features.ProfileManagment.Queries.GetFreelancers;
 using Kawadar.Application.Features.ProfileManagment.Queries.GetFreelancersByAi;
 using Kawadar.Application.Features.ProfileManagment.Queries.GetUserProfile;
@@ -37,7 +39,21 @@ public class ProfileController : ApiController
 
 
   }
-
+  [Consumes("multipart/form-data")]
+  [HttpPost("upload-and-autofill")]
+  [EndpointName("UploadAndAutoFill")]
+  [EndpointSummary("Uploads a resume and auto-fills the profile information")]
+  [EndpointDescription("Uploads a PDF resume, extracts key information using AI, and auto-fills the user's profile with the extracted data.")]
+  [ProducesResponseType(typeof(ProfileAutoFillDto), StatusCodes.Status200OK)]
+  [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  public async Task<IActionResult> UploadAndAutoFill([FromForm] UploadAndAutoFillCommand command, CancellationToken cancellationToken)
+  {
+    var result = await _sender.Send(command, cancellationToken);
+    return result.Match(
+        autoFillData => Ok(autoFillData),
+        errors => Problem(errors));
+  }
 
   [HttpGet("me")]
   [EndpointName("GetProfile")]
