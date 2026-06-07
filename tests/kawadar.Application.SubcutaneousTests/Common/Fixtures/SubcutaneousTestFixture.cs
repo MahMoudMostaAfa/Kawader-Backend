@@ -7,6 +7,7 @@ using Kawadar.Application.Common.Interfaces.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Caching.Hybrid;
 
 namespace kawadar.Application.SubcutaneousTests.Common.Fixtures;
 
@@ -18,6 +19,7 @@ public class SubcutaneousTestFixture
     {
         var services = new ServiceCollection();
         services.AddApplication(); // real MediatR + validators + behaviours
+        services.AddHybridCache(); // required by CachingBehaviour pipeline
         services.AddLogging(b => b.AddProvider(Microsoft.Extensions.Logging.Abstractions.NullLoggerProvider.Instance));
 
         // Config required by event handlers
@@ -62,6 +64,22 @@ public class SubcutaneousTestFixture
         services.AddSingleton<FakeEventBus>();
         services.AddSingleton<Kawadar.Application.Common.Messaging.IEventBus>(sp => sp.GetRequiredService<FakeEventBus>());
         services.AddSingleton<IUnitOfWork, InMemoryUnitOfWork>();
+
+        // Additional repositories required by newer handlers
+        services.AddSingleton<InMemoryWalletRepository>();
+        services.AddSingleton<IWalletRepository>(sp => sp.GetRequiredService<InMemoryWalletRepository>());
+        services.AddSingleton<InMemorySubscriptionsRepository>();
+        services.AddSingleton<ISubscriptionsRepository>(sp => sp.GetRequiredService<InMemorySubscriptionsRepository>());
+        services.AddSingleton<InMemoryNotificationsRepository>();
+        services.AddSingleton<Kawadar.Application.Features.ConversastionsAndMessages.EventHandlers.INotificationsRepository>(sp => sp.GetRequiredService<InMemoryNotificationsRepository>());
+
+        // Fakes for external AI/recommendation services
+        services.AddSingleton<FakeFreelancerVectorStore>();
+        services.AddSingleton<IFreelancerVectorStore>(sp => sp.GetRequiredService<FakeFreelancerVectorStore>());
+        services.AddSingleton<FakeRecommendationService>();
+        services.AddSingleton<IRecommendationService>(sp => sp.GetRequiredService<FakeRecommendationService>());
+        services.AddSingleton<FakeNotificationsHubService>();
+        services.AddSingleton<Kawadar.Application.Common.Hubs.INotificationsHubService>(sp => sp.GetRequiredService<FakeNotificationsHubService>());
 
         Services = services.BuildServiceProvider();
     }
