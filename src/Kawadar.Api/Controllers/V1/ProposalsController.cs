@@ -2,6 +2,7 @@ using Kawadar.Api.Requests.Proposals;
 using Kawadar.Application.Common.Models;
 using Kawadar.Application.Features.Proposals.Commands.CreateProposal;
 using Kawadar.Application.Features.Proposals.Commands.DeleteProposal;
+using Kawadar.Application.Features.Proposals.Commands.GenerateProposal;
 using Kawadar.Application.Features.Proposals.Commands.UpdateProposal;
 using Kawadar.Application.Features.Proposals.Commands.UpdateProposalStatus;
 using Kawadar.Application.Features.Proposals.Dtos;
@@ -26,6 +27,34 @@ public class ProposalsController : ApiController
   {
     _sender = sender;
   }
+
+  [HttpPost("jobs/{jobId:guid}/generate-proposal")]
+  [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
+  [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [EndpointName(nameof(GenerateProposal))]
+  [EndpointSummary("Generates a proposal for a job.")]
+  [EndpointDescription("Generates a new proposal for the specified job using the submitted cover letter, pricing, answers, and milestone details.")]
+  public async Task<IActionResult> GenerateProposal([FromRoute
+        ] Guid jobId)
+  {
+    var query = new GenerateProposalCommand(jobId
+    );
+
+    var result = await _sender.Send(query);
+
+    return result.Match(
+        proposalText => Ok(new
+        {
+          Proposal = proposalText,
+        }),
+        errors => Problem(errors));
+
+  }
+
+
+
+
   [HttpPost("jobs/{jobId:guid}/proposals")]
   [ProducesResponseType(typeof(void), StatusCodes.Status201Created)]
   [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]

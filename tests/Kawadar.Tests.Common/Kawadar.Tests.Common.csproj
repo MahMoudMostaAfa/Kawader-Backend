@@ -21,7 +21,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Kawadar.Infrastructure\Kawadar.Infrastructure.csproj" />
-    <ProjectReference Include="..\..\src\Kawadar.Domain\Kawadar.Domain.csproj" />
     <ProjectReference Include="..\..\src\Kawadar.Application\Kawadar.Application.csproj" />
   </ItemGroup>
 

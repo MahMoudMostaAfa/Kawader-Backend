@@ -1,3 +1,4 @@
+using System.IO.Pipelines;
 using Kawadar.Domain.Common;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Reviews;
@@ -292,4 +293,17 @@ public class UserProfile : AuditableEntity
     LastOnlineAt = lastOnlineAt ?? DateTime.UtcNow;
     return Result.Updated;
   }
+    
+ public Result<bool> IsProfileEgibleToApplyAndPost()
+    {
+        if (IsBanned) return Error.Conflict("UserProfile.Banned", "UserProfile is banned");
+
+        if(!IsActivated) return Error.Conflict("UserProfile.NotActivated", "UserProfile is not activated");
+
+         if(IsDeleted) return Error.Conflict("UserProfile.Deleted", "UserProfile is deleted");
+
+        return false; 
+
+    }
+
 }

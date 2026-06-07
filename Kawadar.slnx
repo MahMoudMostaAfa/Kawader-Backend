@@ -1,15 +1,9 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Kawadar.Api/Kawadar.Api.csproj" />
-  </Folder>
-  <Folder Name="/src/kawadar.application/">
-    <Project Path="src/kawadar.application/Kawadar.Application.csproj" />
-  </Folder>
-  <Folder Name="/src/kawadar.domain/">
-    <Project Path="src/kawadar.domain/Kawadar.Domain.csproj" />
-  </Folder>
-  <Folder Name="/src/kawadar.infrastructure/">
-    <Project Path="src/kawadar.infrastructure/Kawadar.Infrastructure.csproj" />
+    <Project Path="src/Kawadar.Application/Kawadar.Application.csproj" />
+    <Project Path="src/Kawadar.Domain/Kawadar.Domain.csproj" />
+    <Project Path="src/Kawadar.Infrastructure/Kawadar.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/kawadar.Api.IntegrationTests/kawadar.Api.IntegrationTests.csproj" />
