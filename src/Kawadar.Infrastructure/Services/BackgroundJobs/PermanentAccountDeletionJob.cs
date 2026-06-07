@@ -1,3 +1,4 @@
+using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Microsoft.Extensions.Logging;
@@ -10,17 +11,20 @@ public class PermanentAccountDeletionJob
   private readonly IIdentityService _identityService;
   private readonly IUnitOfWork _unitOfWork;
   private readonly ILogger<PermanentAccountDeletionJob> _logger;
+  private readonly IFreelancerVectorStore _freelancerVectorStore;
 
   public PermanentAccountDeletionJob(
     IUsersRepository usersRepository,
     IIdentityService identityService,
     IUnitOfWork unitOfWork,
-    ILogger<PermanentAccountDeletionJob> logger)
+    ILogger<PermanentAccountDeletionJob> logger
+    , IFreelancerVectorStore freelancerVectorStore)
   {
     _usersRepository = usersRepository;
     _identityService = identityService;
     _unitOfWork = unitOfWork;
     _logger = logger;
+    _freelancerVectorStore = freelancerVectorStore;
   }
 
   public async Task ExecuteAsync(string userId, CancellationToken cancellationToken)
@@ -50,6 +54,9 @@ public class PermanentAccountDeletionJob
       _logger.LogError("Failed to delete identity for user {UserId}.", userId);
       throw new InvalidOperationException($"Failed to permanently delete identity for user {userId}.");
     }
+
+    // delete the freelancer vector store data
+    await _freelancerVectorStore.RemoveFreelancerAsync(profile.Id);
 
     _logger.LogInformation("Permanently deleted account for user {UserId}.", userId);
   }
