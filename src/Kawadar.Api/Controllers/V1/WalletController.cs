@@ -28,7 +28,7 @@ public class WalletController : ApiController
   }
 
   [HttpGet("/api/v{version:apiVersion}/admin/wallets")]
-  // [Authorize(Policy = Permissions.ViewWallets)]
+  [Authorize(Policy = Permissions.ViewWallets)]
   [ProducesResponseType(typeof(PaginatedList<AdminWalletDto>), StatusCodes.Status200OK)]
   [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
   [EndpointName("GetAdminWallets")]
@@ -53,7 +53,7 @@ public class WalletController : ApiController
   }
 
   [HttpGet("/api/v{version:apiVersion}/admin/transactions")]
-  // [Authorize(Policy = Permissions.ViewTransactions)]
+  [Authorize(Policy = Permissions.ViewTransactions)]
   [ProducesResponseType(typeof(PaginatedList<TransactionDto>), StatusCodes.Status200OK)]
   [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
   [EndpointName("GetAllTransaction")]
@@ -77,7 +77,7 @@ public class WalletController : ApiController
   }
 
   [HttpGet("/api/v{version:apiVersion}/admin/transactions/{walletId:guid}")]
-  // [Authorize(Policy = Permissions.ViewTransactions)]
+  [Authorize(Policy = Permissions.ViewTransactions)]
   [ProducesResponseType(typeof(PaginatedList<TransactionDto>), StatusCodes.Status200OK)]
   [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
   [EndpointName("GetAllWalletTransaction")]
@@ -102,7 +102,7 @@ public class WalletController : ApiController
   }
 
   [HttpGet("/api/v{version:apiVersion}/admin/wallets/{walletId:guid}")]
-  // [Authorize(Policy = Permissions.ViewWallets)]
+  [Authorize(Policy = Permissions.ViewWallets)]
   [ProducesResponseType(typeof(AdminWalletDto), StatusCodes.Status200OK)]
   [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
   [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
