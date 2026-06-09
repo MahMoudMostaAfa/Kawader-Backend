@@ -5,6 +5,7 @@ using Kawadar.Application.Features.WalletAndPayments.Queries.GetAdminWallets;
 using Kawadar.Application.Features.WalletAndPayments.Queries.GetAllTransactions;
 using Kawadar.Application.Features.WalletAndPayments.Queries.GetAllWalletTransactions;
 using Kawadar.Application.Features.WalletAndPayments.Queries.GetMyWallet;
+using Kawadar.Application.Features.WalletAndPayments.Queries.GetWalletSummary;
 using Kawadar.Domain.Common.Constants;
 using Kawadar.Domain.WalletAndPayments.Enums;
 using MediatR;
@@ -17,6 +18,7 @@ namespace Kawadar.Api.Controllers.V1;
 [Authorize]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/wallet")]
+[Tags("Wallet")]
 public class WalletController : ApiController
 {
   private readonly ISender _sender;
@@ -50,56 +52,56 @@ public class WalletController : ApiController
       errors => Problem(errors));
   }
 
-    [HttpGet("/api/v{version:apiVersion}/admin/transactions")]
-    [Authorize(Policy = Permissions.ViewTransactions)]
-    [ProducesResponseType(typeof(PaginatedList<TransactionDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [EndpointName("GetAllTransaction")]
-    [EndpointSummary("Lists all Transactions")]
-    [EndpointDescription("Lists all Transactions with optional filters for admin review.")]
-    public async Task<IActionResult> GetAllTransactions(
-    [FromQuery] TransactionType? type,
-    [FromQuery] WalletTransactionStatus? status,
-    [FromQuery] WalletTransactionReferenceType? reference,
-    [FromQuery] int page = 1,
-    [FromQuery] int pageSize = 10,
-    [FromQuery] string sortBy = "newest",
-    CancellationToken ct = default)
-    {
-        var query = new GetAllTransactionsQuery(type, status, reference, page, pageSize, sortBy);
-        var result = await _sender.Send(query, ct);
+  [HttpGet("/api/v{version:apiVersion}/admin/transactions")]
+  // [Authorize(Policy = Permissions.ViewTransactions)]
+  [ProducesResponseType(typeof(PaginatedList<TransactionDto>), StatusCodes.Status200OK)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [EndpointName("GetAllTransaction")]
+  [EndpointSummary("Lists all Transactions")]
+  [EndpointDescription("Lists all Transactions with optional filters for admin review.")]
+  public async Task<IActionResult> GetAllTransactions(
+  [FromQuery] TransactionType? type,
+  [FromQuery] WalletTransactionStatus? status,
+  [FromQuery] WalletTransactionReferenceType? reference,
+  [FromQuery] int page = 1,
+  [FromQuery] int pageSize = 10,
+  [FromQuery] string sortBy = "newest",
+  CancellationToken ct = default)
+  {
+    var query = new GetAllTransactionsQuery(type, status, reference, page, pageSize, sortBy);
+    var result = await _sender.Send(query, ct);
 
-        return result.Match(
-          Transactions => Ok(Transactions),
-          errors => Problem(errors));
-    }
+    return result.Match(
+      Transactions => Ok(Transactions),
+      errors => Problem(errors));
+  }
 
-    [HttpGet("/api/v{version:apiVersion}/admin/transactions/{walletId:guid}")]
-    [Authorize(Policy = Permissions.ViewTransactions)]
-    [ProducesResponseType(typeof(PaginatedList<TransactionDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [EndpointName("GetAllWalletTransaction")]
-    [EndpointSummary("Lists all transactions from a single wallet")]
-    [EndpointDescription("Lists all transactions from a single wallet with optional filters for admin review.")]
-    public async Task<IActionResult> GetAllWalletTransactions(
-    [FromRoute] Guid walletId, 
-    [FromQuery] TransactionType? type,
-    [FromQuery] WalletTransactionStatus? status,
-    [FromQuery] WalletTransactionReferenceType? reference,
-    [FromQuery] int page = 1,
-    [FromQuery] int pageSize = 10,
-    [FromQuery] string sortBy = "newest",
-    CancellationToken ct = default)
-    {
-        var query = new GetAllWalletTransactionsQuery(walletId, type, status, reference, page, pageSize, sortBy);
-        var result = await _sender.Send(query, ct);
+  [HttpGet("/api/v{version:apiVersion}/admin/transactions/{walletId:guid}")]
+  // [Authorize(Policy = Permissions.ViewTransactions)]
+  [ProducesResponseType(typeof(PaginatedList<TransactionDto>), StatusCodes.Status200OK)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [EndpointName("GetAllWalletTransaction")]
+  [EndpointSummary("Lists all transactions from a single wallet")]
+  [EndpointDescription("Lists all transactions from a single wallet with optional filters for admin review.")]
+  public async Task<IActionResult> GetAllWalletTransactions(
+  [FromRoute] Guid walletId,
+  [FromQuery] TransactionType? type,
+  [FromQuery] WalletTransactionStatus? status,
+  [FromQuery] WalletTransactionReferenceType? reference,
+  [FromQuery] int page = 1,
+  [FromQuery] int pageSize = 10,
+  [FromQuery] string sortBy = "newest",
+  CancellationToken ct = default)
+  {
+    var query = new GetAllWalletTransactionsQuery(walletId, type, status, reference, page, pageSize, sortBy);
+    var result = await _sender.Send(query, ct);
 
-        return result.Match(
-          Transactions => Ok(Transactions),
-          errors => Problem(errors));
-    }
+    return result.Match(
+      Transactions => Ok(Transactions),
+      errors => Problem(errors));
+  }
 
-    [HttpGet("/api/v{version:apiVersion}/admin/wallets/{walletId:guid}")]
+  [HttpGet("/api/v{version:apiVersion}/admin/wallets/{walletId:guid}")]
   // [Authorize(Policy = Permissions.ViewWallets)]
   [ProducesResponseType(typeof(AdminWalletDto), StatusCodes.Status200OK)]
   [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -128,11 +130,29 @@ public class WalletController : ApiController
     );
   }
 
-
   [HttpGet("summary")]
-  public Task<IActionResult> GetWalletSummary(CancellationToken ct = default)
+  [ProducesResponseType(typeof(PaginatedList<TransactionDto>), StatusCodes.Status200OK)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [EndpointName("GetWalletSummary")]
+  [EndpointSummary("Gets wallet transaction summary")]
+  [EndpointDescription("Gets the current user's wallet transactions as a paginated list with optional filters.")]
+  public async Task<IActionResult> GetWalletSummary(
+    [FromQuery] TransactionType? type,
+    [FromQuery] WalletTransactionStatus? status,
+    [FromQuery] WalletTransactionReferenceType? referenceType,
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 10,
+    [FromQuery] string sortBy = "newest",
+    CancellationToken ct = default)
   {
-    // Implementation for wallet summary goes here
-    return Task.FromResult<IActionResult>(Ok());
+    var query = new GetWalletSummaryQuery(type, status, referenceType, page, pageSize, sortBy);
+    var result = await _sender.Send(query, ct);
+
+    return result.Match(
+      transactions => Ok(transactions),
+      errors => Problem(errors));
   }
+
+
 }

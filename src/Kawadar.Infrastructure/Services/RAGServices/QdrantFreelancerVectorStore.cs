@@ -87,7 +87,7 @@ public class QdrantFreelancerVectorStore : IFreelancerVectorStore
     var embeddingVector = await _embeddingService.GenerateAsync(query);
     var searchResult = await _qdrantClient.SearchAsync(CollectionName, embeddingVector, limit: (ulong)topK, scoreThreshold: 0.5f);
     var ids = searchResult.Select(r => Guid.Parse(r.Id.Uuid)).ToList();
-    // dictonary to hold the id and score
+    // dictionary to hold the id and score 
 
     var idswithscores = searchResult.ToDictionary(r => Guid.Parse(r.Id.Uuid), r => r.Score);
 
@@ -96,7 +96,9 @@ public class QdrantFreelancerVectorStore : IFreelancerVectorStore
     if (freelancersResult.IsError) return freelancersResult.Errors;
     var freelancers = freelancersResult.Value;
     _logger.LogInformation("Search query: {Query}, Found freelancers: {Count}", query, freelancers.Count());
+
     // order the freelancers based on the score + avg rating (if exists) to boost the ones with higher ratings
+
     var orderedFreelancers = freelancers.OrderByDescending(f =>
     {
       var score = idswithscores.ContainsKey(f.Id) ? idswithscores[f.Id] : 0;

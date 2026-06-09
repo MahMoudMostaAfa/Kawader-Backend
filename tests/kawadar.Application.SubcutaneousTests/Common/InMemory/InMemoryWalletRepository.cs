@@ -106,6 +106,13 @@ public class InMemoryWalletRepository : IWalletRepository
     public Task<decimal> GetTotalProfit()
         => Task.FromResult(_walletTransactions.Sum(t => t.Amount));
 
+    public Task<decimal> GetTotalProfitByWalletId(Guid walletId, CancellationToken cancellationToken = default)
+        => Task.FromResult(_walletTransactions
+            .Where(t => t.WalletId == walletId
+                && t.Type == TransactionType.EscrowRelease
+                && t.Status == WalletTransactionStatus.Completed)
+            .Sum(t => t.Amount));
+
     public Task<Dictionary<WalletTransactionStatus, int>> GetTransactionStatusDistribution()
     {
         var dist = _walletTransactions

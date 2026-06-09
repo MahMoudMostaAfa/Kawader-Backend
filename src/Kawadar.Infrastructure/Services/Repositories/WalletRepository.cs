@@ -70,12 +70,12 @@ public class WalletRepository : IWalletRepository
 
     if (minBalance.HasValue)
     {
-      query = query.Where(w => w.TotalBalance >= minBalance.Value);
+      query = query.Where(w => w.Balance >= minBalance.Value);
     }
 
     if (maxBalance.HasValue)
     {
-      query = query.Where(w => w.TotalBalance <= maxBalance.Value);
+      query = query.Where(w => w.Balance <= maxBalance.Value);
     }
 
     query = sortBy == "oldest"
@@ -92,77 +92,77 @@ public class WalletRepository : IWalletRepository
     return new PaginatedList<Wallet>(items, totalCount, page, pageSize);
   }
 
-    public async Task<PaginatedList<WalletTransaction>> GetAllTransactions(TransactionType? type, WalletTransactionStatus? status, WalletTransactionReferenceType? reference,
-        int page, int pageSize, string sortBy, CancellationToken cancellationToken)
+  public async Task<PaginatedList<WalletTransaction>> GetAllTransactions(TransactionType? type, WalletTransactionStatus? status, WalletTransactionReferenceType? reference,
+      int page, int pageSize, string sortBy, CancellationToken cancellationToken)
+  {
+    var query = _context.WalletTransactions.AsQueryable();
+
+    if (type.HasValue)
     {
-        var query = _context.WalletTransactions.AsQueryable();
-
-        if (type.HasValue)
-        {
-            query = query.Where(x => x.Type == type);
-        }
-
-        if (status.HasValue)
-        {
-            query = query.Where(x => x.Status == status);
-        }
-
-        if (reference.HasValue)
-        {
-            query = query.Where(x => x.ReferenceType == reference);
-        }
-
-        query = sortBy == "oldest"
-            ? query.OrderBy(w => w.CreatedAt)
-            : query.OrderByDescending(w => w.CreatedAt);
-
-        var totalCount = await query.CountAsync(cancellationToken);
-
-        var items = await query
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
-
-        return new PaginatedList<WalletTransaction>(items, totalCount, page, pageSize);
+      query = query.Where(x => x.Type == type);
     }
 
-    public async Task<PaginatedList<WalletTransaction>> GetAllTransactionsByWalletId(Guid walletId, TransactionType? type, WalletTransactionStatus? status, WalletTransactionReferenceType? reference,
-        int page, int pageSize, string sortBy, CancellationToken cancellationToken)
+    if (status.HasValue)
     {
-        var query = _context.WalletTransactions.AsQueryable();
-
-        query = query.Where(x => x.WalletId == walletId);
-
-        if (type.HasValue)
-        {
-            query = query.Where(x => x.Type == type);
-        }
-
-        if (status.HasValue)
-        {
-            query = query.Where(x => x.Status == status);
-        }
-
-        if (reference.HasValue)
-        {
-            query = query.Where(x => x.ReferenceType == reference);
-        }
-
-        query = sortBy == "oldest"
-            ? query.OrderBy(w => w.CreatedAt)
-            : query.OrderByDescending(w => w.CreatedAt);
-
-        var totalCount = await query.CountAsync(cancellationToken);
-
-        var items = await query
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
-
-        return new PaginatedList<WalletTransaction>(items, totalCount, page, pageSize);
+      query = query.Where(x => x.Status == status);
     }
 
-    public async Task<Result<EscrowTransaction>> GetEscrowTransactionByContractId(Guid contractId, CancellationToken cancellationToken)
+    if (reference.HasValue)
+    {
+      query = query.Where(x => x.ReferenceType == reference);
+    }
+
+    query = sortBy == "oldest"
+        ? query.OrderBy(w => w.CreatedAt)
+        : query.OrderByDescending(w => w.CreatedAt);
+
+    var totalCount = await query.CountAsync(cancellationToken);
+
+    var items = await query
+        .Skip((page - 1) * pageSize)
+        .Take(pageSize)
+        .ToListAsync(cancellationToken);
+
+    return new PaginatedList<WalletTransaction>(items, totalCount, page, pageSize);
+  }
+
+  public async Task<PaginatedList<WalletTransaction>> GetAllTransactionsByWalletId(Guid walletId, TransactionType? type, WalletTransactionStatus? status, WalletTransactionReferenceType? reference,
+      int page, int pageSize, string sortBy, CancellationToken cancellationToken)
+  {
+    var query = _context.WalletTransactions.AsQueryable();
+
+    query = query.Where(x => x.WalletId == walletId);
+
+    if (type.HasValue)
+    {
+      query = query.Where(x => x.Type == type);
+    }
+
+    if (status.HasValue)
+    {
+      query = query.Where(x => x.Status == status);
+    }
+
+    if (reference.HasValue)
+    {
+      query = query.Where(x => x.ReferenceType == reference);
+    }
+
+    query = sortBy == "oldest"
+        ? query.OrderBy(w => w.CreatedAt)
+        : query.OrderByDescending(w => w.CreatedAt);
+
+    var totalCount = await query.CountAsync(cancellationToken);
+
+    var items = await query
+        .Skip((page - 1) * pageSize)
+        .Take(pageSize)
+        .ToListAsync(cancellationToken);
+
+    return new PaginatedList<WalletTransaction>(items, totalCount, page, pageSize);
+  }
+
+  public async Task<Result<EscrowTransaction>> GetEscrowTransactionByContractId(Guid contractId, CancellationToken cancellationToken)
   {
     var transaction = await _context.EscrowTransactions.FirstOrDefaultAsync(et => et.ContractId == contractId);
     if (transaction is null) return Error.NotFound();
@@ -184,24 +184,34 @@ public class WalletRepository : IWalletRepository
     return transaction;
   }
 
-    public async Task<Dictionary<string, decimal>> GetMoneyTransactionDistributionBasedOnCurrency()
-    {
-        var distribution = await _context.WalletTransactions.GroupBy(x => x.Currency).ToDictionaryAsync(x => x.Key, x => x.Select(x => x.Amount).Sum());
-        return distribution;
-    }
+  public async Task<Dictionary<string, decimal>> GetMoneyTransactionDistributionBasedOnCurrency()
+  {
+    var distribution = await _context.WalletTransactions.GroupBy(x => x.Currency).ToDictionaryAsync(x => x.Key, x => x.Select(x => x.Amount).Sum());
+    return distribution;
+  }
 
-    public async Task<Dictionary<WalletTransactionStatus, int>> GetTransactionStatusDistribution()
-    {
-        var distribution = await _context.WalletTransactions.GroupBy(x => x.Status).ToDictionaryAsync(x => x.Key, x => x.Count());
-        return distribution;
-    }
+  public async Task<Dictionary<WalletTransactionStatus, int>> GetTransactionStatusDistribution()
+  {
+    var distribution = await _context.WalletTransactions.GroupBy(x => x.Status).ToDictionaryAsync(x => x.Key, x => x.Count());
+    return distribution;
+  }
 
-    public async Task<decimal> GetTotalProfit()
-    {
-        var FeeProfit = await _context.EscrowTransactions.Where(x => x.Type == EcrowTransactionType.PlatformFeeDeducted).SumAsync(x => x.Amount);
-        var subscriptionProfit = await _context.WalletTransactions.Where(x => x.Type == TransactionType.SubscriptionCharge).SumAsync(x => x.Amount);
-        return FeeProfit + subscriptionProfit;
-    }
+  public async Task<decimal> GetTotalProfit()
+  {
+    var FeeProfit = await _context.EscrowTransactions.Where(x => x.Type == EcrowTransactionType.PlatformFeeDeducted).SumAsync(x => x.Amount);
+    var subscriptionProfit = await _context.WalletTransactions.Where(x => x.Type == TransactionType.SubscriptionCharge).SumAsync(x => x.Amount);
+    return FeeProfit + subscriptionProfit;
+  }
+
+  public async Task<decimal> GetTotalProfitByWalletId(Guid walletId, CancellationToken cancellationToken = default)
+  {
+    return await _context.WalletTransactions
+      .Where(t => t.WalletId == walletId
+        && t.Type == TransactionType.EscrowRelease
+        && t.Status == WalletTransactionStatus.Completed)
+      .SumAsync(t => t.Amount, cancellationToken);
+  }
+
   public void Add(Wallet wallet)
   {
     _context.Wallets.Add(wallet);

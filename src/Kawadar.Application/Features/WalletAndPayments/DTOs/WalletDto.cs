@@ -6,4 +6,5 @@ public class WalletDto
   public decimal Balance { get; set; }
   public decimal EscrowBalance { get; set; }
   public decimal TotalBalance { get; set; }
+  public decimal TotalProfit { get; set; }
 }
