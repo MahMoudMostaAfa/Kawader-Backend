@@ -3,7 +3,9 @@ using Asp.Versioning;
 using Kawadar.Api.Infrastructure;
 using Kawadar.Api.OpenApi.Transformer;
 using Kawadar.Api.Services;
+using Kawadar.Application.Common.Constants;
 using Kawadar.Application.Common.Interfaces.Auth;
+using Kawadar.Application.Common.Interfaces.Caching;
 using Kawadar.Infrastructure.Hubs;
 using Kawadar.Infrastructure.Settings;
 using Microsoft.AspNetCore.RateLimiting;
@@ -154,6 +156,7 @@ public static class DependencyInjection
   public static IServiceCollection AddOutputCaching(this IServiceCollection services)
   {
     services.AddSingleton<SharedOutputCachePolicy>();
+    services.AddScoped<ICacheInvalidator, OutputCacheInvalidator>();
 
     services.AddOutputCache(options =>
     {
@@ -178,7 +181,7 @@ public static class DependencyInjection
                     "sortBy"
                 );
 
-        policy.Tag("jobs_all_tag");
+        policy.Tag(CacheTags.JobsAll);
       });
     });
 

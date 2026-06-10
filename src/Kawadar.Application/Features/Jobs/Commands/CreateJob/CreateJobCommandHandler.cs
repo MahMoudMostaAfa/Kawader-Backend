@@ -19,6 +19,7 @@ using Kawadar.Application.Features.ConversastionsAndMessages.DTOs;
 using Kawadar.Domain.Jobs.Events;
 using Kawadar.Application.Common.Messaging;
 using Kawadar.Application.Common.Messaging.Messages;
+using Kawadar.Application.Common.Interfaces.Caching;
 
 public class CreateJobCommandHandler : IRequestHandler<CreateJobCommand, Result<Created>>
 {
@@ -35,10 +36,12 @@ public class CreateJobCommandHandler : IRequestHandler<CreateJobCommand, Result<
   private readonly IRecommendationService _recommendationService;
   private readonly IEventBus _eventBus;
   private readonly IUnitOfWork _unitOfWork;
+  private readonly ICacheInvalidator _cacheInvalidator;
+
 
   public CreateJobCommandHandler(IUser user, IIdentityService identityService, IUsersRepository usersRepository, ISpecilizationRepository specilizationRepository, ISkillRepository skillRepository, IJobsRepository jobsRepository, IStorageClient storageClient, IUnitOfWork unitOfWork
   , INotificationsRepository notificationsRepository, INotificationsHubService notificationsHubService, IRecommendationService recommendationService
-  , IEventBus eventBus)
+  , IEventBus eventBus, ICacheInvalidator cacheInvalidator)
   {
     _user = user;
     _identityService = identityService;
@@ -52,6 +55,7 @@ public class CreateJobCommandHandler : IRequestHandler<CreateJobCommand, Result<
     _notificationsHubService = notificationsHubService;
     _recommendationService = recommendationService;
     _eventBus = eventBus;
+    _cacheInvalidator = cacheInvalidator;
   }
   public async Task<Result<Created>> Handle(CreateJobCommand request, CancellationToken cancellationToken)
   {
@@ -194,6 +198,8 @@ public class CreateJobCommandHandler : IRequestHandler<CreateJobCommand, Result<
       await _eventBus.PublishAsync(new JobToCandidatesMessage { JobId = job.Id }, cancellationToken);
 
     }
+    // Invalidate relevant cache entries
+    await _cacheInvalidator.EvictByTagAsync(CacheTags.JobsAll, cancellationToken);
 
 
     return Result.Created;
