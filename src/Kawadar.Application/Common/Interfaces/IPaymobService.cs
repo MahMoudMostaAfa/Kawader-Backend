@@ -15,7 +15,7 @@ public interface IPaymobService
   Task<Result<PaymobIntentionResult>> CreatePaymentIntentionAsync(
     decimal amount,
     string currency,
-    List<int> paymentMethodIds,
+    List<string> paymentMethodIds,
     PaymobBillingData billingData,
     string? internalOrderId = null,
     CancellationToken ct = default);
@@ -50,7 +50,7 @@ public record PaymobBillingData(
   string? ShippingMethod = "NA",
   string? PostalCode = "NA",
   string? City = "NA",
-  string? Country = "EG",
+  string? Country = "EGY",
   string? State = "NA");
 
 /// <summary>Data extracted from a Paymob transaction callback for HMAC verification.</summary>
