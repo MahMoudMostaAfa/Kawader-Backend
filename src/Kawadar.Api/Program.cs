@@ -57,6 +57,10 @@ try
   // Prometheus metrics
   app.UseHttpMetrics();
 
+
+  // if (app.Environment.IsDevelopment())
+  // {
+  app.UseDeveloperExceptionPage();
   // expose OpenAPI
   app.MapOpenApi();
 
@@ -72,9 +76,21 @@ try
   // enable scalar 
   app.MapScalarApiReference();
 
+
+  // seed database with test data
   await app.InitialiseDatabaseAsync();
 
+  // Hangfire dashboard (development only for security)
+  app.UseHangfireDashboard("/hangfire", new DashboardOptions
+  {
+    Authorization = [new HangfireAuthorizationFilter()]
+  });
+
+  // }
+
+  // global middleware
   app.UseCoreMiddleware(builder.Configuration);
+
 
   // register recurring jobs
   var recurringJobManager = app.Services.GetRequiredService<IRecurringJobManager>();
@@ -84,12 +100,6 @@ try
     service => service.ProcessPolicyViolationAsync(),
     Cron.MinuteInterval(3));
 #pragma warning restore CS0618 // Type or member is obsolete
-
-  // Hangfire dashboard (development only for security)
-  app.UseHangfireDashboard("/hangfire", new DashboardOptions
-  {
-    Authorization = [new HangfireAuthorizationFilter()]
-  });
 
   app.MapControllers().RequireRateLimiting("SlidingWindow");
 

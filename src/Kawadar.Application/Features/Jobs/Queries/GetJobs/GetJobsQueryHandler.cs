@@ -14,7 +14,6 @@ public class GetJobsQueryHandler : IRequestHandler<GetJobsQuery, Result<Paginate
   private readonly IJobsRepository _jobsRepository;
   private readonly IMapper _mapper;
   private readonly IUser _user;
-
   public GetJobsQueryHandler(IJobsRepository jobsRepository, IMapper mapper, IUser user)
   {
     _jobsRepository = jobsRepository;
