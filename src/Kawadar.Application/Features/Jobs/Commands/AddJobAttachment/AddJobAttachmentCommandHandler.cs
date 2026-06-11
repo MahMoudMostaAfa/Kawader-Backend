@@ -2,6 +2,7 @@ using Kawadar.Application.Common.Constants;
 using Kawadar.Application.Common.Errors;
 using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Interfaces.Auth;
+using Kawadar.Application.Common.Interfaces.Caching;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Jobs.JobFiles;
@@ -16,19 +17,22 @@ public class AddJobAttachmentCommandHandler : IRequestHandler<AddJobAttachmentCo
   private readonly IUsersRepository _usersRepository;
   private readonly IStorageClient _storageClient;
   private readonly IUnitOfWork _unitOfWork;
+  private readonly ICacheInvalidator _cacheInvalidator;
 
   public AddJobAttachmentCommandHandler(
     IUser user,
     IJobsRepository jobsRepository,
     IUsersRepository usersRepository,
     IStorageClient storageClient,
-    IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork,
+    ICacheInvalidator cacheInvalidator)
   {
     _user = user;
     _jobsRepository = jobsRepository;
     _usersRepository = usersRepository;
     _storageClient = storageClient;
     _unitOfWork = unitOfWork;
+    _cacheInvalidator = cacheInvalidator;
   }
 
   public async Task<Result<Created>> Handle(AddJobAttachmentCommand request, CancellationToken cancellationToken)
@@ -84,6 +88,7 @@ public class AddJobAttachmentCommandHandler : IRequestHandler<AddJobAttachmentCo
     if (addResult.IsError) return addResult.Errors;
 
     await _unitOfWork.SaveChangesAsync(cancellationToken);
+    await _cacheInvalidator.EvictByTagAsync(CacheTags.JobsAll, cancellationToken);
 
     return Result.Created;
   }

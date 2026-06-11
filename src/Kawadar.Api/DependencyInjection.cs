@@ -3,7 +3,9 @@ using Asp.Versioning;
 using Kawadar.Api.Infrastructure;
 using Kawadar.Api.OpenApi.Transformer;
 using Kawadar.Api.Services;
+using Kawadar.Application.Common.Constants;
 using Kawadar.Application.Common.Interfaces.Auth;
+using Kawadar.Application.Common.Interfaces.Caching;
 using Kawadar.Infrastructure.Hubs;
 using Kawadar.Infrastructure.Settings;
 using Microsoft.AspNetCore.RateLimiting;
@@ -22,7 +24,8 @@ public static class DependencyInjection
     .AddApiVersioning()
     .AddConfiguredCors(configuration)
     .AddIdentityServices()
-    .AddAppRateLimiting();
+    .AddAppRateLimiting()
+    .AddOutputCaching();
 
     return services;
   }
@@ -150,7 +153,40 @@ public static class DependencyInjection
     return services;
   }
 
+  public static IServiceCollection AddOutputCaching(this IServiceCollection services)
+  {
+    services.AddSingleton<SharedOutputCachePolicy>();
+    services.AddScoped<ICacheInvalidator, OutputCacheInvalidator>();
 
+    services.AddOutputCache(options =>
+    {
+      options.AddPolicy("JobsCachePolicy", policy =>
+      {
+        // Override the default policy that blocks caching for authenticated requests
+        policy.AddPolicy<SharedOutputCachePolicy>();
+
+        policy.Expire(TimeSpan.FromMinutes(10));
+
+        // All authenticated users share the same cache entries — do NOT vary by Authorization header
+        policy.SetVaryByQuery(
+                    "search",
+                    "specilizationId",
+                    "jobType",
+                    "experienceLevel",
+                    "budgetRange",
+                    "hourlyRateRange",
+                    "skillIds",
+                    "page",
+                    "pageSize",
+                    "sortBy"
+                );
+
+        policy.Tag(CacheTags.JobsAll);
+      });
+    });
+
+    return services;
+  }
 
   public static IApplicationBuilder UseCoreMiddleware(this IApplicationBuilder app, IConfiguration configuration)
   {
@@ -176,6 +212,9 @@ public static class DependencyInjection
     // 8. Authorization (must come after authentication)
     app.UseAuthorization();
 
+    // 9. Output Cache must come AFTER auth so the identity is established
+    //    before the cache middleware decides whether to serve/store a response
+    app.UseOutputCache();
 
 
     return app;

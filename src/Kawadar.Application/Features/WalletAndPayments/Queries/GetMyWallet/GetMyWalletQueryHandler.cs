@@ -44,6 +44,8 @@ public class GetMyWalletQueryHandler : IRequestHandler<GetMyWalletQuery, Result<
 
     var walletDto = _mapper.Map<WalletDto>(wallet);
 
+    walletDto.TotalProfit = await _walletRepository.GetTotalProfitByWalletId(wallet.Id, cancellationToken);
+
     return walletDto;
 
 

@@ -9,4 +9,5 @@ public class AdminWalletDto
   public decimal TotalBalance { get; set; }
   public string Currency { get; set; } = string.Empty;
   public bool IsActive { get; set; }
+  public decimal TotalProfit { get; set; }
 }

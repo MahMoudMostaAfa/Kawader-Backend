@@ -78,16 +78,24 @@ public class ProfileController : ApiController
   [ProducesResponseType(typeof(UserProfileDto), StatusCodes.Status200OK)]
   [ProducesResponseType(StatusCodes.Status500InternalServerError)]
   public async Task<IActionResult> GetFreelancers(
+      [FromQuery] string search,
       [FromQuery] float? AverageRating,
       [FromQuery] ExperienceYear? ExperienceYear,
       [FromQuery] Guid? specilizationId,
+      [FromQuery] string? skillIds,
       [FromQuery] int page = 1,
       [FromQuery] int pageSize = 10,
       [FromQuery] string sortBy = "newest",
       CancellationToken ct = default
       )
   {
-    var query = new GetFreelancersQuery(ExperienceYear, specilizationId, AverageRating, page, pageSize, sortBy);
+    var parsedSkillIds = skillIds
+    ?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+    .Select(s => Guid.TryParse(s, out var g) ? g : Guid.Empty)
+    .Where(g => g != Guid.Empty)
+    .ToList();
+
+    var query = new GetFreelancersQuery(search, ExperienceYear, specilizationId, AverageRating, parsedSkillIds, page, pageSize, sortBy);
     var profileResult = await _sender.Send(query, ct);
 
     return profileResult.Match(

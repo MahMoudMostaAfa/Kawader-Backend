@@ -15,6 +15,9 @@ public class GetAdminWalletByIdQueryHandler(IWalletRepository walletRepository, 
     if (walletResult.IsError) return walletResult.Errors;
 
     var dto = mapper.Map<AdminWalletDto>(walletResult.Value);
+
+    dto.TotalProfit = await walletRepository.GetTotalProfitByWalletId(request.WalletId, cancellationToken);
+
     return dto;
   }
 }

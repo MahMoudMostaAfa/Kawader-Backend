@@ -19,6 +19,7 @@ public class CreatePaymentIntentionCommandHandler
   private readonly IPaymentRepository _paymentRepository;
   private readonly IPaymobService _paymobService;
   private readonly IUnitOfWork _unitOfWork;
+  private readonly IIdentityService _identityService;
 
   public CreatePaymentIntentionCommandHandler(
     IUser user,
@@ -26,8 +27,8 @@ public class CreatePaymentIntentionCommandHandler
     IWalletRepository walletRepository,
     IPaymentRepository paymentRepository,
     IPaymobService paymobService,
-    IIdentityService identityService,
-    IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork,
+    IIdentityService identityService)
   {
     _user = user;
     _usersRepository = usersRepository;
@@ -55,16 +56,15 @@ public class CreatePaymentIntentionCommandHandler
     if (walletResult.IsError) return walletResult.Errors;
     var wallet = walletResult.Value;
 
-    // Get User Email it needs a valid email format doesn't need to be a real one
-    var identityResult = await _identityService.GetUserByIdAsync(userProfile.UserId);
-    if (identityResult.IsError) return identityResult.Errors;
-    var userDto = identityResult.Value;
+        var userIdentityResult = await _identityService.GetUserByIdAsync(userProfile.UserId);
+        if (userIdentityResult.IsError) return userIdentityResult.Errors;
+        var userDto = userIdentityResult.Value;
 
     // 3. Create billing data from user profile
     var billingData = new PaymobBillingData(
       FirstName: userProfile.FirstName ?? "NA",
       LastName: userProfile.LastName ?? "NA",
-      Email: userDto.Email  ?? "NA",
+      Email: userDto.Email ?? "NA",
       PhoneNumber: userProfile.PhoneNumber ?? "NA"
     );
 
@@ -72,7 +72,7 @@ public class CreatePaymentIntentionCommandHandler
     var intentionResult = await _paymobService.CreatePaymentIntentionAsync(
       amount: request.Amount,
       currency: "EGP",
-      paymentMethodIds: ["testing"], // Card integration ID from Paymob dashboard
+      paymentMethodIds: ["4892084"], // Card integration ID from Paymob dashboard
       billingData: billingData,
       internalOrderId: null,
       ct: cancellationToken);

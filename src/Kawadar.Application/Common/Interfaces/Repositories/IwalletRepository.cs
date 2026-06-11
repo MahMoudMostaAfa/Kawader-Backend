@@ -33,6 +33,7 @@ public interface IWalletRepository
         int page, int pageSize, string sortBy, CancellationToken cancellationToken);
 
     Task<decimal> GetTotalProfit();
+    Task<decimal> GetTotalProfitByWalletId(Guid walletId, CancellationToken cancellationToken = default);
     Task<Dictionary<WalletTransactionStatus, int>> GetTransactionStatusDistribution();
     Task<Dictionary<string, decimal>> GetMoneyTransactionDistributionBasedOnCurrency();
   void Add(Wallet wallet);

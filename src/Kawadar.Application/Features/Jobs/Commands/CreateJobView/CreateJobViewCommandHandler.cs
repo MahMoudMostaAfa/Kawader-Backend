@@ -1,6 +1,8 @@
+using Kawadar.Application.Common.Constants;
 using Kawadar.Application.Common.Errors;
 using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Interfaces.Auth;
+using Kawadar.Application.Common.Interfaces.Caching;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Domain.Common.Results;
 using Kawadar.Domain.Jobs.JobViews;
@@ -16,6 +18,7 @@ public class CreateJobViewCommandHandler : IRequestHandler<CreateJobViewCommand,
   private readonly IUsersRepository _usersRepository;
   private readonly IUnitOfWork _unitOfWork;
   private readonly IRecommendationService _recommendationService;
+  private readonly ICacheInvalidator _cacheInvalidator;
 
   public CreateJobViewCommandHandler(
     IUser user,
@@ -23,7 +26,8 @@ public class CreateJobViewCommandHandler : IRequestHandler<CreateJobViewCommand,
     IJobViewRepository jobViewRepository,
     IUsersRepository usersRepository,
     IUnitOfWork unitOfWork
-    , IRecommendationService recommendationService)
+    , IRecommendationService recommendationService,
+    ICacheInvalidator cacheInvalidator)
   {
     _user = user;
     _jobsRepository = jobsRepository;
@@ -31,6 +35,7 @@ public class CreateJobViewCommandHandler : IRequestHandler<CreateJobViewCommand,
     _usersRepository = usersRepository;
     _unitOfWork = unitOfWork;
     _recommendationService = recommendationService;
+    _cacheInvalidator = cacheInvalidator;
   }
 
   public async Task<Result<Created>> Handle(CreateJobViewCommand request, CancellationToken cancellationToken)
@@ -60,7 +65,7 @@ public class CreateJobViewCommandHandler : IRequestHandler<CreateJobViewCommand,
     var feedback = new RecommendationFeedback("view", userProfile.Id, job.Id.ToString());
 
     await _recommendationService.InsertFeedbackAsync(new[] { feedback }, cancellationToken);
-
+    await _cacheInvalidator.EvictByTagAsync(CacheTags.JobsAll, cancellationToken);
 
     return Result.Created;
   }

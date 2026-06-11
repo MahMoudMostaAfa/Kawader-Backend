@@ -1,5 +1,7 @@
+using Kawadar.Application.Common.Constants;
 using Kawadar.Application.Common.Errors;
 using Kawadar.Application.Common.Interfaces.Auth;
+using Kawadar.Application.Common.Interfaces.Caching;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Domain.Common.Results;
 using MediatR;
@@ -12,17 +14,20 @@ public class DeleteJobQuestionCommandHandler : IRequestHandler<DeleteJobQuestion
   private readonly IJobsRepository _jobsRepository;
   private readonly IUsersRepository _usersRepository;
   private readonly IUnitOfWork _unitOfWork;
+    private readonly ICacheInvalidator _cacheInvalidator;
 
   public DeleteJobQuestionCommandHandler(
     IUser user,
     IJobsRepository jobsRepository,
     IUsersRepository usersRepository,
-    IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork,
+    ICacheInvalidator cacheInvalidator)
   {
     _user = user;
     _jobsRepository = jobsRepository;
     _usersRepository = usersRepository;
     _unitOfWork = unitOfWork;
+    _cacheInvalidator = cacheInvalidator;
   }
 
   public async Task<Result<Deleted>> Handle(DeleteJobQuestionCommand request, CancellationToken cancellationToken)
@@ -45,7 +50,7 @@ public class DeleteJobQuestionCommandHandler : IRequestHandler<DeleteJobQuestion
     if (removeResult.IsError) return removeResult.Errors;
 
     await _unitOfWork.SaveChangesAsync(cancellationToken);
-
+    await _cacheInvalidator.EvictByTagAsync(CacheTags.JobsAll, cancellationToken);
     return Result.Deleted;
   }
 }

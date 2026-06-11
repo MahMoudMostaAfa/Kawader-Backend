@@ -16,11 +16,12 @@ using Kawadar.Application.Common.Models;
 using Kawadar.Application.Features.Jobs.DTOs;
 using Kawadar.Domain.Jobs.Enums;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Kawadar.Application.Features.Reviews.Commands.CreateReview;
 using Kawadar.Application.Features.Jobs.Queries.GetJobById;
 using Kawadar.Application.Features.Jobs.Queries.GetRecommendationJobs;
+using Microsoft.AspNetCore.OutputCaching;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Kawadar.Api.Controllers.V1;
 
@@ -32,10 +33,12 @@ public class JobsController : ApiController
 {
 
   private readonly ISender _sender;
+  private readonly ILogger<JobsController> _logger;
 
-  public JobsController(ISender sender)
+  public JobsController(ISender sender, ILogger<JobsController> logger)
   {
     _sender = sender;
+    _logger = logger;
 
   }
 
@@ -137,6 +140,7 @@ public class JobsController : ApiController
     );
   }
 
+  [OutputCache(PolicyName = "JobsCachePolicy")]
   [HttpGet]
   [EndpointSummary("Lists and searches jobs")]
   [EndpointDescription("Returns a paginated list of jobs with optional filtering by search term, specialization, type, experience level, budget range, hourly rate, and skills.")]
@@ -156,6 +160,10 @@ public class JobsController : ApiController
     [FromQuery] string sortBy = "newest",
     CancellationToken ct = default)
   {
+
+    _logger.LogInformation("Received GetJobs request with search={Search}, specializationId={SpecializationId}, jobType={JobType}, experienceLevel={ExperienceLevel}, budgetRange={BudgetRange}, hourlyRateRange={HourlyRateRange}, skillIds={SkillIds}, page={Page}, pageSize={PageSize}, sortBy={SortBy}",
+        search, specilizationId, jobType, experienceLevel, budgetRange, hourlyRateRange, skillIds, page, pageSize, sortBy);
+
     var parsedSkillIds = skillIds
         ?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
         .Select(s => Guid.TryParse(s, out var g) ? g : Guid.Empty)
