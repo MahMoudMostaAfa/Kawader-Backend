@@ -1,3 +1,4 @@
+using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Models;
 using Kawadar.Application.Features.Proposals.Dtos;
 using Kawadar.Domain.Common.Results;
@@ -15,4 +16,9 @@ public record GetProposalsQuery(
     string DatesortBy = "newest",
     string? PriceSortBy = null,
     string? EstimatedTimeSortBy = null
-) : IRequest<Result<PaginatedList<ProposalSummaryDto>>>;
+) : IRequest<Result<PaginatedList<ProposalSummaryDto>>>, ICachedQuery
+{
+    public string CacheKey => $"Proposals-{JobId}-{Type?.ToString() ?? "all"}-{Status?.ToString() ?? "all"}-{Page}-{PageSize}-{DatesortBy}-{PriceSortBy ?? "none"}-{EstimatedTimeSortBy ?? "none"}";
+
+    public string[] Tags => ["proposals"];
+}

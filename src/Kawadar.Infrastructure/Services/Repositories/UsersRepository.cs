@@ -92,6 +92,7 @@ public class UsersRepository(AppDbContext appDbContext) : IUsersRepository
         ExperienceYear? ExperienceYear,
         Guid? specilizationId,
         float? minumumRating,
+        List<Guid>? skillsIds,
         int page,
         int pageSize,
         string sortBy)
@@ -116,6 +117,11 @@ public class UsersRepository(AppDbContext appDbContext) : IUsersRepository
         if (minumumRating.HasValue)
         {
             query = query.Where(u => u.Reviews.Select(x => x.Rating).DefaultIfEmpty(0).Average() >= minumumRating);
+        }
+
+        if (skillsIds is { Count: > 0 })
+        {
+            query = query.Where(j => j.Skills.Any(s => skillsIds.Contains(s.Id)));
         }
 
         query = sortBy == "oldest"
