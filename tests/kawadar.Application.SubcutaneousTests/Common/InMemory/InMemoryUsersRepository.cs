@@ -175,7 +175,7 @@ public class InMemoryUsersRepository : IUsersRepository
         UserReports.Clear();
     }
 
-    public Task<PaginatedList<UserProfile>> GetFreelancers(string? search, ExperienceYear? ExperienceYear, Guid? specilizationId, float? minumumRating, int page, int pageSize, string sortBy)
+    public Task<PaginatedList<UserProfile>> GetFreelancers(string? search, ExperienceYear? ExperienceYear, Guid? specilizationId, float? minumumRating, List<Guid>? skillsIds, int page, int pageSize, string sortBy)
     {
         throw new NotImplementedException();
     }

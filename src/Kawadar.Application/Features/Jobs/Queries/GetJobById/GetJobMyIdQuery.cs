@@ -11,5 +11,5 @@ public record GetJobByIdQuery(Guid JobId) : ICachedQuery
 {
   public string CacheKey => $"GetJobByIdQuery:{JobId:N}";
 
-  public string[] Tags => new[] { "jobs" };
+  public string[] Tags => new[] { $"{JobId}" };
 }

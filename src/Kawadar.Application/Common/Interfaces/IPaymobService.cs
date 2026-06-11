@@ -15,7 +15,7 @@ public interface IPaymobService
   Task<Result<PaymobIntentionResult>> CreatePaymentIntentionAsync(
     decimal amount,
     string currency,
-    List<int> paymentMethodIds,
+    List<string> paymentMethodIds,
     PaymobBillingData billingData,
     string? internalOrderId = null,
     CancellationToken ct = default);

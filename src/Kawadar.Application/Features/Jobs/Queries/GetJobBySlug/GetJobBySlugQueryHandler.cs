@@ -84,4 +84,4 @@ public class GetJobBySlugQueryHandler : IRequestHandler<GetJobBySlugQuery, Resul
     return jobDetailsDto;
 
   }
-}
+}

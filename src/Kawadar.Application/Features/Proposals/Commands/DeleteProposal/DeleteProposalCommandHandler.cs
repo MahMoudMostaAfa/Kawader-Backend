@@ -46,6 +46,7 @@ public class DeleteProposalCommandHandler : IRequestHandler<DeleteProposalComman
 
 
     var proposal = proposalResult.Value;
+        if (proposal.Status == Domain.Proposals.Enums.JobProposalStatus.Withdrawn) return Error.Validation("This Proposal is already withdrawn.");
 
     if (proposal.FreelancerId != userProfile.Id) return ApplicationErrors.UnauthorizedAccess;
 

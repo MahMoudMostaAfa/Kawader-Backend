@@ -43,6 +43,7 @@ public interface IUsersRepository
         ExperienceYear? ExperienceYear,
         Guid? specilizationId,
         float? minumumRating,
+        List<Guid>? skillsIds,
         int page,
         int pageSize,
         string sortBy);
