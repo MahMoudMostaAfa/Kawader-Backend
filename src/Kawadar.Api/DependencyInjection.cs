@@ -6,9 +6,10 @@ using Kawadar.Api.Services;
 using Kawadar.Application.Common.Constants;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Caching;
-using Kawadar.Infrastructure.Hubs;
+
 using Kawadar.Infrastructure.Settings;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.ResponseCompression;
 
 namespace Kawadar.Api;
 
@@ -25,7 +26,8 @@ public static class DependencyInjection
     .AddConfiguredCors(configuration)
     .AddIdentityServices()
     .AddAppRateLimiting()
-    .AddOutputCaching();
+    .AddOutputCaching()
+    .AddResponseCompressionService();
 
     return services;
   }
@@ -188,6 +190,32 @@ public static class DependencyInjection
     return services;
   }
 
+  public static IServiceCollection AddResponseCompressionService(
+  this IServiceCollection services
+  )
+  {
+    services.AddResponseCompression(options =>
+    {
+      options.EnableForHttps = true;
+      options.Providers.Add<BrotliCompressionProvider>();
+      options.Providers.Add<GzipCompressionProvider>();
+
+      options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/json" });
+    });
+
+
+    services.Configure<BrotliCompressionProviderOptions>(options =>
+   {
+     options.Level = System.IO.Compression.CompressionLevel.Fastest;
+   });
+
+    services.Configure<GzipCompressionProviderOptions>(options =>
+     {
+       options.Level = System.IO.Compression.CompressionLevel.Fastest;
+     });
+
+    return services;
+  }
   public static IApplicationBuilder UseCoreMiddleware(this IApplicationBuilder app, IConfiguration configuration)
   {
     // 1. Exception handling should be FIRST to catch all errors
@@ -216,6 +244,9 @@ public static class DependencyInjection
     //    before the cache middleware decides whether to serve/store a response
     app.UseOutputCache();
 
+    // 10. Response Compression should come AFTER Output Cache so that the cached response is compressed before being sent to the client
+
+    app.UseResponseCompression();
 
     return app;
   }
