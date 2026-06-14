@@ -1,4 +1,5 @@
 using Kawadar.Domain.Common.Results;
+using System.Runtime.Serialization;
 
 namespace Kawadar.Application.Common.Interfaces;
 
@@ -50,7 +51,7 @@ public record PaymobBillingData(
   string? ShippingMethod = "NA",
   string? PostalCode = "NA",
   string? City = "NA",
-  string? Country = "EG",
+  string? Country = "EGY",
   string? State = "NA");
 
 /// <summary>Data extracted from a Paymob transaction callback for HMAC verification.</summary>
@@ -59,6 +60,8 @@ public record PaymobCallbackData(
   string CreatedAt,
   string Currency,
   string ErrorCode,
+  bool has_parent_transaction,
+  string transactionId,
   string IntegrationId,
   bool Is3dSecure,
   bool IsAuth,

@@ -71,6 +71,7 @@ public class JobsRepository : IJobsRepository
     string sortBy)
   {
     var query = _context.Jobs
+      .Where(j => !j.IsPrivate)
       .Include(j => j.Specilization)
       .Include(j => j.Skills)
       .AsQueryable();

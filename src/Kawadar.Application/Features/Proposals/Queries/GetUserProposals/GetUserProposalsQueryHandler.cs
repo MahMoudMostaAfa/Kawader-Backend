@@ -53,6 +53,7 @@ public class GetUserProposalsQueryHandler : IRequestHandler<GetUserProposalsQuer
         Id = p.Id,
         CoverLetter = p.CoverLetter,
         ProposalType = p.ProposalType,
+        Status = p.Status,
         ProposedPrice = p.ProposalType switch
         {
           Domain.Proposals.Enums.JobProposalType.OneTime => (decimal)p.Amount!,

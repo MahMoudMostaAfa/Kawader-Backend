@@ -253,6 +253,19 @@ services:
       - ollama
     networks:
       - kawadar-network
+  
+  ngrok:
+    container_name: "ngrok"
+    image: ngrok/ngrok:latest
+    command: http kawadar-api:8080 --log=stdout
+    ports:
+      - "4040:4040"
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    depends_on:
+      - kawadar-api
+    networks:
+      - kawadar-network
 
 networks:
   kawadar-network:

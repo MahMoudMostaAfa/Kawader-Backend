@@ -14,11 +14,11 @@ public class CreatePaymentIntentionCommandHandler
 {
   private readonly IUser _user;
   private readonly IUsersRepository _usersRepository;
+  private readonly IIdentityService _identityService;
   private readonly IWalletRepository _walletRepository;
   private readonly IPaymentRepository _paymentRepository;
   private readonly IPaymobService _paymobService;
   private readonly IUnitOfWork _unitOfWork;
-  private readonly IIdentityService _identityService;
 
   public CreatePaymentIntentionCommandHandler(
     IUser user,
@@ -67,30 +67,30 @@ public class CreatePaymentIntentionCommandHandler
       PhoneNumber: userProfile.PhoneNumber ?? "NA"
     );
 
-    // 4. Create payment intention on Paymob
-    var intentionResult = await _paymobService.CreatePaymentIntentionAsync(
+        // 4. Create local PaymentTransaction record (Pending)
+      var paymentTxResult = PaymentTransaction.Create(
+        userId: userProfile.Id,
+        walletId: wallet.Id,
+        amount: request.Amount,
+        gateway: PaymentGateway.Paymob,
+        method: PaymentMethod.Card,
+        gatewayTransactionId: null,
+        gatewayOrderId: null);
+
+      if (paymentTxResult.IsError) return paymentTxResult.Errors;
+      var paymentTx = paymentTxResult.Value;
+
+      // 5. Create payment intention on Paymob
+      var intentionResult = await _paymobService.CreatePaymentIntentionAsync(
       amount: request.Amount,
       currency: "EGP",
-      paymentMethodIds: ["4892084"], // Card integration ID from Paymob dashboard
+      paymentMethodIds: ["testing", "wallet"], // Card integration ID from Paymob dashboard
       billingData: billingData,
-      internalOrderId: null,
+      internalOrderId: paymentTx.Id.ToString(),
       ct: cancellationToken);
 
     if (intentionResult.IsError) return intentionResult.Errors;
     var intention = intentionResult.Value;
-
-    // 5. Create local PaymentTransaction record (Pending)
-    var paymentTxResult = PaymentTransaction.Create(
-      userId: userProfile.Id,
-      walletId: wallet.Id,
-      amount: request.Amount,
-      gateway: PaymentGateway.Paymob,
-      method: PaymentMethod.Card,
-      gatewayTransactionId: intention.IntentionId,
-      gatewayOrderId: intention.IntentionId);
-
-    if (paymentTxResult.IsError) return paymentTxResult.Errors;
-    var paymentTx = paymentTxResult.Value;
 
     _paymentRepository.Add(paymentTx);
     await _unitOfWork.SaveChangesAsync(cancellationToken);
