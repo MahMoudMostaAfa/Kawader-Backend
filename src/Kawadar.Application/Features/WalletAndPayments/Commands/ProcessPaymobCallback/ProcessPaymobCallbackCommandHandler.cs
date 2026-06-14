@@ -49,9 +49,11 @@ public class ProcessPaymobCallbackCommandHandler
       var amountCents = obj.GetProperty("amount_cents").ToString();
       var success = obj.GetProperty("success").GetBoolean();
       var pending = obj.GetProperty("pending").GetBoolean();
+      var internalOrderId = obj.GetProperty("order").GetProperty("merchant_order_id").ToString();
+            var hasParentTransaction = obj.GetProperty("has_parent_transaction").GetBoolean();
 
-      // 1. Idempotency check — skip if already processed
-      var alreadyProcessed = await _paymentRepository.EventHookExistsAsync(transactionId, cancellationToken);
+            // 1. Idempotency check — skip if already processed
+            var alreadyProcessed = await _paymentRepository.EventHookExistsAsync(transactionId);
       if (alreadyProcessed)
       {
         _logger.LogInformation("Paymob callback for transaction {TransactionId} already processed. Skipping.", transactionId);
@@ -64,6 +66,8 @@ public class ProcessPaymobCallbackCommandHandler
         CreatedAt: obj.GetProperty("created_at").GetString() ?? string.Empty,
         Currency: obj.GetProperty("currency").GetString() ?? "EGP",
         ErrorCode: obj.TryGetProperty("error_occured", out var errProp) ? errProp.ToString() : string.Empty,
+        has_parent_transaction: hasParentTransaction,
+        transactionId: transactionId,
         IntegrationId: obj.GetProperty("integration_id").ToString(),
         Is3dSecure: obj.GetProperty("is_3d_secure").GetBoolean(),
         IsAuth: obj.GetProperty("is_auth").GetBoolean(),
@@ -84,21 +88,10 @@ public class ProcessPaymobCallbackCommandHandler
       var isValid = _paymobService.VerifyHmacSignature(callbackData, request.HmacSignature);
 
       // 4. Find our local PaymentTransaction
-      var paymentResult = await _paymentRepository.GetByGatewayTransactionIdAsync(
-        obj.TryGetProperty("order", out var orderProp)
-          ? orderProp.GetProperty("merchant_order_id").GetString() ?? transactionId
-          : transactionId,
-        cancellationToken);
+      var paymentResult = await _paymentRepository.GetByIdAsync(Guid.Parse(internalOrderId));
 
-      // If not found by merchant_order_id, try by gateway transaction ID
-      if (paymentResult.IsError)
-      {
-        // Try finding by the intention ID that we stored
-        paymentResult = await _paymentRepository.GetByGatewayOrderIdAsync(orderId, cancellationToken);
-      }
-
-      // Create event hook record regardless of finding the payment
-      Guid paymentTxId = paymentResult.IsError ? Guid.Empty : paymentResult.Value.Id;
+        // Create event hook record regardless of finding the payment
+        Guid paymentTxId = paymentResult.IsError ? Guid.Empty : paymentResult.Value.Id;
 
       var eventHookResult = PaymentEventHook.Create(
         paymentTransactionId: paymentTxId,
@@ -117,7 +110,7 @@ public class ProcessPaymobCallbackCommandHandler
         _logger.LogWarning("Invalid HMAC signature for Paymob transaction {TransactionId}", transactionId);
         eventHook.MarkAsProcessed("Invalid HMAC signature");
         _paymentRepository.AddEventHook(eventHook);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync();
         return Error.Validation("Paymob.InvalidSignature", "HMAC signature verification failed.");
       }
 
@@ -126,7 +119,7 @@ public class ProcessPaymobCallbackCommandHandler
         _logger.LogWarning("No matching PaymentTransaction found for Paymob transaction {TransactionId}", transactionId);
         eventHook.MarkAsProcessed("No matching payment transaction found");
         _paymentRepository.AddEventHook(eventHook);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync();
         return Error.NotFound("PaymentTransaction.NotFound", "No matching payment transaction found.");
       }
 
@@ -138,12 +131,12 @@ public class ProcessPaymobCallbackCommandHandler
         paymentTx.MarkAsCompleted();
 
         // 6. Credit the wallet — deposit the amount
-        var walletResult = await _walletRepository.GetByIdAsync(paymentTx.WalletId, cancellationToken);
+        var walletResult = await _walletRepository.GetByIdAsync(paymentTx.WalletId);
         if (walletResult.IsError)
         {
           eventHook.MarkAsProcessed($"Wallet not found: {paymentTx.WalletId}");
           _paymentRepository.AddEventHook(eventHook);
-          await _unitOfWork.SaveChangesAsync(cancellationToken);
+          await _unitOfWork.SaveChangesAsync();
           return walletResult.Errors;
         }
 
@@ -160,7 +153,7 @@ public class ProcessPaymobCallbackCommandHandler
         {
           eventHook.MarkAsProcessed($"Wallet deposit failed: {depositResult.TopError.Description}");
           _paymentRepository.AddEventHook(eventHook);
-          await _unitOfWork.SaveChangesAsync(cancellationToken);
+          await _unitOfWork.SaveChangesAsync();
           return depositResult.Errors;
         }
 
@@ -182,7 +175,7 @@ public class ProcessPaymobCallbackCommandHandler
 
       eventHook.MarkAsProcessed();
       _paymentRepository.AddEventHook(eventHook);
-      await _unitOfWork.SaveChangesAsync(cancellationToken);
+      await _unitOfWork.SaveChangesAsync();
 
       return Result.Success;
     }

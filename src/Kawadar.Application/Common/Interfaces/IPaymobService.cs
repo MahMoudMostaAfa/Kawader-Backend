@@ -1,4 +1,5 @@
 using Kawadar.Domain.Common.Results;
+using System.Runtime.Serialization;
 
 namespace Kawadar.Application.Common.Interfaces;
 
@@ -59,6 +60,8 @@ public record PaymobCallbackData(
   string CreatedAt,
   string Currency,
   string ErrorCode,
+  bool has_parent_transaction,
+  string transactionId,
   string IntegrationId,
   bool Is3dSecure,
   bool IsAuth,
