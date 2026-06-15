@@ -284,6 +284,22 @@ services:
     networks:
       - kawadar-network
 
+  # ───────────────────────────────────────────────
+  # Kawadar Frontend
+  # ───────────────────────────────────────────────
+  kawadar-frontend:
+    container_name: "kawadar-frontend"
+    build:
+      context: ../Kawader-Frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80" # Frontend (http://localhost)
+    depends_on:
+      - kawadar-api
+    restart: unless-stopped
+    networks:
+      - kawadar-network
+
 networks:
   kawadar-network:
     driver: bridge
