@@ -39,8 +39,9 @@ USER appuser
 # Expose HTTP port
 EXPOSE 8080
 
+# Create a health endpoint in the API
 # Health check
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8080/metrics || exit 1
+# HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+#   CMD curl -f http://localhost:8080/metrics || exit 1
 
 ENTRYPOINT ["dotnet", "Kawadar.Api.dll"]

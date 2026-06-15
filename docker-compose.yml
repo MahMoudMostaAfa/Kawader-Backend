@@ -10,6 +10,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080" # API (http://localhost:8080)
+    env_file:
+      - .env
     environment:
       ASPNETCORE_ENVIRONMENT: Docker
       ASPNETCORE_URLS: http://+:8080
@@ -40,11 +42,12 @@ services:
     container_name: "rabbitmq"
     image: rabbitmq:3-management
     ports:
+      # Should be not exposed in production
       - "5672:5672" # RabbitMQ port
       - "15672:15672" # Management UI (http://localhost:15672)
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     restart: unless-stopped
@@ -59,6 +62,7 @@ services:
     container_name: "prometheus"
     image: prom/prometheus:latest
     ports:
+      # Should be not exposed in production
       - "9090:9090" # Prometheus UI (http://localhost:9090)
     volumes:
       - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
@@ -80,8 +84,8 @@ services:
     ports:
       - "3000:3000" # Grafana UI (http://localhost:3000)
     environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
       GF_USERS_ALLOW_SIGN_UP: "false"
     volumes:
       - grafana_data:/var/lib/grafana
@@ -98,6 +102,7 @@ services:
     container_name: "loki"
     image: grafana/loki:latest
     ports:
+      # Should be not exposed in production
       - "3100:3100" # Loki API
     volumes:
       - ./monitoring/loki/loki-config.yml:/etc/loki/local-config.yaml
@@ -129,15 +134,16 @@ services:
     container_name: "gorse-postgres"
     image: postgres:16
     environment:
-      POSTGRES_USER: gorse
-      POSTGRES_PASSWORD: gorsepass
+      POSTGRES_USER: ${GORSE_DB_USER}
+      POSTGRES_PASSWORD: ${GORSE_DB_PASSWORD}
       POSTGRES_DB: gorse
     ports:
+      # Should be not exposed in production
       - "5433:5432"
     volumes:
       - gorse_pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U gorse -d gorse"]
+      test: [ "CMD-SHELL", "pg_isready -U ${GORSE_DB_USER} -d gorse" ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -169,23 +175,22 @@ services:
     container_name: "redis"
     image: redis:7-alpine
     ports:
+      # Should be not exposed in production
       - "6379:6379"
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes # persist data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
       timeout: 3s
       retries: 5
     restart: unless-stopped
     networks:
       - kawadar-network
-
     # ───────────────────────────────────────────────
-
-  # RedisInsight (Redis Dashboard)
-  # ───────────────────────────────────────────────
+    # RedisInsight (Redis Dashboard)
+    # ───────────────────────────────────────────────
   redisinsight:
     container_name: "redisinsight"
     image: redis/redisinsight:latest
@@ -199,6 +204,7 @@ services:
     restart: unless-stopped
     networks:
       - kawadar-network
+
   # ───────────────────────────────────────────────
   # Qdrant (Vector Store for RAG)
   # ───────────────────────────────────────────────
@@ -206,8 +212,9 @@ services:
     container_name: "qdrant"
     image: qdrant/qdrant:latest
     ports:
-      - "6333:6333" # REST API (http://localhost:6333)
-      - "6334:6334" # gRPC
+      # Should be not exposed in production
+      - "6333:6333" # Qdrant REST
+      - "6334:6334" # Qdrant gRPC
     volumes:
       - qdrant_data:/qdrant/storage
     restart: unless-stopped
@@ -221,16 +228,20 @@ services:
     container_name: "ollama"
     image: ollama/ollama
     ports:
-      - "11434:11434" # Ollama API (http://localhost:11434)
+      # Should be not exposed in production
+      - "11434:11434" # Ollama API
     volumes:
       - ollama_data:/root/.ollama
+    # Remove this part to deploy on vm has no GPU
+    # -----------------------------------
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
               count: all
-              capabilities: [gpu]
+              capabilities: [ gpu ]
+    # -----------------------------------
     restart: unless-stopped
     networks:
       - kawadar-network
@@ -253,7 +264,7 @@ services:
       - ollama
     networks:
       - kawadar-network
-  
+
   ngrok:
     container_name: "ngrok"
     image: ngrok/ngrok:latest
