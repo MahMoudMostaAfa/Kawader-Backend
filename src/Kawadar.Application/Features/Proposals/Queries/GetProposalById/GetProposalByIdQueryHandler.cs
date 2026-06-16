@@ -46,8 +46,8 @@ public class GetProposalByIdQueryHandler : IRequestHandler<GetProposalByIdQuery,
     var userProfileResult = await _usersRepository.GetUserProfileByUserIdAsync(userId);
     if (userProfileResult.IsError) return userProfileResult.Errors;
     var userProfile = userProfileResult.Value;
-    if (proposal.FreelancerId != userProfile.Id && Job.PostedById != userProfile.Id) return Error.Unauthorized();
-        // get user identiy 
+    if (userProfile.ProfileType != Domain.UserProfiles.Enums.ProfileType.Admin && proposal.FreelancerId != userProfile.Id && Job.PostedById != userProfile.Id) return Error.Unauthorized();
+    // get user identiy 
     var submittedBy = await _usersRepository.GetUserProfileByIdAsync(proposal.FreelancerId);
     if (submittedBy.IsError) return submittedBy.Errors;
     var userResult = await _identityService.GetUserByIdAsync(submittedBy.Value.UserId);
