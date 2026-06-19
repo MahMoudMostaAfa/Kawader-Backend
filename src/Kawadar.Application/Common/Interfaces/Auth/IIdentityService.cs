@@ -29,4 +29,11 @@ public interface IIdentityService
 
   Task<Result<string>> GenerateUserNameAsync(string firstName, string lastName);
   Task<Result<IEnumerable<UserDto>>> GetUsersByIds(IEnumerable<string> Ids);
+
+  Task<Result<bool>> AddRefreshTokenAsync(string userId, string refreshToken, DateTime expires);
+
+  Task<Result<RefreshTokenDto>> GetRefreshTokenAsync(string userId);
+  Task<Result<Success>> ExpireRefreshTokenAsync(string userId);
+
+
 }

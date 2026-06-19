@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Kawadar.Application.Features.Auth.Commands.Login;
 
-public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginDto>>
+public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRefreshDto>>
 {
 
   private readonly IIdentityService _identityService;
@@ -25,7 +25,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginDto
     _usersRepository = usersRepository;
     _unitOfWork = unitOfWork;
   }
-  public async Task<Result<LoginDto>> Handle(LoginCommand request, CancellationToken cancellationToken)
+  public async Task<Result<LoginRefreshDto>> Handle(LoginCommand request, CancellationToken cancellationToken)
   {
     var LoginResult = await _identityService.LoginAsync(request.Email, request.Password);
     if (LoginResult.IsError) return LoginResult.Errors;
@@ -43,15 +43,22 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginDto
     var tokenResult = await _tokenProvider.GenerateTokenAsync(userDto.Id);
     if (tokenResult.IsError) return tokenResult.Errors;
 
-        var claims = await _identityService.GetUserClaimsAsync(userDto.Id);
-        var permissions = claims.Value.Select(x => x.Value.Substring(12)).ToList();
-        var roles = await _identityService.GetUserRolesAsync(userDto.Id);
+    var claims = await _identityService.GetUserClaimsAsync(userDto.Id);
+    var permissions = claims.Value.Select(x => x.Value.Substring(12)).ToList();
+    var roles = await _identityService.GetUserRolesAsync(userDto.Id);
 
-        return new LoginDto
-        {
-            token = tokenResult.Value,
-            permissions = permissions,
-            role = roles.Value[0]
-        };
+    var refreshTokenResult = _tokenProvider.GenerateRefreshTokenAsync();
+    if (refreshTokenResult.IsError) return refreshTokenResult.Errors;
+
+    var addRefreshTokenResult = await _identityService.AddRefreshTokenAsync(userDto.Id, refreshTokenResult.Value, DateTime.UtcNow.AddDays(7));
+    if (addRefreshTokenResult.IsError) return addRefreshTokenResult.Errors;
+
+    return new LoginRefreshDto
+    {
+      token = tokenResult.Value,
+      refreshToken = refreshTokenResult.Value,
+      permissions = permissions,
+      role = roles.Value[0]
+    };
   }
 }

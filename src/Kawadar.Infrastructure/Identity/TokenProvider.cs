@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Interfaces.Auth;
@@ -19,6 +20,15 @@ public class TokenProvider : ITokenProvider
     _userManager = userManager;
     _configuration = configuration;
   }
+
+  public Result<string> GenerateRefreshTokenAsync()
+  {
+    var randomNumber = new byte[64];
+    using var rng = RandomNumberGenerator.Create();
+    rng.GetBytes(randomNumber);
+    return Convert.ToBase64String(randomNumber);
+  }
+
   public async Task<Result<string>> GenerateTokenAsync(string userId)
   {
     var user = await _userManager.FindByIdAsync(userId);

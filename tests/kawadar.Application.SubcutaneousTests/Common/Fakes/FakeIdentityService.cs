@@ -276,4 +276,19 @@ public class FakeIdentityService : IIdentityService
         _passwordResetTokens.Clear();
         _emailConfirmationTokens.Clear();
     }
+
+    public Task<Result<bool>> AddRefreshTokenAsync(string userId, string refreshToken, DateTime expires)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Result<RefreshTokenDto>> GetRefreshTokenAsync(string userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Result<Success>> ExpireRefreshTokenAsync(string userId)
+    {
+        throw new NotImplementedException();
+    }
 }

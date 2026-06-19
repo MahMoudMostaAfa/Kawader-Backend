@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 using Kawadar.Application.Common.Interfaces.Auth;
@@ -406,26 +407,90 @@ public class IdentityService : IIdentityService
 
   }
 
-    public async Task<Result<IEnumerable<UserDto>>> GetUsersByIds(IEnumerable<string> Ids)
+  public async Task<Result<IEnumerable<UserDto>>> GetUsersByIds(IEnumerable<string> Ids)
+  {
+    List<UserDto> UserDTOs = new();
+    foreach (var id in Ids)
     {
-        List<UserDto> UserDTOs = new();
-        foreach(var id in Ids)
-        {
-            var user = await _userManager.FindByIdAsync(id);
-            if (user is null)
-            {
-                return Error.NotFound("User.NotFound", "User not found.");
-            }
-            var userDto = new UserDto
-            {
-                Id = user.Id,
-                Email = user.Email!,
-                UserName = user.UserName!,
-                EmailConfirmed = user.EmailConfirmed
-            };
-            UserDTOs.Add(userDto);
-        }
-
-        return UserDTOs;
+      var user = await _userManager.FindByIdAsync(id);
+      if (user is null)
+      {
+        return Error.NotFound("User.NotFound", "User not found.");
+      }
+      var userDto = new UserDto
+      {
+        Id = user.Id,
+        Email = user.Email!,
+        UserName = user.UserName!,
+        EmailConfirmed = user.EmailConfirmed
+      };
+      UserDTOs.Add(userDto);
     }
+
+    return UserDTOs;
+  }
+
+  public async Task<Result<bool>> AddRefreshTokenAsync(string userId, string refreshToken, DateTime expires)
+  {
+    var user = await _userManager.FindByIdAsync(userId);
+    if (user is null)
+    {
+      return Error.NotFound("User.NotFound", "User not found.");
+    }
+
+
+    await _userManager.SetAuthenticationTokenAsync(user, "JWTAuth", "RefreshToken", refreshToken);
+    await _userManager.SetAuthenticationTokenAsync(user, "JWTAuth", "RefreshTokenExpiry", expires.ToString("o"));
+
+    return true;
+  }
+
+  public async Task<Result<RefreshTokenDto>> GetRefreshTokenAsync(string userId)
+  {
+    var user = await _userManager.FindByIdAsync(userId);
+    if (user is null)
+    {
+      return Error.NotFound("User.NotFound", "User not found.");
+    }
+
+    var refreshToken = await _userManager.GetAuthenticationTokenAsync(user, "JWTAuth", "RefreshToken");
+    var expiryString = await _userManager.GetAuthenticationTokenAsync(user, "JWTAuth", "RefreshTokenExpiry");
+
+    if (string.IsNullOrEmpty(refreshToken) || string.IsNullOrEmpty(expiryString))
+    {
+      return Error.NotFound("RefreshToken.NotFound", "Refresh token not found.");
+    }
+
+    if (!DateTime.TryParseExact(expiryString, "o", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var expires))
+    {
+      return Error.Validation("RefreshToken.InvalidExpiry", "Invalid refresh token expiry.");
+    }
+
+    return new RefreshTokenDto
+    {
+      RefreshToken = refreshToken,
+      Expires = expires
+    };
+  }
+
+  public async Task<Result<Success>> ExpireRefreshTokenAsync(string userId)
+  {
+    var user = await _userManager.FindByIdAsync(userId);
+    if (user is null)
+    {
+      return Error.NotFound("User.NotFound", "User not found.");
+    }
+
+    var refreshToken = await _userManager.GetAuthenticationTokenAsync(user, "JWTAuth", "RefreshToken");
+    var expiryString = await _userManager.GetAuthenticationTokenAsync(user, "JWTAuth", "RefreshTokenExpiry");
+
+    if (string.IsNullOrEmpty(refreshToken) || string.IsNullOrEmpty(expiryString))
+    {
+      return Error.NotFound("RefreshToken.NotFound", "Refresh token not found.");
+    }
+
+    await _userManager.SetAuthenticationTokenAsync(user, "JWTAuth", "RefreshTokenExpiry", DateTime.UtcNow.ToString("o"));
+
+    return Result.Success;
+  }
 }

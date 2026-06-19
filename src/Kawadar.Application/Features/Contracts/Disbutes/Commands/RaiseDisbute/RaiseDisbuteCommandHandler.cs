@@ -21,7 +21,7 @@ namespace Kawadar.Application.Features.Contracts.Disbutes.Commands.RaiseDisbute
             var contract = await contractsRepository.GetContractByIdAsync(request.ContractId, cancellationToken);
             if (contract.IsError) return contract.Errors;
 
-            if(contract.Value.FreelancerId == userProfileResult.Value.Id || contract.Value.ClientId == userProfileResult.Value.Id)
+            if (contract.Value.FreelancerId == userProfileResult.Value.Id || contract.Value.ClientId == userProfileResult.Value.Id)
             {
                 return Error.Validation("You can't raise a disbute for a contract you are not a part of");
             }
@@ -31,6 +31,7 @@ namespace Kawadar.Application.Features.Contracts.Disbutes.Commands.RaiseDisbute
 
             await disbuteRepository.AddDisbute(disbuteResult.Value);
             await unitOfWork.SaveChangesAsync(cancellationToken);
+
 
             return Result.Created;
         }

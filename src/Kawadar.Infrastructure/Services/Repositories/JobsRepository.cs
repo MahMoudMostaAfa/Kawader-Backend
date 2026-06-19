@@ -166,17 +166,17 @@ public class JobsRepository : IJobsRepository
 
   public async Task<Result<Job>> GetJobByIdAsync(Guid Id)
   {
-        var job = await _context.Jobs.Include(j => j.Attachments).Include(j => j.Specilization)
-        .Include(J => J.Skills).Include(J => J.Questions.OrderBy(q => q.DisplayOrder))
-         .FirstOrDefaultAsync(j => j.Id == Id);
+    var job = await _context.Jobs.Include(j => j.Attachments).Include(j => j.Specilization)
+    .Include(J => J.Skills).Include(J => J.Questions.OrderBy(q => q.DisplayOrder))
+     .FirstOrDefaultAsync(j => j.Id == Id);
 
-        if (job == null)
-        {
-            return Error.NotFound("Job not found.");
-        }
-
-        return job;
+    if (job == null)
+    {
+      return Error.NotFound("Job not found.");
     }
+
+    return job;
+  }
 
   public async Task<Result<List<Job>>> GetJobsByIds(IEnumerable<Guid> Ids)
   {
@@ -184,7 +184,7 @@ public class JobsRepository : IJobsRepository
     foreach (var id in Ids)
     {
       var job = await _context.Jobs.FirstOrDefaultAsync(x => x.Id == id && x.JobStatus == JobStatus.Open);
-      if (job is null) return Error.NotFound("Job not found.");
+      if (job is null) continue;
 
       jobs.Add(job);
     }

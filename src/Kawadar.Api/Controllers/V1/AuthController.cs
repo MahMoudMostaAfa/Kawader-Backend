@@ -5,6 +5,8 @@ using Kawadar.Application.Features.Auth.Commands.ConfirmEmail;
 using Kawadar.Application.Features.Auth.Commands.DeleteAccount;
 using Kawadar.Application.Features.Auth.Commands.ForgetPassword;
 using Kawadar.Application.Features.Auth.Commands.Login;
+using Kawadar.Application.Features.Auth.Commands.Logout;
+using Kawadar.Application.Features.Auth.Commands.RefreshToken;
 using Kawadar.Application.Features.Auth.Commands.Register;
 using Kawadar.Application.Features.Auth.Commands.ResendConfirmationEmail;
 using Kawadar.Application.Features.Auth.Commands.ResetPassword;
@@ -60,8 +62,26 @@ public class AuthController : ApiController
   public async Task<IActionResult> Login([FromBody] LoginCommand command, CancellationToken ct)
   {
     var result = await _sender.Send(command, ct);
+
+    if (result.IsError) return Problem(result.Errors);
+
+    var loginDto = new LoginDto
+    {
+      token = result.Value.token,
+      permissions = result.Value.permissions,
+      role = result.Value.role
+    };
+    Response.Cookies.Append("refreshToken", result.Value.refreshToken, new CookieOptions
+    {
+      HttpOnly = true,
+      Secure = true,
+      SameSite = SameSiteMode.Strict,
+      Expires = DateTime.UtcNow.AddDays(7)
+    });
+
+
     return result.Match(
-      LoginDto => Ok(new { Token = LoginDto.token, Permissions = LoginDto.permissions, Role = LoginDto.role}),
+      _ => Ok(loginDto),
       Problem
     );
   }
@@ -151,6 +171,60 @@ public class AuthController : ApiController
      );
   }
 
+  [AllowAnonymous]
+  [HttpPost("refresh")]
+  [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [EndpointName(nameof(Refresh))]
+  [EndpointSummary("Retrieves the refresh token for the  user.")]
+  public async Task<IActionResult> Refresh(CancellationToken cancellationToken)
+  {
+    if (!Request.Cookies.TryGetValue("refreshToken", out string? refreshToken) || string.IsNullOrEmpty(refreshToken))
+    {
+      return BadRequest("Refresh token is missing.");
+    }
+
+    var command = new RefreshTokenCommand(refreshToken);
+
+    var result = await _sender.Send(command, cancellationToken);
+
+    if (result.IsError) return Problem(result.Errors);
+
+
+    Response.Cookies.Append("refreshToken", result.Value.RefreshToken, new CookieOptions
+    {
+      HttpOnly = true,
+      Secure = true,
+      SameSite = SameSiteMode.Strict,
+      Expires = DateTime.UtcNow.AddDays(7)
+    });
+
+    return Ok(new { AccessToken = result.Value.AccessToken });
+  }
+
+  [Authorize]
+  [HttpPost("logout")]
+  [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
+  [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+  [EndpointName(nameof(Logout))]
+  [EndpointSummary("Logs out the authenticated user by invalidating the refresh token.")]
+  public async Task<IActionResult> Logout(CancellationToken cancellationToken)
+  {
+
+
+    var result = await _sender.Send(new LogoutCommand(), cancellationToken);
+
+    if (result.IsError) return Problem(result.Errors);
+
+    Response.Cookies.Delete("refreshToken", new CookieOptions
+    {
+      HttpOnly = true,
+      Secure = true,
+      SameSite = SameSiteMode.Strict
+    });
+
+    return Ok(new { Message = "Logged out successfully" });
+  }
   [Authorize]
   [HttpDelete("account")]
   [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
