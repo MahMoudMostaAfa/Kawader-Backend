@@ -29,12 +29,13 @@ public class GetFreelancersByAiQueryHandler : IRequestHandler<GetFreelancersByAi
     Return ONLY a JSON array. No explanation, no markdown. Example format:
     [
       {{
-        "id": "001",
+        "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
         "strengths": ["strength 1", "strength 2"]
       }}
     ]
 
     Rules:
+    - Use the exact ID values provided in the Freelancers list above (they are GUIDs)
     - Only include freelancers RELEVANT to the request
     - Each strength must be specific and related to the user's need
     - Max 3 strengths per freelancer
@@ -63,8 +64,14 @@ public class GetFreelancersByAiQueryHandler : IRequestHandler<GetFreelancersByAi
 
     var freelancersResult = await _freelancerVectorStore.SearchFreelancersIdsAsync(request.Query, 10);
     if (freelancersResult.IsError) return freelancersResult.Errors;
-    var freelancers = freelancersResult.Value;
-    var identitiesIDs = freelancers.Where(f => f.Id != userProfile.Id).Select(f => f.UserId);
+    var freelancers = freelancersResult.Value?
+      .Where(f => f.Id != userProfile.Id)
+      .ToList() ?? [];
+
+    if (freelancers.Count == 0)
+      return new List<BriefFreelancerWithStrengthDto>();
+
+    var identitiesIDs = freelancers.Select(f => f.UserId);
 
     var identitiesResult = await _identityService.GetUsersByIds(identitiesIDs);
     var identities = identitiesResult.Value;
@@ -87,7 +94,9 @@ public class GetFreelancersByAiQueryHandler : IRequestHandler<GetFreelancersByAi
     if (aiResponseResult.IsError) return aiResponseResult.Errors;
 
     var aiResponse = aiResponseResult.Value ?? [];
-    var response = aiResponse.ToDictionary(r => r.Id, r => r.Strengths);
+    var response = aiResponse
+      .Where(r => Guid.TryParse(r.Id, out _))
+      .ToDictionary(r => Guid.Parse(r.Id), r => r.Strengths);
 
     var finalResult = freelancers.Join(
       identities,
@@ -98,7 +107,7 @@ public class GetFreelancersByAiQueryHandler : IRequestHandler<GetFreelancersByAi
         Id = f.Id,
         fullName = f.FullName,
         PhotoUrl = f.ProfilePictureUrl ?? "",
-        Strength = response.ContainsKey(f.Id) ? response[f.Id] : new List<string>(),
+        Strength = response.TryGetValue(f.Id, out var strengths) ? strengths : new List<string>(),
         IsOnline = f.IsOnline,
         AverageRating = f.Reviews != null && f.Reviews.Count > 0 ? f.Reviews.Average(r => r.Rating) : 0
         ,
@@ -116,7 +125,7 @@ public class GetFreelancersByAiQueryHandler : IRequestHandler<GetFreelancersByAi
   private class AiResponseDto
   {
     [JsonPropertyName("id")]
-    public Guid Id { get; set; }
+    public string Id { get; set; } = string.Empty;
     [JsonPropertyName("strengths")]
     public List<string> Strengths { get; set; } = [];
   }

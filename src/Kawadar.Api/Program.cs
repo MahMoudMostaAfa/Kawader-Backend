@@ -69,6 +69,7 @@ try
   {
     options.SwaggerEndpoint("/openapi/v1.json", "Kawadar Api v1");
     options.EnableDeepLinking();
+    options.EnablePersistAuthorization();
     options.DisplayRequestDuration();
     options.EnableFilter();
   });
