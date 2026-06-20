@@ -76,4 +76,30 @@ public class TokenProvider : ITokenProvider
 
 
   }
+
+  public Result<string> GetUserIdFromToken(string token)
+  {
+    if (string.IsNullOrEmpty(token)) return Error.Validation(description: "Token is null or empty");
+
+    try
+    {
+      var tokenHandler = new JwtSecurityTokenHandler();
+
+      if (!tokenHandler.CanReadToken(token))
+        return Error.Validation(description: "Invalid token format");
+
+      var jwtToken = tokenHandler.ReadJwtToken(token);
+
+      var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
+
+      if (string.IsNullOrEmpty(userId))
+        return Error.Validation(description: "User ID claim not found in token");
+
+      return userId;
+    }
+    catch (Exception)
+    {
+      return Error.Validation(description: "Failed to read token");
+    }
+  }
 }

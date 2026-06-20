@@ -1,5 +1,4 @@
-
-
+using Kawadar.Api.Requests.Auth;
 using Kawadar.Application.Features.Auth.Commands.ChangePassword;
 using Kawadar.Application.Features.Auth.Commands.ConfirmEmail;
 using Kawadar.Application.Features.Auth.Commands.DeleteAccount;
@@ -177,14 +176,14 @@ public class AuthController : ApiController
   [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
   [EndpointName(nameof(Refresh))]
   [EndpointSummary("Retrieves the refresh token for the  user.")]
-  public async Task<IActionResult> Refresh(CancellationToken cancellationToken)
+  public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken)
   {
     if (!Request.Cookies.TryGetValue("refreshToken", out string? refreshToken) || string.IsNullOrEmpty(refreshToken))
     {
       return BadRequest("Refresh token is missing.");
     }
 
-    var command = new RefreshTokenCommand(refreshToken);
+    var command = new RefreshTokenCommand(request.AccessToken, refreshToken);
 
     var result = await _sender.Send(command, cancellationToken);
 

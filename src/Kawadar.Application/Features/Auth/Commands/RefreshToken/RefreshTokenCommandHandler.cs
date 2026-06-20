@@ -3,6 +3,7 @@ using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Models;
 using Kawadar.Domain.Common.Results;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace Kawadar.Application.Features.Auth.Commands.RefreshToken;
 
@@ -12,19 +13,22 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, R
   private readonly IIdentityService _identityService;
   private readonly ITokenProvider _tokenProvider;
 
-  private IUser _user;
 
-  public RefreshTokenCommandHandler(IIdentityService identityService, ITokenProvider tokenProvider, IUser user)
+  private readonly ILogger<RefreshTokenCommandHandler> _logger;
+
+  public RefreshTokenCommandHandler(IIdentityService identityService, ITokenProvider tokenProvider, ILogger<RefreshTokenCommandHandler> logger)
   {
     _identityService = identityService;
     _tokenProvider = tokenProvider;
-    _user = user;
+    _logger = logger;
 
   }
   public async Task<Result<RefreshTokenResponseDto>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
   {
-    var userId = _user.Id;
-    if (userId is null) return ApplicationErrors.UserIsNotAuthenticated;
+    var userIdResult = _tokenProvider.GetUserIdFromToken(request.AccessToken);
+    var userId = userIdResult.Value;
+
+    _logger.LogInformation("Refreshing token for user {UserId}", userId);
 
     var refreshTokenResult = await _identityService.GetRefreshTokenAsync(userId);
 
