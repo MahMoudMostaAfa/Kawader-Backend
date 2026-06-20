@@ -78,7 +78,7 @@ public class ProfileController : ApiController
   [ProducesResponseType(typeof(UserProfileDto), StatusCodes.Status200OK)]
   [ProducesResponseType(StatusCodes.Status500InternalServerError)]
   public async Task<IActionResult> GetFreelancers(
-      [FromQuery] string search,
+      [FromQuery] string? search,
       [FromQuery] float? AverageRating,
       [FromQuery] ExperienceYear? ExperienceYear,
       [FromQuery] Guid? specilizationId,

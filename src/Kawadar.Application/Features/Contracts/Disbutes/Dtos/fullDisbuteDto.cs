@@ -13,6 +13,6 @@ namespace Kawadar.Application.Features.Contracts.Disbutes.Dtos
         public string reason { get; set; } = "";
         public string? resolution { get; set; }
         public DateTime? ResolvedAt { get; set; }
-
+        public AdminContractDto? contract { get; set; } 
     }
 }
