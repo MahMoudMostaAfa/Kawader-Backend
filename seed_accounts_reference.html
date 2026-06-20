@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kawader — Seeded Accounts Reference</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0f1117;
+      --surface:   #1a1d27;
+      --surface2:  #222535;
+      --border:    #2e3247;
+      --text:      #e2e8f0;
+      --muted:     #8892a4;
+      --red:       #f87171;
+      --orange:    #fb923c;
+      --green:     #4ade80;
+      --blue:      #60a5fa;
+      --purple:    #a78bfa;
+      --cyan:      #22d3ee;
+      --red-bg:    #1f1215;
+      --orange-bg: #1f160d;
+      --green-bg:  #0e1f14;
+      --blue-bg:   #0d1826;
+      --purple-bg: #160f1f;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 40px 24px;
+      min-height: 100vh;
+    }
+
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    header .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+    header h1 {
+      font-size: 2.4rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #e2e8f0 30%, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+    header p {
+      color: var(--muted);
+      font-size: .95rem;
+    }
+
+    /* ── Section ── */
+    section { margin-bottom: 52px; }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-icon {
+      font-size: 1.4rem;
+      line-height: 1;
+    }
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+    }
+    .section-count {
+      margin-left: auto;
+      font-size: .8rem;
+      color: var(--muted);
+      background: var(--surface2);
+      padding: 2px 10px;
+      border-radius: 20px;
+    }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .875rem;
+    }
+    thead tr {
+      background: var(--surface2);
+    }
+    thead th {
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      font-size: .75rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    tbody tr {
+      border-top: 1px solid var(--border);
+      transition: background .15s;
+    }
+    tbody tr:hover { background: var(--surface); }
+    tbody td {
+      padding: 13px 16px;
+      vertical-align: top;
+    }
+
+    /* ── Badges / pills ── */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: .75rem;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .pill-red    { background: var(--red-bg);    color: var(--red);    border: 1px solid #3a1818; }
+    .pill-orange { background: var(--orange-bg); color: var(--orange); border: 1px solid #3a220d; }
+    .pill-green  { background: var(--green-bg);  color: var(--green);  border: 1px solid #0e3020; }
+    .pill-blue   { background: var(--blue-bg);   color: var(--blue);   border: 1px solid #0d2a40; }
+    .pill-purple { background: var(--purple-bg); color: var(--purple); border: 1px solid #250f3a; }
+    .pill-cyan   { background: #0d1f22;          color: var(--cyan);   border: 1px solid #0d3040; }
+
+    /* ── Code / password ── */
+    code {
+      font-family: 'Courier New', monospace;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-size: .82rem;
+      color: #c084fc;
+    }
+
+    /* ── Email ── */
+    .email { color: var(--cyan); font-size: .83rem; }
+
+    /* ── Tags ── */
+    .tags { display: flex; flex-wrap: wrap; gap: 5px; }
+    .tag {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: .72rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    /* ── Permission list ── */
+    .perms { display: flex; flex-wrap: wrap; gap: 4px; max-width: 360px; }
+    .perm {
+      background: #1a1f2e;
+      border: 1px solid #2a3050;
+      color: #7c8db5;
+      font-size: .68rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    /* ── Password table ── */
+    .pwd-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .pwd-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .pwd-card .label { font-size: .75rem; color: var(--muted); font-weight: 500; }
+    .pwd-card .value { font-size: .95rem; font-weight: 600; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: .8rem;
+    }
+
+    @media print {
+      body { background: #fff; color: #000; padding: 20px; }
+      :root {
+        --bg: #fff; --surface: #f5f5f5; --surface2: #ebebeb;
+        --border: #ddd; --text: #111; --muted: #555;
+      }
+      .pill-red    { color: #c00; }
+      .pill-orange { color: #b45300; }
+      .pill-green  { color: #166534; }
+      .pill-blue   { color: #1d4ed8; }
+      .pill-purple { color: #6d28d9; }
+      code { color: #7c3aed; }
+      .email { color: #0369a1; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <div class="badge">Internal Reference</div>
+    <h1>Kawader — Seeded Accounts</h1>
+    <p>All accounts created automatically by the database seeder on first startup. Do not share publicly.</p>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════
+       1. SUPER ADMINS
+  ════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-header">
+      <span class="section-icon">🔴</span>
+      <span class="section-title">Super Admins — Full Platform Access</span>
+      <span class="section-count">3 accounts</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Password</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Master Admin</strong></td>
+            <td class="email">admin@kawadar.com</td>
+            <td><code>Admin@123</code></td>
+            <td><span class="pill pill-red">All Permissions</span> · No UserProfile</td>
+          </tr>
+          <tr>
+            <td><strong>Omar Tamer</strong></td>
+            <td class="email">Omartamer2445@gmail.com</td>
+            <td><code>Omar@123</code></td>
+            <td><span class="pill pill-red">All Permissions</span> · Has UserProfile · Admin</td>
+          </tr>
+          <tr>
+            <td><strong>Omar (Co-Admin)</strong></td>
+            <td class="email">omartamer244@gmail.com</td>
+            <td><code>Omar@123</code></td>
+            <td><span class="pill pill-red">All Permissions</span> · No UserProfile</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       2. SPECIALIZED ADMINS
+  ════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-header">
+      <span class="section-icon">🟠</span>
+      <span class="section-title">Specialized Admins — Scoped Permissions</span>
+      <span class="section-count">5 accounts</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Password</th>
+            <th>Role</th>
+            <th>Permissions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="email">violations.admin@kawadar.com</td>
+            <td><code>Admin@123</code></td>
+            <td><span class="pill pill-orange">Policy &amp; Violations</span></td>
+            <td>
+              <div class="perms">
+                <span class="perm">ViewUsers</span><span class="perm">BanUsers</span>
+                <span class="perm">ViewViolations</span><span class="perm">SolveViolations</span>
+                <span class="perm">ViewDisbutes</span><span class="perm">SolveDisbutes</span>
+                <span class="perm">ViewConversations</span><span class="perm">ViewJobReports</span>
+                <span class="perm">UpdateJobReports</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="email">finance.admin@kawadar.com</td>
+            <td><code>Admin@123</code></td>
+            <td><span class="pill pill-orange">Financial</span></td>
+            <td>
+              <div class="perms">
+                <span class="perm">ViewWallets</span><span class="perm">ViewWithdrawals</span>
+                <span class="perm">ApproveWithdrawals</span><span class="perm">RejectWithdrawals</span>
+                <span class="perm">ViewTransactions</span><span class="perm">ViewStatistics</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="email">users.admin@kawadar.com</td>
+            <td><code>Admin@123</code></td>
+            <td><span class="pill pill-orange">User Management</span></td>
+            <td>
+              <div class="perms">
+                <span class="perm">ViewUsers</span><span class="perm">EditUsers</span>
+                <span class="perm">DeleteUsers</span><span class="perm">ApproveUsers</span>
+                <span class="perm">BanUsers</span><span class="perm">ViewStatistics</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="email">content.admin@kawadar.com</td>
+            <td><code>Admin@123</code></td>
+            <td><span class="pill pill-orange">Content Moderation</span></td>
+            <td>
+              <div class="perms">
+                <span class="perm">ViewUsers</span><span class="perm">DeleteJobs</span>
+                <span class="perm">ViewJobReports</span><span class="perm">UpdateJobReports</span>
+                <span class="perm">ViewBadges</span><span class="perm">CreateBadges</span>
+                <span class="perm">EditBadges</span><span class="perm">DeleteBadges</span>
+                <span class="perm">ViewProposals</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="email">analytics.admin@kawadar.com</td>
+            <td><code>Admin@123</code></td>
+            <td><span class="pill pill-orange">Analytics (read-only)</span></td>
+            <td>
+              <div class="perms">
+                <span class="perm">ViewUsers</span><span class="perm">ViewStatistics</span>
+                <span class="perm">ViewWallets</span><span class="perm">ViewTransactions</span>
+                <span class="perm">ViewProposals</span><span class="perm">ViewJobReports</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       3. FREELANCERS
+  ════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-header">
+      <span class="section-icon">🟢</span>
+      <span class="section-title">Freelancers — Activated &amp; Identity Verified</span>
+      <span class="section-count">10 accounts · password: User@123</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Title</th>
+            <th>Specialization</th>
+            <th>Skills</th>
+            <th>Portfolio</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Khaled Mansour</strong></td>
+            <td class="email">khalid.dev@kawadar.com</td>
+            <td>+201012345678</td>
+            <td>Full Stack Web Developer</td>
+            <td><span class="pill pill-green">Web Development</span></td>
+            <td><div class="tags"><span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">JS</span><span class="tag">TypeScript</span><span class="tag">React</span><span class="tag">Next.js</span></div></td>
+            <td><span class="pill pill-cyan">2 projects</span></td>
+          </tr>
+          <tr>
+            <td><strong>Sara Hassan</strong></td>
+            <td class="email">sara.design@kawadar.com</td>
+            <td>+201198765432</td>
+            <td>Senior UI/UX Designer</td>
+            <td><span class="pill pill-green">UI/UX Design</span></td>
+            <td><div class="tags"><span class="tag">Figma</span><span class="tag">Adobe XD</span><span class="tag">Sketch</span><span class="tag">UI Design</span><span class="tag">UX Research</span></div></td>
+            <td><span class="pill pill-cyan">1 project</span></td>
+          </tr>
+          <tr>
+            <td><strong>Mohammed Ibrahim</strong></td>
+            <td class="email">mohammed.ai@kawadar.com</td>
+            <td>+201123456789</td>
+            <td>AI &amp; Data Engineer</td>
+            <td><span class="pill pill-green">AI &amp; Machine Learning</span></td>
+            <td><div class="tags"><span class="tag">Machine Learning</span><span class="tag">Deep Learning</span><span class="tag">TensorFlow</span><span class="tag">PyTorch</span><span class="tag">Scikit-learn</span></div></td>
+            <td><span class="pill pill-cyan">1 project</span></td>
+          </tr>
+          <tr>
+            <td><strong>Nour El-Sayed</strong></td>
+            <td class="email">nora.mobile@kawadar.com</td>
+            <td>+201234567890</td>
+            <td>Mobile App Developer</td>
+            <td><span class="pill pill-green">Mobile App Development</span></td>
+            <td><div class="tags"><span class="tag">Flutter</span><span class="tag">React Native</span><span class="tag">Swift</span><span class="tag">Kotlin</span><span class="tag">Dart</span></div></td>
+            <td><span class="pill pill-cyan">1 project</span></td>
+          </tr>
+          <tr>
+            <td><strong>Fares Mostafa</strong></td>
+            <td class="email">faisal.devops@kawadar.com</td>
+            <td>+201345678901</td>
+            <td>DevOps &amp; Cloud Engineer</td>
+            <td><span class="pill pill-green">DevOps &amp; Cloud Engineering</span></td>
+            <td><div class="tags"><span class="tag">Docker</span><span class="tag">Kubernetes</span><span class="tag">CI/CD</span><span class="tag">AWS</span><span class="tag">GCP</span></div></td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><strong>Omar Abdallah</strong></td>
+            <td class="email">omar.backend@kawadar.com</td>
+            <td>+201056789012</td>
+            <td>.NET Backend Developer</td>
+            <td><span class="pill pill-green">Backend Development</span></td>
+            <td><div class="tags"><span class="tag">ASP.NET Core</span><span class="tag">Node.js</span><span class="tag">PostgreSQL</span><span class="tag">MySQL</span></div></td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><strong>Lina Kamal</strong></td>
+            <td class="email">lina.data@kawadar.com</td>
+            <td>+201567890123</td>
+            <td>Data Analyst &amp; BI Developer</td>
+            <td><span class="pill pill-green">Data Science &amp; Analytics</span></td>
+            <td><div class="tags"><span class="tag">Pandas</span><span class="tag">NumPy</span><span class="tag">Power BI</span><span class="tag">Tableau</span></div></td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><strong>Yasser Salah</strong></td>
+            <td class="email">yazeed.security@kawadar.com</td>
+            <td>+201678901234</td>
+            <td>Cybersecurity Specialist</td>
+            <td><span class="pill pill-green">Cybersecurity</span></td>
+            <td><div class="tags"><span class="tag">Penetration Testing</span><span class="tag">OWASP</span><span class="tag">Network Security</span><span class="tag">Ethical Hacking</span></div></td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><strong>Ali Farouk</strong></td>
+            <td class="email">ali.fullstack@kawadar.com</td>
+            <td>+201789012345</td>
+            <td>Full Stack Dev (React + Node)</td>
+            <td><span class="pill pill-green">Full Stack Development</span></td>
+            <td><div class="tags"><span class="tag">React</span><span class="tag">TypeScript</span><span class="tag">Node.js</span><span class="tag">NestJS</span><span class="tag">PostgreSQL</span></div></td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><strong>Reem Tawfik</strong></td>
+            <td class="email">reem.qa@kawadar.com</td>
+            <td>+201890123456</td>
+            <td>QA Engineer</td>
+            <td><span class="pill pill-green">Quality Assurance &amp; Testing</span></td>
+            <td><div class="tags"><span class="tag">Cypress</span><span class="tag">Playwright</span><span class="tag">Selenium</span><span class="tag">Jest</span></div></td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       4. CLIENTS
+  ════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-header">
+      <span class="section-icon">🔵</span>
+      <span class="section-title">Clients</span>
+      <span class="section-count">8 accounts</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Password</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Default User</strong></td>
+            <td class="email">user@kawadar.com</td>
+            <td><code>User@123</code></td>
+            <td>Generic test user · no UserProfile</td>
+          </tr>
+          <tr>
+            <td><strong>Ahmed Tarek</strong></td>
+            <td class="email">Ahmed12345@gmail.com</td>
+            <td><code>Ahmed@123</code></td>
+            <td><span class="pill pill-blue">Client</span></td>
+          </tr>
+          <tr>
+            <td><strong>Youssef Amin</strong></td>
+            <td class="email">Youssef123@gmail.com</td>
+            <td><code>Youssef@123</code></td>
+            <td><span class="pill pill-blue">Client</span></td>
+          </tr>
+          <tr>
+            <td><strong>Tarek Naguib</strong></td>
+            <td class="email">tech.startup@kawadar.com</td>
+            <td><code>User@123</code></td>
+            <td><span class="pill pill-blue">Client</span> — Tech startup</td>
+          </tr>
+          <tr>
+            <td><strong>Samy Khalil</strong></td>
+            <td class="email">ecommerce.client@kawadar.com</td>
+            <td><code>User@123</code></td>
+            <td><span class="pill pill-blue">Client</span> — E-commerce</td>
+          </tr>
+          <tr>
+            <td><strong>Nadia Ragab</strong></td>
+            <td class="email">fintech.co@kawadar.com</td>
+            <td><code>User@123</code></td>
+            <td><span class="pill pill-blue">Client</span> — Fintech</td>
+          </tr>
+          <tr>
+            <td><strong>Yousef Hamdy</strong></td>
+            <td class="email">health.app@kawadar.com</td>
+            <td><code>User@123</code></td>
+            <td><span class="pill pill-blue">Client</span> — Healthcare</td>
+          </tr>
+          <tr>
+            <td><strong>Layla Elmasry</strong></td>
+            <td class="email">edu.platform@kawadar.com</td>
+            <td><code>User@123</code></td>
+            <td><span class="pill pill-blue">Client</span> — EdTech</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       5. PASSWORD SUMMARY
+  ════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-header">
+      <span class="section-icon">🔑</span>
+      <span class="section-title">Password Summary</span>
+    </div>
+    <div class="pwd-grid">
+      <div class="pwd-card">
+        <div class="label">Super Admins</div>
+        <div class="value"><code>Admin@123</code></div>
+      </div>
+      <div class="pwd-card">
+        <div class="label">Specialized Admins</div>
+        <div class="value"><code>Admin@123</code></div>
+      </div>
+      <div class="pwd-card">
+        <div class="label">Freelancers</div>
+        <div class="value"><code>User@123</code></div>
+      </div>
+      <div class="pwd-card">
+        <div class="label">Clients (seeded)</div>
+        <div class="value"><code>User@123</code></div>
+      </div>
+      <div class="pwd-card">
+        <div class="label">Ahmed Tarek</div>
+        <div class="value"><code>Ahmed@123</code></div>
+      </div>
+      <div class="pwd-card">
+        <div class="label">Youssef Amin</div>
+        <div class="value"><code>Youssef@123</code></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Generated from <code>AppDbInitilazer.cs</code> &nbsp;·&nbsp; Kawader Backend &nbsp;·&nbsp; <span id="date"></span>
+  </footer>
+
+</div>
+<script>
+  document.getElementById('date').textContent = new Date().toLocaleDateString('en-GB', {
+    day: '2-digit', month: 'long', year: 'numeric'
+  });
+</script>
+</body>
+</html>
