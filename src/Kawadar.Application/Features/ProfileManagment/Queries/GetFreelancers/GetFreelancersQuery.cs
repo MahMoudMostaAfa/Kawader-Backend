@@ -7,7 +7,7 @@ using MediatR;
 namespace Kawadar.Application.Features.ProfileManagment.Queries.GetFreelancers
 {
     public record GetFreelancersQuery(
-        string search,
+        string? search,
         ExperienceYear? ExperienceYear,
         Guid? specilizationId,
         float? averageRating,

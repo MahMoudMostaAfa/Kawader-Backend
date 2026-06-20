@@ -50,7 +50,6 @@ public static class Permissions
   public const string ViewConversations = "Permissions.Conversations.View";
 
   public const string ViewTransactions = "Permissions.Transactions.View";
-  public const string ViewProposals = "Permissions.Proposals.View";
 
 
   public static List<string> GetAllPermissions()

@@ -4,6 +4,7 @@ using Kawadar.Application.Common.Interfaces;
 using Kawadar.Application.Common.Interfaces.Auth;
 using Kawadar.Application.Common.Interfaces.Caching;
 using Kawadar.Application.Common.Interfaces.Repositories;
+using Kawadar.Domain.Common.Constants;
 using Kawadar.Domain.Common.Results;
 using MediatR;
 
@@ -17,6 +18,7 @@ public class DeleteJobCommandHandler : IRequestHandler<DeleteJobCommand, Result<
   private readonly IStorageClient _storageClient;
   private readonly IUnitOfWork _unitOfWork;
   private readonly ICacheInvalidator _cacheInvalidator;
+  private readonly IIdentityService _identityService;
 
   public DeleteJobCommandHandler(
     IUser user,
@@ -24,7 +26,8 @@ public class DeleteJobCommandHandler : IRequestHandler<DeleteJobCommand, Result<
     IUsersRepository usersRepository,
     IStorageClient storageClient,
     IUnitOfWork unitOfWork,
-    ICacheInvalidator cacheInvalidator)
+    ICacheInvalidator cacheInvalidator,
+    IIdentityService identityService)
   {
     _user = user;
     _jobsRepository = jobsRepository;
@@ -32,6 +35,7 @@ public class DeleteJobCommandHandler : IRequestHandler<DeleteJobCommand, Result<
     _storageClient = storageClient;
     _unitOfWork = unitOfWork;
     _cacheInvalidator = cacheInvalidator;
+    _identityService = identityService;
   }
 
   public async Task<Result<Deleted>> Handle(DeleteJobCommand request, CancellationToken cancellationToken)
@@ -47,8 +51,15 @@ public class DeleteJobCommandHandler : IRequestHandler<DeleteJobCommand, Result<
     if (jobResult.IsError) return jobResult.Errors;
     var job = jobResult.Value;
 
-    if (job.PostedById != userProfile.Id)
+    if (userProfile.ProfileType != Domain.UserProfiles.Enums.ProfileType.Admin && job.PostedById != userProfile.Id)
       return ApplicationErrors.UnauthorizedAccess;
+
+    if (userProfile.ProfileType == Domain.UserProfiles.Enums.ProfileType.Admin)
+    {
+        var permissions = await _identityService.GetUserClaimsAsync(userProfile.UserId);
+        if (!permissions.Value.Contains(("Permission", Permissions.ViewViolations)) && !permissions.Value.Contains(("Permission", Permissions.ViewJobReports)))
+            return ApplicationErrors.UnauthorizedAccess;
+    }
 
     // Delete uploaded attachments from blob storage
     foreach (var attachment in job.Attachments)

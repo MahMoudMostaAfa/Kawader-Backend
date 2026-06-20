@@ -42,6 +42,8 @@ public class GetContractDetailsQueryHandler : IRequestHandler<GetContractDetails
     {
       return ApplicationErrors.UnauthorizedAccess;
     }
+        
+
     var OtherPartyId = contract.ClientId == userProfile.Id ? contract.FreelancerId : contract.ClientId;
     var otherPartyProfileResult = await _usersRepository.GetUserProfileByIdAsync(OtherPartyId);
     if (otherPartyProfileResult.IsError) return otherPartyProfileResult.Errors;
