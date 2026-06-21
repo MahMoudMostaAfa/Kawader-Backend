@@ -238,6 +238,7 @@ public class UsersRepository(AppDbContext appDbContext) : IUsersRepository
         {
             query = query.Where(x => x.ReportStatus == reportStatus);
         }
+
         query = sortBy == "oldest"
             ? query.OrderBy(x => x.CreatedAt)
             : query.OrderByDescending(x => x.CreatedAt);

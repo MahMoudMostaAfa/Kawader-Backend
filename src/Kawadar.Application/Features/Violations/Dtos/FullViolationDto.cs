@@ -1,4 +1,6 @@
-﻿using Kawadar.Domain.Violations.Enums;
+﻿using Kawadar.Application.Features.ConversastionsAndMessages.DTOs;
+using Kawadar.Domain.Violations.Enums;
+using System.Runtime.CompilerServices;
 
 namespace Kawadar.Application.Features.Violations.Dtos
 {
@@ -16,5 +18,12 @@ namespace Kawadar.Application.Features.Violations.Dtos
         public string NoteByAdmin { get; set; } = default!;
         public DateTime? ResolvedAt { get; set; }
         public string ResolvedByUserName { get; set; } = "";
+        public MessageDto? message { get; set; }
+    }
+
+    public class MessageDto
+    {
+        public string? content { get; set; }
+        public Guid? conversationId { get; set; }
     }
 }

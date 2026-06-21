@@ -172,6 +172,7 @@ public static class DependencyInjection
         // All authenticated users share the same cache entries — do NOT vary by Authorization header
         policy.SetVaryByQuery(
                     "search",
+                    "MaxProposalCount",
                     "specilizationId",
                     "jobType",
                     "experienceLevel",

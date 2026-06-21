@@ -120,6 +120,7 @@ public class GetJobTests : IClassFixture<SubcutaneousTestFixture>, IAsyncLifetim
 
         var query = new GetJobsQuery(
             Search: null,
+            MaxProposalCount: null,
             SpecilizationId: null,
             JobType: null,
             ExperienceLevel: null,
@@ -154,6 +155,7 @@ public class GetJobTests : IClassFixture<SubcutaneousTestFixture>, IAsyncLifetim
 
         var query = new GetJobsQuery(
             Search: null,
+            MaxProposalCount: null,
             SpecilizationId: null,
             JobType: JobType.Hourly,
             ExperienceLevel: null,
@@ -179,6 +181,7 @@ public class GetJobTests : IClassFixture<SubcutaneousTestFixture>, IAsyncLifetim
         // Arrange
         var query = new GetJobsQuery(
             Search: null,
+            MaxProposalCount: null,
             SpecilizationId: null,
             JobType: null,
             ExperienceLevel: null,

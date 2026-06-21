@@ -9,6 +9,7 @@ namespace Kawadar.Application.Features.Jobs.Queries.GetJobs;
 
 public record GetJobsQuery(
   string? Search,
+  int? MaxProposalCount,
   Guid? SpecilizationId,
   JobType? JobType,
   JobExperienceLevel? ExperienceLevel,
@@ -33,6 +34,7 @@ public record GetJobsQuery(
       {
         "GetJobsQuery",
         $"search={search}",
+        $"maxProposalCount={MaxProposalCount?.ToString() ?? "null"}",
         $"spec={SpecilizationId?.ToString("N") ?? "null"}",
         $"type={(int?)JobType ?? -1}",
         $"exp={(int?)ExperienceLevel ?? -1}",
