@@ -212,6 +212,17 @@ public class WalletRepository : IWalletRepository
       .SumAsync(t => t.Amount, cancellationToken);
   }
 
+    public async Task<decimal> GetTotalBalance()
+    {
+        var balance = await _context.Wallets.Select(x => x.Balance).SumAsync();
+        return balance;
+    }
+
+    public async Task<decimal> GetTotalEscrow()
+    {
+        return await _context.Wallets.Select(x => x.EscrowBalance).SumAsync();
+    }
+
   public void Add(Wallet wallet)
   {
     _context.Wallets.Add(wallet);

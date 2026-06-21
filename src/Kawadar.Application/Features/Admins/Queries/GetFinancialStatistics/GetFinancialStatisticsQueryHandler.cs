@@ -17,12 +17,16 @@ namespace Kawadar.Application.Features.Admins.Queries.GetFinancialStatistics
             var totalProfit = await walletRepository.GetTotalProfit();
             var distributionBasedOnCurrency = await walletRepository.GetMoneyTransactionDistributionBasedOnCurrency();
             var transactionDistributionBasedOnStatus = await walletRepository.GetTransactionStatusDistribution();
+            var totalBalance = await walletRepository.GetTotalBalance();
+            var totalEscrow = await walletRepository.GetTotalEscrow();
 
             return new FinancialStatisticsDto
             {
                 TotalProfit = totalProfit,
                 TransactionStatusDistribution = transactionDistributionBasedOnStatus,
-                TotalMoneyTransfered = distributionBasedOnCurrency
+                TotalMoneyTransfered = distributionBasedOnCurrency,
+                totalBalance = totalBalance,
+                totalEscrow = totalEscrow
             };
         }
     }
