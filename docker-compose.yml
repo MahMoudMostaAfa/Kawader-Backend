@@ -19,6 +19,7 @@ services:
       Ollama__BaseUrl: "http://ollama:11434"
       Qdrant__Host: "qdrant"
       Qdrant__Port: "6334"
+      Gorse__ApiKey: ${GORSE_API_KEY}
     volumes:
       - api_logs:/app/Logs
     depends_on:
@@ -167,6 +168,9 @@ services:
       GORSE_CONFIG: /etc/gorse/config.toml
       GORSE_DATABASE_DATA_STORE: postgres://${GORSE_DB_USER}:${GORSE_DB_PASSWORD}@gorse-postgres:5432/gorse?sslmode=disable
       GORSE_DATABASE_CACHE_STORE: postgres://${GORSE_DB_USER}:${GORSE_DB_PASSWORD}@gorse-postgres:5432/gorse?sslmode=disable
+      GORSE_MASTER_DASHBOARD_USER_NAME: ${GORSE_DASHBOARD_USER}
+      GORSE_MASTER_DASHBOARD_PASSWORD: ${GORSE_DASHBOARD_PASSWORD}
+      GORSE_SERVER_API_KEY: ${GORSE_API_KEY}
     volumes:
       - ./gorse/config.toml:/etc/gorse/config.toml:ro
     depends_on:
