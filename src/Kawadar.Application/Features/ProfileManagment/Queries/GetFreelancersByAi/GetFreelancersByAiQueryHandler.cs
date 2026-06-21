@@ -30,15 +30,14 @@ public class GetFreelancersByAiQueryHandler : IRequestHandler<GetFreelancersByAi
     [
       {{
         "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-        "strengths": ["strength 1", "strength 2"]
+        "strength": "Comment on why this freelancer is a good match for the user's needs in English. "
       }}
     ]
 
     Rules:
     - Use the exact ID values provided in the Freelancers list above (they are GUIDs)
     - Only include freelancers RELEVANT to the request
-    - Each strength must be specific and related to the user's need
-    - Max 3 strengths per freelancer
+    - strength should be a concise comment on why this freelancer is a good match for the user's needs, based on their skills, experience, and other relevant information.
     """;
 
   public GetFreelancersByAiQueryHandler(IUser user, IAIChatService aiChatService, IIdentityService identityService, IFreelancerVectorStore freelancerVectorStore, IUsersRepository usersRepository
@@ -96,7 +95,7 @@ public class GetFreelancersByAiQueryHandler : IRequestHandler<GetFreelancersByAi
     var aiResponse = aiResponseResult.Value ?? [];
     var response = aiResponse
       .Where(r => Guid.TryParse(r.Id, out _))
-      .ToDictionary(r => Guid.Parse(r.Id), r => r.Strengths);
+      .ToDictionary(r => Guid.Parse(r.Id), r => r.Strength);
 
     var finalResult = freelancers.Join(
       identities,
@@ -107,7 +106,7 @@ public class GetFreelancersByAiQueryHandler : IRequestHandler<GetFreelancersByAi
         Id = f.Id,
         fullName = f.FullName,
         PhotoUrl = f.ProfilePictureUrl ?? "",
-        Strength = response.TryGetValue(f.Id, out var strengths) ? strengths : new List<string>(),
+        Strength = [response.TryGetValue(f.Id, out var strength) ? strength : string.Empty],
         IsOnline = f.IsOnline,
         AverageRating = f.Reviews != null && f.Reviews.Count > 0 ? f.Reviews.Average(r => r.Rating) : 0
         ,
@@ -126,7 +125,7 @@ public class GetFreelancersByAiQueryHandler : IRequestHandler<GetFreelancersByAi
   {
     [JsonPropertyName("id")]
     public string Id { get; set; } = string.Empty;
-    [JsonPropertyName("strengths")]
-    public List<string> Strengths { get; set; } = [];
+    [JsonPropertyName("strength")]
+    public string Strength { get; set; } = string.Empty;
   }
 }
