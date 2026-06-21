@@ -2,8 +2,9 @@
 
 [database]
 # Use Postgres for both data store and cache store
-data_store = "postgres://gorse:gorsepass@gorse-postgres:5432/gorse?sslmode=disable"
-cache_store = "postgres://gorse:gorsepass@gorse-postgres:5432/gorse?sslmode=disable"
+# These values are overridden by GORSE_DATABASE_DATA_STORE and GORSE_DATABASE_CACHE_STORE environment variables in docker-compose.yml
+data_store = "postgres://user:password@gorse-postgres:5432/gorse?sslmode=disable"
+cache_store = "postgres://user:password@gorse-postgres:5432/gorse?sslmode=disable"
 
 [master]
 # REST API settings (used by gorse-in-one)
