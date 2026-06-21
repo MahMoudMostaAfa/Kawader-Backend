@@ -1,3 +1,4 @@
+using iText.Signatures.Validation.Lotl.Criteria;
 using Kawadar.Application.Common.Interfaces.Repositories;
 using Kawadar.Application.Common.Models;
 using Kawadar.Domain.Common.Results;
@@ -60,6 +61,7 @@ public class JobsRepository : IJobsRepository
 
   public async Task<PaginatedList<Job>> GetJobsAsync(
     string? search,
+    int? MaxProposalCount,
     Guid? specilizationId,
     JobType? jobType,
     JobExperienceLevel? experienceLevel,
@@ -84,6 +86,17 @@ public class JobsRepository : IJobsRepository
     if (specilizationId.HasValue)
     {
       query = query.Where(j => j.SpecilizationId == specilizationId.Value);
+    }
+
+    if (MaxProposalCount.HasValue)
+    {
+        var jobsExceedingMaxQuery = _context.JobProposals
+            .GroupBy(p => p.JobId)
+            .Select(g => new { JobId = g.Key, Count = g.Count() })
+            .Where(x => x.Count > MaxProposalCount)
+            .Select(x => x.JobId);
+
+        query = query.Where(j => !jobsExceedingMaxQuery.Contains(j.Id));
     }
 
     if (jobType.HasValue)

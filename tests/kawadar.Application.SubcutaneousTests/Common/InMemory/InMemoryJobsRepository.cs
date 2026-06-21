@@ -175,4 +175,9 @@ public class InMemoryJobsRepository : IJobsRepository
     {
         throw new NotImplementedException();
     }
+
+    public Task<PaginatedList<Job>> GetJobsAsync(string? search, int? MaxProposalCount, Guid? specilizationId, JobType? jobType, JobExperienceLevel? experienceLevel, BudgetRange? budgetRange, HourlyRateRange? hourlyRateRange, List<Guid>? skillIds, int page, int pageSize, string sortBy)
+    {
+        throw new NotImplementedException();
+    }
 }

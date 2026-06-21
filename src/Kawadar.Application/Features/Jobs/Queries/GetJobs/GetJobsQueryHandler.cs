@@ -28,6 +28,7 @@ public class GetJobsQueryHandler : IRequestHandler<GetJobsQuery, Result<Paginate
 
     var result = await _jobsRepository.GetJobsAsync(
       request.Search,
+      request.MaxProposalCount,
       request.SpecilizationId,
       request.JobType,
       request.ExperienceLevel,

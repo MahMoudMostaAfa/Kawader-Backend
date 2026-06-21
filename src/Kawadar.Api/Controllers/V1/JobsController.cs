@@ -149,6 +149,7 @@ public class JobsController : ApiController
   [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
   public async Task<IActionResult> GetJobs(
     [FromQuery] string? search,
+    [FromQuery] int? MaxProposalCount,
     [FromQuery] Guid? specilizationId,
     [FromQuery] JobType? jobType,
     [FromQuery] JobExperienceLevel? experienceLevel,
@@ -172,6 +173,7 @@ public class JobsController : ApiController
 
     var query = new GetJobsQuery(
         search,
+        MaxProposalCount,
         specilizationId,
         jobType,
         experienceLevel,
