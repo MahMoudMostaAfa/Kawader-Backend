@@ -371,7 +371,7 @@ public class JobsController : ApiController
       );
   }
 
-  [HttpGet("/recommendations")]
+  [HttpGet("recommendations")]
   [EndpointSummary("Gets recommended jobs for a user based on a specific job")]
   [EndpointDescription("Returns a list of jobs recommended for the authenticated user based on their interaction with a specific job identified by its slug. The recommendations are personalized using AI algorithms that analyze the user's behavior and preferences.")]
   [ProducesResponseType(typeof(List<JobSummaryDto>), StatusCodes.Status200OK)]
