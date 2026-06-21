@@ -12,7 +12,7 @@ public class ProposalConfiguration : IEntityTypeConfiguration<JobProposal>
 
               builder.Property(p => p.CoverLetter)
                      .IsRequired()
-                     .HasMaxLength(200);
+                     .HasMaxLength(800);
 
               builder.Property(p => p.ProposalType).HasConversion<string>()
                      .IsRequired();

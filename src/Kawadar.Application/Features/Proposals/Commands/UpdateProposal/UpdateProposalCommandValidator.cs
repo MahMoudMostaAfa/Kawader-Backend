@@ -10,7 +10,7 @@ public class UpdateProposalCommandValidator : AbstractValidator<UpdateProposalCo
     RuleFor(x => x.ProposalId).NotEmpty();
     When(x => x.CoverLetter != null, () =>
     {
-      RuleFor(x => x.CoverLetter).NotEmpty().Length(50, 5000).WithMessage("Cover letter must be between 50 and 5000 characters");
+      RuleFor(x => x.CoverLetter).NotEmpty().Length(50, 800).WithMessage("Cover letter must be between 50 and 800 characters");
     });
 
     When(x => x.QuestionAnswerUpdateDtos != null, () =>
