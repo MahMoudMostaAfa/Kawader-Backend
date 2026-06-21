@@ -217,6 +217,9 @@ public class ApplicationDbContextInitialiser(
 
     // seed reviews
     await SeedReviewsAsync();
+
+    // seed jobs
+    await SeedJobsAsync();
   }
 
   private async Task SeedSpecializedAdminsAsync()
@@ -332,7 +335,7 @@ public class ApplicationDbContextInitialiser(
 
   private async Task SeedSkillsAsync()
   {
-    if (await _context.Skills.CountAsync() > 6) return;
+    if (await _context.Skills.AnyAsync()) return;
 
     _logger.LogInformation("Seeding skills...");
 
@@ -412,7 +415,7 @@ public class ApplicationDbContextInitialiser(
 
   private async Task SeedSpecilizationsAsync()
   {
-    if (await _context.Specilizations.CountAsync() > 6) return;
+    if (await _context.Specilizations.AnyAsync()) return;
 
     _logger.LogInformation("Seeding specializations...");
 
@@ -450,6 +453,80 @@ public class ApplicationDbContextInitialiser(
     await _context.SaveChangesAsync();
 
     _logger.LogInformation("Seeded {Count} specializations.", specilizations.Count);
+  }
+
+  private async Task SeedJobsAsync()
+  {
+    if (await _context.Jobs.AnyAsync()) return;
+
+    _logger.LogInformation("Seeding ~100 random Arabic jobs...");
+
+    var clients = await _context.UserProfiles
+      .Where(p => p.ProfileType == ProfileType.Client)
+      .ToListAsync();
+
+    var specs = await _context.Specilizations.ToListAsync();
+    var allSkills = await _context.Skills.ToListAsync();
+
+    if (!clients.Any() || !specs.Any() || !allSkills.Any()) return;
+
+    var rnd = new Random(42);
+
+    var jobAdjectives = new[] { "مطلوب", "نبحث عن", "فرصة لـ", "مشروع جديد لـ" };
+    var jobRoles = new[] { "مطور ويب", "مصمم واجهات", "مطور تطبيقات", "مهندس بيانات", "مسوق إلكتروني", "كاتب محتوى", "خبير أمن سيبراني", "مستشار قانوني", "محاسب", "مترجم", "محرر فيديو", "مساعد افتراضي" };
+    var jobScopes = new[] { "لمشروع ناشئ", "لشركة تقنية", "لتطبيق جوال", "لمنصة تجارة إلكترونية", "لعمل عن بعد", "بعقد حر", "لمشروع طويل الأمد", "لمهمة سريعة" };
+    var jobReqs = new[] { "بخبرة لا تقل عن سنتين.", "مطلوب مهارات تواصل ممتازة.", "العمل عن بعد بالكامل.", "الالتزام بالمواعيد النهائية.", "القدرة على العمل ضمن فريق.", "يجب إرفاق سابقة الأعمال." };
+
+    var jobsToAdd = new List<Job>();
+
+    for (int i = 0; i < 100; i++)
+    {
+      var client = clients[rnd.Next(clients.Count)];
+      var spec = specs[rnd.Next(specs.Count)];
+
+      var title = $"{jobAdjectives[rnd.Next(jobAdjectives.Length)]} {jobRoles[rnd.Next(jobRoles.Length)]} {jobScopes[rnd.Next(jobScopes.Length)]}";
+      var description = $"نحن {jobScopes[rnd.Next(jobScopes.Length)]} {jobAdjectives[rnd.Next(jobAdjectives.Length)]} {jobRoles[rnd.Next(jobRoles.Length)]} ذو كفاءة عالية. {jobReqs[rnd.Next(jobReqs.Length)]} التفاصيل سيتم مناقشتها لاحقاً.";
+
+      var jobType = (JobType)rnd.Next(1, 3);
+      var budget = (BudgetRange)rnd.Next(1, 5); 
+      var rate = (HourlyRateRange)rnd.Next(1, 5);
+      var expLevel = (JobExperienceLevel)rnd.Next(1, 4);
+      var duration = rnd.Next(7, 90);
+
+      var slugResult = Job.GenerateSlug(title);
+      var slug = slugResult.IsSuccess ? slugResult.Value : $"job-{Guid.NewGuid().ToString().Substring(0, 8)}";
+
+      var numSkills = rnd.Next(2, 6);
+      var jobSkills = allSkills.OrderBy(x => rnd.Next()).Take(numSkills).ToList();
+
+      var jobResult = Job.Create(
+        client.Id,
+        spec.Id,
+        title,
+        description,
+        jobType,
+        budget,
+        rate,
+        duration,
+        expLevel,
+        slug,
+        [], 
+        jobSkills, 
+        []  
+      );
+
+      if (jobResult.IsSuccess)
+      {
+        jobsToAdd.Add(jobResult.Value);
+      }
+    }
+
+    if (jobsToAdd.Any())
+    {
+      await _context.Jobs.AddRangeAsync(jobsToAdd);
+      await _context.SaveChangesAsync();
+      _logger.LogInformation("Seeded {Count} jobs.", jobsToAdd.Count);
+    }
   }
 
   private async Task SeedReviewsAsync()
