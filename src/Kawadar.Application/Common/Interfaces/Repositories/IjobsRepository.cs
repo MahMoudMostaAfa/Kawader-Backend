@@ -16,6 +16,7 @@ public interface IJobsRepository
   public Task<Result<Job>> GetJobsAsync(Guid jobId);
   public Task<PaginatedList<Job>> GetJobsAsync(
     string? search,
+    int? MaxProposalCount,
     Guid? specilizationId,
     JobType? jobType,
     JobExperienceLevel? experienceLevel,

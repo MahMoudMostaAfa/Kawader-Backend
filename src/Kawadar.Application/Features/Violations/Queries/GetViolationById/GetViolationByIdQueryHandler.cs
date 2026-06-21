@@ -9,7 +9,7 @@ using MediatR;
 namespace Kawadar.Application.Features.Violations.Queries.GetViolationById
 {
     public class GetViolationByIdQueryHandler(IUser user, IViolationRepository violationRepository, IUsersRepository usersRepository
-        , IIdentityService identityService, IMapper mapper) : IRequestHandler<GetViolationByIdQuery, Result<FullViolationDto>>
+        , IIdentityService identityService, IMapper mapper, IConversationsRepository conversationsRepository) : IRequestHandler<GetViolationByIdQuery, Result<FullViolationDto>>
     {
         public async Task<Result<FullViolationDto>> Handle(GetViolationByIdQuery request, CancellationToken cancellationToken)
         {
@@ -36,6 +36,13 @@ namespace Kawadar.Application.Features.Violations.Queries.GetViolationById
                 if (adminDto.IsError) return adminDto.Errors;
 
                 violationDto.ResolvedByUserName = adminDto.Value.UserName;
+            }
+
+            if(violation.ReferenceType == "messages")
+            {
+                var backSlashIndex = violation.RedirectUrl!.IndexOf('/');
+                var message = await conversationsRepository.GetMessageByIdAsync(Guid.Parse(violation.RedirectUrl.Substring(backSlashIndex + 1)));
+                violationDto.message = new MessageDto { content = message.Value.Content, conversationId = message.Value.ConversationId };
             }
             return violationDto;
         }
