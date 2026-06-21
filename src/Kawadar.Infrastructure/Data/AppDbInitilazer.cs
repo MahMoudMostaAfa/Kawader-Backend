@@ -9,9 +9,14 @@ using Kawadar.Domain.Skills;
 using Kawadar.Domain.Skills.FreelancerSkill;
 using Kawadar.Domain.Skills.FreelancerSkill.Enum;
 using Kawadar.Domain.Specilizations;
+using Kawadar.Domain.Jobs;
+using Kawadar.Domain.Jobs.Enums;
+using Kawadar.Domain.Reviews;
+using Kawadar.Domain.Reviews.Enums;
 using Kawadar.Domain.Portfolios.Project;
 using Kawadar.Domain.Portfolios.Items;
 using Kawadar.Domain.Portfolios.Items.Enum;
+using Kawadar.Domain.WalletAndPayments;
 using Kawadar.Infrastructure.Identity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -206,6 +211,12 @@ public class ApplicationDbContextInitialiser(
 
     // seed random users (freelancers + clients)
     await SeedRandomUsersAsync();
+
+    // seed wallets
+    await SeedWalletsAsync();
+
+    // seed reviews
+    await SeedReviewsAsync();
   }
 
   private async Task SeedSpecializedAdminsAsync()
@@ -439,6 +450,135 @@ public class ApplicationDbContextInitialiser(
     await _context.SaveChangesAsync();
 
     _logger.LogInformation("Seeded {Count} specializations.", specilizations.Count);
+  }
+
+  private async Task SeedReviewsAsync()
+  {
+    // if (await _context.Reviews.AnyAsync()) return;
+
+    _logger.LogInformation("Seeding reviews...");
+
+    var seededEmails = new[]
+    {
+      "khalid.dev@kawadar.com", "sara.design@kawadar.com", "mohammed.ai@kawadar.com",
+      "nora.mobile@kawadar.com", "faisal.devops@kawadar.com", "omar.backend@kawadar.com",
+      "lina.data@kawadar.com", "yazeed.security@kawadar.com", "ali.fullstack@kawadar.com",
+      "reem.qa@kawadar.com"
+    };
+
+    var freelancers = new List<UserProfile>();
+    foreach (var email in seededEmails)
+    {
+      var user = await _userManager.FindByEmailAsync(email);
+      if (user != null)
+      {
+        var profile = await _context.UserProfiles.FirstOrDefaultAsync(p => p.UserId == user.Id && p.ProfileType == ProfileType.Freelancer);
+        if (profile != null) freelancers.Add(profile);
+      }
+    }
+
+    var client = await _context.UserProfiles
+      .FirstOrDefaultAsync(p => p.ProfileType == ProfileType.Client);
+
+    if (client == null || !freelancers.Any()) return;
+
+    var spec = await _context.Specilizations.FirstOrDefaultAsync();
+    if (spec == null) return;
+
+    // Ensure we have a job to attach reviews to
+    var job = await _context.Jobs.FirstOrDefaultAsync(j => j.PostedById == client.Id);
+    if (job == null)
+    {
+      var jobSlugResult = Job.GenerateSlug("Dummy Job for Reviews");
+      string slug = jobSlugResult.IsSuccess ? jobSlugResult.Value : "dummy-job-reviews";
+
+      var jobResult = Job.Create(
+        client.Id,
+        spec.Id,
+        "Dummy Job for Reviews",
+        "This is a dummy job created to hold reviews.",
+        (JobType)1,
+        (BudgetRange)1,
+        (HourlyRateRange)1,
+        30,
+        (JobExperienceLevel)1,
+        slug,
+        [],
+        [],
+        []
+      );
+
+      if (jobResult.IsSuccess)
+      {
+        job = jobResult.Value;
+        await _context.Jobs.AddAsync(job);
+        await _context.SaveChangesAsync();
+      }
+      else
+      {
+        _logger.LogWarning("Failed to create dummy job for reviews.");
+        return;
+      }
+    }
+
+    var rnd = new Random(42);
+    var comments = new[]
+    {
+      "Excellent work, highly recommended!",
+      "Great communication and fast delivery.",
+      "Good quality, but slightly delayed.",
+      "Very professional and skilled.",
+      "Exceeded my expectations."
+    };
+
+    foreach (var freelancer in freelancers)
+    {
+      var rating = rnd.Next(3, 6); // 4 or 5
+      var comment = comments[rnd.Next(comments.Length)];
+
+      var reviewResult = Review.Create(
+        job.Id,
+        client.Id,
+        freelancer.Id,
+        ReviewType.ClientFreelancer,
+        rating,
+        comment
+      );
+
+      if (reviewResult.IsSuccess)
+      {
+        await _context.Reviews.AddAsync(reviewResult.Value);
+      }
+    }
+
+    await _context.SaveChangesAsync();
+    _logger.LogInformation("Seeded reviews for {Count} freelancers.", freelancers.Count);
+  }
+
+  private async Task SeedWalletsAsync()
+  {
+    _logger.LogInformation("Seeding wallets...");
+
+    var profilesWithoutWallets = await _context.UserProfiles
+      .Where(p => !_context.Wallets.Any(w => w.UserId == p.Id))
+      .ToListAsync();
+
+    if (!profilesWithoutWallets.Any())
+    {
+      return;
+    }
+
+    foreach (var profile in profilesWithoutWallets)
+    {
+      var walletResult = Wallet.Create(profile.Id);
+      if (walletResult.IsSuccess)
+      {
+        await _context.Wallets.AddAsync(walletResult.Value);
+      }
+    }
+
+    await _context.SaveChangesAsync();
+    _logger.LogInformation("Seeded {Count} wallets.", profilesWithoutWallets.Count);
   }
 
   private async Task SeedRandomUsersAsync()

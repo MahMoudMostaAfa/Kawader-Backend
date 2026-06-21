@@ -11,6 +11,7 @@ namespace Kawadar.Infrastructure.Services.HubServices;
 public class PersistanceService : IPersistanceService
 {
 
+
   private readonly ILogger<PersistanceService> _logger;
 
   private readonly IServiceScopeFactory _scopeFactory;
