@@ -2,19 +2,22 @@
 
 [database]
 # Use Postgres for both data store and cache store
-data_store = "postgres://gorse:gorsepass@gorse-postgres:5432/gorse?sslmode=disable"
-cache_store = "postgres://gorse:gorsepass@gorse-postgres:5432/gorse?sslmode=disable"
+# These values are overridden by GORSE_DATABASE_DATA_STORE and GORSE_DATABASE_CACHE_STORE environment variables in docker-compose.yml
+data_store = "postgres://user:password@gorse-postgres:5432/gorse?sslmode=disable"
+cache_store = "postgres://user:password@gorse-postgres:5432/gorse?sslmode=disable"
 
 [master]
 # REST API settings (used by gorse-in-one)
 http_host = "0.0.0.0"
 http_port = 8088
 n_jobs = 1
-dashboard_user_name = "admin"
-dashboard_password = "admin"
+# These values are overridden by GORSE_MASTER_DASHBOARD_USER_NAME and GORSE_MASTER_DASHBOARD_PASSWORD environment variables in docker-compose.yml
+dashboard_user_name = "user"
+dashboard_password = "password"
 
 [server]
-api_key = "change-me"
+# This value is overridden by GORSE_SERVER_API_KEY environment variable in docker-compose.yml
+api_key = "api-key"
 
 [recommend]
 cache_size = 100
