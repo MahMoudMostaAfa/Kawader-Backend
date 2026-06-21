@@ -183,7 +183,7 @@ public class JobsRepository : IJobsRepository
     List<Job> jobs = new();
     foreach (var id in Ids)
     {
-      var job = await _context.Jobs.FirstOrDefaultAsync(x => x.Id == id && x.JobStatus == JobStatus.Open);
+      var job = await _context.Jobs.FirstOrDefaultAsync(x => x.Id == id);
       if (job is null) continue;
 
       jobs.Add(job);
