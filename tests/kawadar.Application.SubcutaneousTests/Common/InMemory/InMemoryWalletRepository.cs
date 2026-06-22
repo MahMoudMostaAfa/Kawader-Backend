@@ -126,4 +126,14 @@ public class InMemoryWalletRepository : IWalletRepository
 
     public void Add(Wallet wallet)
         => _wallets[wallet.Id] = wallet;
+
+    public Task<decimal> GetTotalEscrow()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<decimal> GetTotalBalance()
+    {
+        throw new NotImplementedException();
+    }
 }

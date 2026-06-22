@@ -8,10 +8,5 @@ using MediatR;
 namespace Kawadar.Application.Features.Jobs.Queries.GetJobReports
 {
     public record GetJobReportsQuery(ReportType? reportType, ReportStatus? reportStatus,
-        int Page = 1, int PageSize = 10, string SortBy = "newest") : IRequest<Result<PaginatedList<BriefJobReportDto>>>, ICachedQuery
-    {
-        public string CacheKey => $"JobsReports-{reportType?.ToString() ?? "all"}-{reportStatus?.ToString() ?? "all"}-{Page}-{PageSize}-{SortBy}";
-
-        public string[] Tags => ["JobReports"];
-    }
+        int Page = 1, int PageSize = 10, string SortBy = "newest") : IRequest<Result<PaginatedList<BriefJobReportDto>>>;
 }

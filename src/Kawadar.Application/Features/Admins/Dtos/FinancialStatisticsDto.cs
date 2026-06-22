@@ -8,5 +8,7 @@ namespace Kawadar.Application.Features.Admins.Dtos
         public Dictionary<string, decimal> TotalMoneyTransfered { get; set; } = default!;
         public decimal TotalProfit { get; set; }
         public Dictionary<WalletTransactionStatus, int> TransactionStatusDistribution { get; set; } = default!;
+        public decimal totalBalance { get; set; }
+        public decimal totalEscrow { get; set; }
     }
 }
