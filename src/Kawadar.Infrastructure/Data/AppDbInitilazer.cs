@@ -220,6 +220,9 @@ public class ApplicationDbContextInitialiser(
 
     // seed jobs
     await SeedJobsAsync();
+
+    // seed jobs to recommendation engine
+    await SeedJobsToRecommendationEngineAsync();
   }
 
   private async Task SeedSpecializedAdminsAsync()
@@ -1067,6 +1070,40 @@ public class ApplicationDbContextInitialiser(
 
       await _context.SaveChangesAsync();
       _logger.LogInformation("Seeded portfolio project '{Title}' for freelancer {Id}.", p.Title, freelancerId);
+    }
+  }
+
+  private async Task SeedJobsToRecommendationEngineAsync()
+  {
+    _logger.LogInformation("Seeding jobs to Gorse recommendation engine...");
+
+    var jobs = await _context.Jobs
+      .Include(j => j.Skills)
+      .Include(j => j.Specilization)
+      .ToListAsync();
+
+    foreach (var job in jobs)
+    {
+      try
+      {
+        var labels = job.Skills.Select(s => s.Name.ToLower())
+          .Concat(new[] { job.JobType.ToString().ToLower(), job.ExperienceLevel.ToString().ToLower() })
+          .ToArray();
+
+        var categories = job.Specilization != null ? new[] { job.Specilization.Name } : Array.Empty<string>();
+
+        await _recommendationService.InsertItemAsync(
+          job.Id.ToString(),
+          categories: categories,
+          labels: labels,
+          comment: job.Title);
+
+        _logger.LogInformation("Registered job {Title} in Gorse.", job.Title);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogWarning(ex, "Failed to register job {Title} in Gorse.", job.Title);
+      }
     }
   }
 }
