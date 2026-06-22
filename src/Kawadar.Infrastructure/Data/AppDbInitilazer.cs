@@ -223,6 +223,9 @@ public class ApplicationDbContextInitialiser(
 
     // seed jobs to recommendation engine
     await SeedJobsToRecommendationEngineAsync();
+
+    // seed users to recommendation engine
+    await SeedUsersToRecommendationEngineAsync();
   }
 
   private async Task SeedSpecializedAdminsAsync()
@@ -903,16 +906,6 @@ public class ApplicationDbContextInitialiser(
 
       if (fullProfile is null) continue;
 
-      // Register in Gorse recommendation engine
-      try
-      {
-        await _recommendationService.InsertUserAsync(fullProfile.Id, comment: fullProfile.FullName);
-        _logger.LogInformation("Registered freelancer {Name} in Gorse.", fullProfile.FullName);
-      }
-      catch (Exception ex)
-      {
-        _logger.LogWarning(ex, "Failed to register freelancer {Name} in Gorse.", fullProfile.FullName);
-      }
 
       // Register in Qdrant vector store
       try
@@ -1075,7 +1068,6 @@ public class ApplicationDbContextInitialiser(
 
   private async Task SeedJobsToRecommendationEngineAsync()
   {
-    return; ;
     _logger.LogInformation("Seeding jobs to Gorse recommendation engine...");
 
     var jobs = await _context.Jobs
@@ -1104,6 +1096,28 @@ public class ApplicationDbContextInitialiser(
       catch (Exception ex)
       {
         _logger.LogWarning(ex, "Failed to register job {Title} in Gorse.", job.Title);
+      }
+    }
+  }
+
+  private async Task SeedUsersToRecommendationEngineAsync()
+  {
+    
+
+    var freelancers = await _context.UserProfiles
+      .Where(p => p.ProfileType == ProfileType.Freelancer)
+      .ToListAsync();
+
+    foreach (var freelancer in freelancers)
+    {
+      try
+      {
+        await _recommendationService.InsertUserAsync(freelancer.Id, comment: freelancer.FullName);
+        _logger.LogInformation("Registered freelancer {Name} in Gorse.", freelancer.FullName);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogWarning(ex, "Failed to register freelancer {Name} in Gorse.", freelancer.FullName);
       }
     }
   }
